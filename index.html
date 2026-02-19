@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>🌈 무지개 유치원 & 어린이집</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    :root {
+      --bg:#f2f2f7; --card:#fff; --text:#1c1c1e; --sub:#8e8e93; --border:#e5e5ea;
+      --accent:#ff6b6b; --yar:#ff9f0a; --blue:#007aff;
+      --radius-card:16px; --radius-icon:18px;
+    }
+    body { font-family:'Noto Sans KR',-apple-system,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+    #globalLoader { position:fixed; inset:0; background:rgba(255,255,255,.95); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:9000; gap:14px; }
+    #globalLoader.hidden { display:none; }
+    .loader-emoji { font-size:52px; }
+    .loader-text { font-size:14px; color:var(--sub); }
+    .spinner { width:28px; height:28px; border:3px solid var(--border); border-top-color:var(--text); border-radius:50%; animation:spin .8s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+    .header { background:var(--card); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:100; }
+    .header-inner { max-width:640px; margin:0 auto; padding:10px 16px; display:flex; align-items:center; justify-content:space-between; }
+    .logo { display:flex; align-items:center; gap:6px; text-decoration:none; }
+    .logo-emoji { font-size:28px; }
+    .logo-text { display:flex; flex-direction:column; line-height:1.2; }
+    .logo-main { font-size:17px; font-weight:900; color:var(--text); }
+    .logo-sub { font-size:10px; color:var(--sub); }
+    .board-link { padding:7px 14px; background:var(--text); color:#fff; border-radius:20px; font-size:12px; font-weight:700; text-decoration:none; }
+
+    .container { max-width:640px; margin:0 auto; padding:0 0 80px; }
+
+    /* 공지 */
+    .notice-section { padding:14px 16px 0; }
+    .notice-card { background:var(--card); border-radius:var(--radius-card); padding:14px; border-left:4px solid var(--accent); box-shadow:0 1px 4px rgba(0,0,0,.06); margin-bottom:10px; }
+    .notice-label { font-size:11px; font-weight:700; color:var(--accent); margin-bottom:4px; }
+    .notice-title { font-size:14px; font-weight:700; }
+    .notice-body { font-size:13px; color:var(--sub); line-height:1.5; margin-top:2px; }
+    .skel-box { border-radius:var(--radius-card); background:linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%); background-size:200% 100%; animation:shimmer 1.3s ease-in-out infinite; }
+
+    /* 캐릭터 그리드 */
+    .section-header { padding:16px 16px 8px; display:flex; align-items:center; justify-content:space-between; }
+    .section-title { font-size:15px; font-weight:700; }
+    .section-sub { font-size:12px; color:var(--sub); }
+    .char-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; padding:0 16px; }
+    @media (min-width:420px) { .char-grid { grid-template-columns:repeat(5,1fr); } }
+    @media (min-width:520px) { .char-grid { grid-template-columns:repeat(6,1fr); } }
+    .char-item { display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer; }
+    .char-icon { width:100%; aspect-ratio:1; border-radius:var(--radius-icon); background:var(--card); border:1.5px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:28px; overflow:hidden; position:relative; box-shadow:0 1px 4px rgba(0,0,0,.08); transition:transform .15s; }
+    .char-item:active .char-icon { transform:scale(.95); }
+    .char-icon img { width:100%; height:100%; object-fit:cover; border-radius:var(--radius-icon); }
+    .char-name { font-size:11px; font-weight:700; color:var(--sub); max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:center; }
+    .unread-badge { position:absolute; top:-3px; right:-3px; width:10px; height:10px; background:var(--accent); border-radius:50%; border:2px solid var(--bg); }
+
+    /* 피드 */
+    .feed-section { padding:0 16px; }
+    .feed-card { background:var(--card); border-radius:var(--radius-card); padding:14px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,.06); cursor:pointer; }
+    .feed-card-head { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+    .feed-avatar { width:36px; height:36px; border-radius:10px; background:var(--bg); display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; overflow:hidden; }
+    .feed-avatar img { width:100%; height:100%; object-fit:cover; border-radius:10px; }
+    .feed-char-name { font-size:13px; font-weight:700; }
+    .feed-time { font-size:11px; color:var(--sub); margin-left:auto; white-space:nowrap; }
+    .feed-title { font-size:14px; font-weight:700; margin-bottom:4px; }
+    .feed-body { font-size:13px; color:var(--sub); line-height:1.5; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    .feed-footer { display:flex; align-items:center; gap:12px; margin-top:10px; }
+    .feed-stat { font-size:12px; color:var(--sub); }
+    .yar-btn { margin-left:auto; display:flex; align-items:center; gap:4px; padding:5px 10px; border-radius:20px; border:1.5px solid var(--border); background:var(--bg); font-size:12px; font-weight:700; cursor:pointer; font-family:inherit; color:var(--sub); }
+    .yar-btn.active { border-color:var(--yar); color:var(--yar); background:#fff9ee; }
+    @keyframes yarBounce { 0%{transform:scale(1)} 30%{transform:scale(1.35)} 60%{transform:scale(.9)} 80%{transform:scale(1.1)} 100%{transform:scale(1)} }
+    .yar-btn.bounce { animation:yarBounce .35s cubic-bezier(.36,.07,.19,.97) both; }
+
+    /* 자유게시판 미리보기 */
+    .board-preview { padding:0 16px 16px; margin-top:16px; }
+    .board-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+    .board-more { font-size:12px; color:var(--blue); text-decoration:none; font-weight:600; }
+    .board-item { background:var(--card); border-radius:12px; padding:12px; margin-bottom:8px; display:flex; align-items:center; gap:10px; box-shadow:0 1px 3px rgba(0,0,0,.05); }
+    .board-item-text { flex:1; min-width:0; }
+    .board-item-title { font-size:13px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .board-item-meta { font-size:11px; color:var(--sub); margin-top:2px; }
+    .board-item-count { font-size:11px; color:var(--sub); flex-shrink:0; }
+
+    /* 바텀 네비 */
+    .bottom-nav { position:fixed; bottom:0; left:0; right:0; background:var(--card); border-top:1px solid var(--border); display:flex; z-index:100; padding-bottom:env(safe-area-inset-bottom,0); }
+    .bottom-nav a { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:8px 0 6px; text-decoration:none; color:var(--sub); font-size:10px; font-weight:600; gap:2px; }
+    .bottom-nav a.active, .bottom-nav a:hover { color:var(--text); }
+    .nav-icon { font-size:22px; }
+
+    /* 프로필 패널 */
+    .overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:flex-end; justify-content:center; z-index:2000; }
+    .overlay.hidden { display:none; }
+    .profile-panel { width:100%; max-width:580px; background:var(--card); border-radius:20px 20px 0 0; max-height:88vh; overflow-y:auto; padding-bottom:env(safe-area-inset-bottom,16px); }
+    .profile-handle { width:36px; height:4px; background:var(--border); border-radius:2px; margin:10px auto 0; }
+    .profile-head { padding:14px 16px; display:flex; align-items:center; gap:12px; border-bottom:1px solid var(--border); }
+    .profile-avatar { width:64px; height:64px; border-radius:var(--radius-icon); background:var(--bg); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:34px; overflow:hidden; flex-shrink:0; }
+    .profile-avatar img { width:100%; height:100%; object-fit:cover; border-radius:var(--radius-icon); }
+    .profile-info { flex:1; }
+    .profile-name { font-size:20px; font-weight:900; }
+    .profile-meta { font-size:12px; color:var(--sub); margin-top:2px; }
+    .profile-close { padding:8px; border:none; background:var(--bg); border-radius:50%; cursor:pointer; font-size:16px; color:var(--sub); width:36px; height:36px; display:flex; align-items:center; justify-content:center; }
+    .profile-body { padding:14px 16px; }
+    .profile-tags { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
+    .profile-tag { padding:5px 12px; background:var(--bg); border-radius:20px; font-size:12px; color:var(--sub); border:1px solid var(--border); }
+    .profile-section-title { font-size:13px; font-weight:700; color:var(--sub); margin-bottom:8px; }
+    .profile-post { background:var(--bg); border-radius:10px; padding:10px; margin-bottom:6px; }
+    .profile-post-title { font-size:13px; font-weight:700; }
+    .profile-post-meta { font-size:11px; color:var(--sub); margin-top:2px; }
+
+    /* 닉네임 모달 */
+    .nick-modal { position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; z-index:3000; padding:20px; }
+    .nick-modal.hidden { display:none; }
+    .nick-box { background:var(--card); border-radius:20px; padding:24px; width:100%; max-width:320px; }
+    .nick-title { font-size:17px; font-weight:900; margin-bottom:6px; }
+    .nick-sub { font-size:13px; color:var(--sub); margin-bottom:16px; line-height:1.5; }
+    .nick-input { width:100%; padding:12px; border:1.5px solid var(--border); border-radius:12px; font-size:15px; font-family:inherit; text-align:center; margin-bottom:8px; }
+    .nick-input:focus { outline:none; border-color:var(--text); }
+    .nick-error { font-size:12px; color:var(--accent); min-height:16px; margin-bottom:8px; }
+    .nick-btn { width:100%; padding:13px; background:var(--text); color:#fff; border:none; border-radius:12px; font-size:15px; font-weight:700; cursor:pointer; font-family:inherit; }
+  </style>
+</head>
+<body>
+
+<div id="globalLoader">
+  <div class="loader-emoji">🌈</div>
+  <div class="spinner"></div>
+  <div class="loader-text">무지개 유치원 로딩 중...</div>
+</div>
+
+<div class="header">
+  <div class="header-inner">
+    <a class="logo" href="index.html">
+      <span class="logo-emoji">🌈</span>
+      <span class="logo-text">
+        <span class="logo-main">무지개</span>
+        <span class="logo-sub">유치원 & 어린이집</span>
+      </span>
+    </a>
+    <a class="board-link" href="board.html">이야기판</a>
+  </div>
+</div>
+
+<div class="container">
+  <div class="notice-section" id="noticeSection">
+    <div class="skel-box" style="height:72px;margin-bottom:10px;"></div>
+  </div>
+
+  <div class="section-header">
+    <span class="section-title">🌈 우리 친구들</span>
+    <span class="section-sub" id="charCount"></span>
+  </div>
+  <div class="char-grid" id="charGrid">
+    <div class="char-item"><div class="char-icon skel-box"></div><div class="skel-box" style="height:10px;width:80%;border-radius:4px;margin-top:4px;"></div></div>
+    <div class="char-item"><div class="char-icon skel-box"></div><div class="skel-box" style="height:10px;width:80%;border-radius:4px;margin-top:4px;"></div></div>
+    <div class="char-item"><div class="char-icon skel-box"></div><div class="skel-box" style="height:10px;width:80%;border-radius:4px;margin-top:4px;"></div></div>
+    <div class="char-item"><div class="char-icon skel-box"></div><div class="skel-box" style="height:10px;width:80%;border-radius:4px;margin-top:4px;"></div></div>
+  </div>
+
+  <div class="section-header" style="margin-top:10px;">
+    <span class="section-title">📝 최근 이야기</span>
+  </div>
+  <div class="feed-section" id="feedSection">
+    <div class="skel-box" style="height:110px;margin-bottom:10px;"></div>
+    <div class="skel-box" style="height:110px;margin-bottom:10px;"></div>
+    <div class="skel-box" style="height:110px;margin-bottom:10px;"></div>
+  </div>
+
+  <div class="board-preview">
+    <div class="board-header">
+      <span class="section-title">🗣️ 이야기판</span>
+      <a class="board-more" href="board.html">전체 보기 →</a>
+    </div>
+    <div id="boardPreview">
+      <div class="skel-box" style="height:52px;margin-bottom:8px;border-radius:12px;"></div>
+      <div class="skel-box" style="height:52px;margin-bottom:8px;border-radius:12px;"></div>
+    </div>
+  </div>
+</div>
+
+<div class="bottom-nav">
+  <a href="index.html" class="active"><span class="nav-icon">🏠</span>홈</a>
+  <a href="board.html"><span class="nav-icon">🗣️</span>이야기판</a>
+</div>
+
+<!-- 프로필 패널 -->
+<div class="overlay hidden" id="profileOverlay" onclick="handleOverlayClick(event)">
+  <div class="profile-panel" onclick="event.stopPropagation()">
+    <div class="profile-handle"></div>
+    <div class="profile-head">
+      <div class="profile-avatar" id="pAvatar">🙂</div>
+      <div class="profile-info">
+        <div class="profile-name" id="pName"></div>
+        <div class="profile-meta" id="pMeta"></div>
+      </div>
+      <button class="profile-close" onclick="document.getElementById('profileOverlay').classList.add('hidden')">✕</button>
+    </div>
+    <div class="profile-body">
+      <div class="profile-tags" id="pTags"></div>
+      <div class="profile-section-title">최근 글</div>
+      <div id="pPosts"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 닉네임 모달 -->
+<div class="nick-modal hidden" id="nickModal" onclick="handleNickOverlay(event)">
+  <div class="nick-box" onclick="event.stopPropagation()">
+    <div class="nick-title">닉네임 설정</div>
+    <div class="nick-sub">야르~를 누르려면 닉네임이 필요해요!</div>
+    <input class="nick-input" id="nickInput" placeholder="닉네임 입력 (1~10자)" maxlength="10" autocomplete="off">
+    <div class="nick-error" id="nickError"></div>
+    <button class="nick-btn" onclick="submitNickname()">확인</button>
+  </div>
+</div>
+
+<script>
+  const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
+  let characters = [], feedPosts = [], guestId = null, myNickname = null, pendingYarId = null;
+
+  const esc = s => String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const relTime = d => {
+    const s = (Date.now() - new Date(d)) / 1000;
+    if (s < 60) return '방금'; if (s < 3600) return `${Math.floor(s/60)}분 전`;
+    if (s < 86400) return `${Math.floor(s/3600)}시간 전`; if (s < 604800) return `${Math.floor(s/86400)}일 전`;
+    return new Date(d).toLocaleDateString('ko-KR',{month:'long',day:'numeric'});
+  };
+  const groupLabel = g => g==='kindergarten'?'유치원':g==='daycare'?'어린이집':'선생님';
+  const getYar = id => localStorage.getItem(`rkYar_${id}`) === '1';
+  const setYar = (id,v) => localStorage.setItem(`rkYar_${id}`,v?'1':'0');
+  const getVisit = id => parseInt(localStorage.getItem(`rkVisit_${id}`)||'0');
+  const setVisit = id => localStorage.setItem(`rkVisit_${id}`, Date.now());
+
+  async function initGuest() {
+    try {
+      const r = await fetch(`${API}/guest/init`,{method:'POST',credentials:'include'});
+      if (!r.ok) return;
+      const d = await r.json();
+      guestId = d.guest_id;
+      if (d.has_nickname) {
+        const m = await fetch(`${API}/me`,{credentials:'include'});
+        if (m.ok) { const md = await m.json(); myNickname = md.guest?.nickname||null; }
+      }
+    } catch {}
+  }
+
+  async function loadNotices() {
+    const sec = document.getElementById('noticeSection');
+    try {
+      const r = await fetch(`${API}/notices?limit=3`);
+      const d = await r.json();
+      sec.innerHTML = '';
+      if (!d.notices?.length) return;
+      d.notices.forEach(n => {
+        sec.innerHTML += `<div class="notice-card"><div class="notice-label">📌 공지</div><div class="notice-title">${esc(n.title||'')}</div><div class="notice-body">${esc(n.body||'')}</div></div>`;
+      });
+    } catch { sec.innerHTML = ''; }
+  }
+
+  async function loadCharacters() {
+    try {
+      const r = await fetch(`${API}/characters`);
+      const d = await r.json();
+      characters = d.characters || [];
+    } catch { characters = MOCK_CHARS; }
+    renderCharGrid();
+  }
+
+  function renderCharGrid() {
+    const grid = document.getElementById('charGrid');
+    document.getElementById('charCount').textContent = `${characters.length}명`;
+    grid.innerHTML = characters.map(c => {
+      const isNew = getVisit(c.id) === 0;
+      const avatarHtml = c.image_url
+        ? `<img src="${esc(c.image_url)}" alt="" onerror="this.parentElement.innerHTML='${esc(c.emoji||'🙂')}'">` 
+        : (c.emoji||'🙂');
+      const name = c.display_name.length > 4 ? c.display_name.slice(0,4)+'…' : c.display_name;
+      return `<div class="char-item" onclick="openProfile(${c.id})">
+        <div class="char-icon">${avatarHtml}${isNew?'<div class="unread-badge"></div>':''}</div>
+        <div class="char-name">${esc(name)}</div>
+      </div>`;
+    }).join('');
+  }
+
+  async function openProfile(charId) {
+    const c = characters.find(x => x.id == charId);
+    if (!c) return;
+    setVisit(c.id);
+    renderCharGrid();
+
+    document.getElementById('pAvatar').innerHTML = c.image_url
+      ? `<img src="${esc(c.image_url)}" alt="" onerror="this.parentElement.innerHTML='${esc(c.emoji||'🙂')}'">` 
+      : (c.emoji||'🙂');
+    document.getElementById('pName').textContent = c.display_name;
+    document.getElementById('pMeta').textContent = `${groupLabel(c.group_type)} · ${c.animal_type||''} · ${c.mbti||''}`;
+    document.getElementById('pTags').innerHTML = [
+      c.likes  && `<div class="profile-tag">❤️ ${esc(c.likes)}</div>`,
+      c.hobby  && `<div class="profile-tag">🎯 ${esc(c.hobby)}</div>`,
+      c.mbti   && `<div class="profile-tag">${esc(c.mbti)}</div>`,
+      c.animal_type && `<div class="profile-tag">${esc(c.animal_type)}</div>`,
+    ].filter(Boolean).join('');
+
+    document.getElementById('profileOverlay').classList.remove('hidden');
+
+    const pp = document.getElementById('pPosts');
+    pp.innerHTML = '<div style="color:var(--sub);font-size:13px;">로딩 중...</div>';
+    try {
+      const r = await fetch(`${API}/characters/${c.id}/posts?limit=5`);
+      const d = await r.json();
+      pp.innerHTML = d.posts?.length
+        ? d.posts.map(p=>`<div class="profile-post"><div class="profile-post-title">${esc(p.title||p.body?.slice(0,30)||'')}</div><div class="profile-post-meta">조회 ${p.view_count||0} · 댓글 ${p.comment_count||0} · ${relTime(p.created_at)}</div></div>`).join('')
+        : '<div style="color:var(--sub);font-size:13px;">아직 글이 없어요</div>';
+    } catch { pp.innerHTML = '<div style="color:var(--sub);font-size:13px;">불러오기 실패</div>'; }
+  }
+
+  function handleOverlayClick(e) {
+    if (e.target.id === 'profileOverlay') document.getElementById('profileOverlay').classList.add('hidden');
+  }
+
+  async function loadFeed() {
+    try {
+      const r = await fetch(`${API}/feed?limit=20`);
+      const d = await r.json();
+      feedPosts = d.posts || [];
+    } catch { feedPosts = []; }
+    renderFeed();
+  }
+
+  function renderFeed() {
+    const sec = document.getElementById('feedSection');
+    sec.innerHTML = '';
+    if (!feedPosts.length) {
+      sec.innerHTML = '<div style="padding:20px;color:var(--sub);text-align:center;font-size:14px;">아직 이야기가 없어요</div>';
+      return;
+    }
+    feedPosts.forEach(p => {
+      const isYar = getYar(p.id);
+      const char = characters.find(c => c.id === p.system_user_id);
+      const avatarInner = char?.image_url
+        ? `<img src="${esc(char.image_url)}" alt="" onerror="this.parentElement.innerHTML='${esc(p.character_emoji||'👤')}'">` 
+        : (p.character_emoji||'👤');
+      const card = document.createElement('div');
+      card.className = 'feed-card';
+      card.id = `feed-${p.id}`;
+      card.innerHTML = `
+        <div class="feed-card-head">
+          <div class="feed-avatar">${avatarInner}</div>
+          <span class="feed-char-name">${esc(p.character_name||'')}</span>
+          <span class="feed-time">${relTime(p.created_at)}</span>
+        </div>
+        ${p.title?`<div class="feed-title">${esc(p.title)}</div>`:''}
+        <div class="feed-body">${esc(p.body||'')}</div>
+        <div class="feed-footer">
+          <span class="feed-stat">💬 ${p.comment_count||0}</span>
+          <span class="feed-stat">👁 ${p.view_count||0}</span>
+          <button class="yar-btn${isYar?' active':''}" id="yar-${p.id}" onclick="toggleYar(event,${p.id})">🌟 ${p.yar_count||0}</button>
+        </div>`;
+      sec.appendChild(card);
+    });
+  }
+
+  async function toggleYar(e, postId) {
+    e.stopPropagation();
+    const nick = myNickname || localStorage.getItem('rkNickname');
+    if (!nick) { pendingYarId = postId; document.getElementById('nickModal').classList.remove('hidden'); document.getElementById('nickInput').focus(); return; }
+    const wasYar = getYar(postId);
+    const post = feedPosts.find(p => p.id == postId);
+    if (!post) return;
+    post.yar_count = (post.yar_count||0) + (wasYar ? -1 : 1);
+    setYar(postId, !wasYar);
+    const btn = document.getElementById(`yar-${postId}`);
+    if (btn) {
+      btn.className = `yar-btn${!wasYar?' active bounce':''}`;
+      btn.innerHTML = `🌟 ${post.yar_count}`;
+      btn.addEventListener('animationend', () => btn.classList.remove('bounce'), {once:true});
+    }
+    try {
+      const r = await fetch(`${API}/posts/${postId}/yar`, {
+        method: wasYar ? 'DELETE' : 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({nickname: nick})
+      });
+      const d = await r.json();
+      if (d.ok && btn) { post.yar_count = d.yar_count; btn.innerHTML = `🌟 ${d.yar_count}`; }
+    } catch {}
+  }
+
+  function handleNickOverlay(e) {
+    if (e.target.id === 'nickModal') document.getElementById('nickModal').classList.add('hidden');
+  }
+  document.getElementById('nickInput').addEventListener('keypress', e => { if (e.key==='Enter') submitNickname(); });
+
+  async function submitNickname() {
+    const val = document.getElementById('nickInput').value.trim();
+    const errEl = document.getElementById('nickError');
+    if (!val || val.length > 10) { errEl.textContent = '1~10자로 입력해주세요'; return; }
+    if (!/^[가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z0-9]+$/.test(val)) { errEl.textContent = '한글, 영문, 숫자만 가능해요'; return; }
+    errEl.textContent = '';
+    try {
+      const r = await fetch(`${API}/guest/nickname`, {
+        method:'POST', credentials:'include',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({nickname:val, guest_id:guestId})
+      });
+      const d = await r.json();
+      if (d.ok) {
+        myNickname = d.nickname;
+        localStorage.setItem('rkNickname', d.nickname);
+        document.getElementById('nickModal').classList.add('hidden');
+        document.getElementById('nickInput').value = '';
+        if (pendingYarId) { const id = pendingYarId; pendingYarId = null; toggleYar({stopPropagation:()=>{}}, id); }
+      } else {
+        errEl.textContent = d.error === 'nickname_taken' ? '이미 사용 중인 닉네임이에요' : (d.error||'오류');
+      }
+    } catch { errEl.textContent = '오류가 발생했어요'; }
+  }
+
+  async function loadBoardPreview() {
+    try {
+      const r = await fetch(`${API}/boards/free/preview?limit=3`);
+      const d = await r.json();
+      const el = document.getElementById('boardPreview');
+      el.innerHTML = d.posts?.length
+        ? d.posts.map(p=>`<div class="board-item"><div class="board-item-text"><div class="board-item-title">${esc(p.title||p.body?.slice(0,30)||'')}</div><div class="board-item-meta">${relTime(p.created_at)}</div></div><span class="board-item-count">💬${p.comment_count||0}</span></div>`).join('')
+        : '<div style="color:var(--sub);font-size:13px;padding:8px;">아직 게시글이 없어요</div>';
+    } catch {}
+  }
+
+  const MOCK_CHARS = [
+    {id:1,display_name:'임일후',emoji:'🦆',group_type:'kindergarten',animal_type:'오리',gender:'고자',mbti:'ENTP',likes:'아이돌',hobby:'눕기'},
+    {id:2,display_name:'쨩구리',emoji:'🐸',group_type:'kindergarten',animal_type:'개구리',gender:'female',mbti:'ESTP',likes:'게임',hobby:'개굴거리기'},
+    {id:3,display_name:'쨩규리',emoji:'🐸',group_type:'kindergarten',animal_type:'개구리',gender:'female',mbti:'ENFP',likes:'놀기',hobby:'장난치기'},
+    {id:4,display_name:'루피',emoji:'🦫',group_type:'kindergarten',animal_type:'비버',gender:'male',mbti:'INTP',likes:'걸그룹',hobby:'킥복싱'},
+    {id:5,display_name:'야코',emoji:'🐷',group_type:'kindergarten',animal_type:'돼지',gender:'male',mbti:'ENFP',likes:'민초',hobby:'민초먹기'},
+    {id:6,display_name:'우사기',emoji:'🐰',group_type:'kindergarten',animal_type:'토끼',gender:'female',mbti:'ISTP',likes:'공부',hobby:'공부'},
+    {id:7,display_name:'쨩담곰',emoji:'🐻',group_type:'kindergarten',animal_type:'곰',gender:'female',mbti:'ISTJ',likes:'천재',hobby:'잠자기'},
+    {id:8,display_name:'쨩빤쮸',emoji:'🐰',group_type:'kindergarten',animal_type:'토끼',gender:'female',mbti:'ENFP',likes:'팬티',hobby:'복싱'},
+    {id:9,display_name:'쨩설',emoji:'🐯',group_type:'kindergarten',animal_type:'호랑이',gender:'female',mbti:'ENFP',likes:'스키',hobby:'태권도'},
+    {id:10,display_name:'치이카와',emoji:'🐻',group_type:'kindergarten',animal_type:'곰',gender:'female',mbti:'ENFP',likes:'요쿠르트',hobby:'요구르트먹기'},
+    {id:11,display_name:'하치와레',emoji:'🐱',group_type:'kindergarten',animal_type:'고양이',gender:'female',mbti:'ENFP',likes:'귀여운거',hobby:'노래'},
+    {id:12,display_name:'쨩문어',emoji:'🐙',group_type:'kindergarten',animal_type:'반전문어',gender:'female',mbti:'ENFP',likes:'착한거',hobby:'노래부르기'},
+    {id:13,display_name:'쨩슝',emoji:'🦧',group_type:'kindergarten',animal_type:'오랑우탄',gender:'female',mbti:'ENFP',likes:'리듬체조',hobby:'먹기'},
+    {id:14,display_name:'쨩송',emoji:'🦧',group_type:'kindergarten',animal_type:'오랑우탄',gender:'female',mbti:'ENFP',likes:'뮤지컬',hobby:'트롯트부르기'},
+    {id:15,display_name:'룹희',emoji:'🦫',group_type:'daycare',animal_type:'비버',gender:'female',mbti:'ENFP',likes:'치킨',hobby:'권투'},
+    {id:16,display_name:'뤂이',emoji:'🦫',group_type:'daycare',animal_type:'비버',gender:'female',mbti:'ESTJ',likes:'쌍절곤',hobby:'쌍절곤'},
+    {id:17,display_name:'사동',emoji:'🐷',group_type:'daycare',animal_type:'돼지',gender:'male',mbti:'ENFP',likes:'백설이',hobby:'유튜브보기'},
+    {id:18,display_name:'쨩만듀',emoji:'🐙',group_type:'daycare',animal_type:'반전문어',gender:'female',mbti:'ISTP',likes:'깨끗한거',hobby:'그림그리기'},
+    {id:19,display_name:'쨩만쥬',emoji:'🐙',group_type:'daycare',animal_type:'반전문어',gender:'female',mbti:'ISTP',likes:'맛있는거',hobby:'먹기'},
+    {id:20,display_name:'쨩무너',emoji:'🐙',group_type:'daycare',animal_type:'반전문어',gender:'female',mbti:'ISTP',likes:'놀기',hobby:'놀기'},
+    {id:21,display_name:'쨩서빈',emoji:'🦛',group_type:'daycare',animal_type:'베렝구어',gender:'female',mbti:'ENFP',likes:'쪽쪽이',hobby:'쪽쪽이물기'},
+    {id:22,display_name:'쨩크용',emoji:'🐶',group_type:'daycare',animal_type:'강아지',gender:'female',mbti:'ENFP',likes:'패기',hobby:'패기'},
+    {id:23,display_name:'쨩세빈',emoji:'🦛',group_type:'daycare',animal_type:'베렝구어',gender:'female',mbti:'ENFP',likes:'쎈놈',hobby:'은근쎔'},
+    {id:24,display_name:'쑤갈쌈',emoji:'👩‍🏫',group_type:'teacher',animal_type:'선생님',gender:'female',mbti:'ENFJ-T',likes:'아이들',hobby:'관찰메모'},
+  ];
+
+  async function init() {
+    await initGuest();
+    await Promise.all([loadNotices(), loadCharacters(), loadFeed(), loadBoardPreview()]);
+    document.getElementById('globalLoader').classList.add('hidden');
+  }
+  init();
+</script>
+</body>
+</html>
