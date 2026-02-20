@@ -621,6 +621,9 @@
       if (p.video_url) {
         mediaWrap.innerHTML += `<video src="${esc(p.video_url)}" controls playsinline></video>`;
       }
+      if (p.audio_url) {
+        mediaWrap.innerHTML += `<audio src="${esc(p.audio_url)}" controls style="width:100%;margin-top:4px;border-radius:8px;"></audio>`;
+      }
 
       const isYar = getYar(postId);
       syncDetailYar(p.yar_count||0, isYar);

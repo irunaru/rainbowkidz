@@ -165,7 +165,44 @@
       <div class="tool-title">📌 공지사항 작성 (쑤갈쌈 명의)</div>
       <input class="input" id="noticeTitle" placeholder="공지 제목">
       <textarea class="textarea" id="noticeBody" placeholder="공지 내용..."></textarea>
-      <button class="btn btn-blue" onclick="publishNotice()">등록</button>
+
+      <!-- 미디어 첨부 -->
+      <div style="margin:10px 0 6px;font-size:13px;font-weight:700;color:var(--sub);">📎 미디어 첨부 (선택)</div>
+
+      <!-- 이미지 -->
+      <div style="margin-bottom:8px;">
+        <label style="font-size:12px;font-weight:600;color:var(--sub);display:block;margin-bottom:4px;">🖼️ 이미지</label>
+        <input type="file" id="noticeImageFile" accept="image/*" style="display:none;" onchange="previewNoticeMedia('image')">
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+          <button class="btn btn-ghost btn-sm" onclick="document.getElementById('noticeImageFile').click()">파일 선택</button>
+          <input class="input" id="noticeImageUrl" placeholder="또는 이미지 URL 직접 입력" style="flex:1;min-width:180px;margin:0;">
+        </div>
+        <div id="noticeImagePreview" style="margin-top:6px;"></div>
+      </div>
+
+      <!-- 동영상 -->
+      <div style="margin-bottom:8px;">
+        <label style="font-size:12px;font-weight:600;color:var(--sub);display:block;margin-bottom:4px;">🎬 동영상</label>
+        <input type="file" id="noticeVideoFile" accept="video/*" style="display:none;" onchange="previewNoticeMedia('video')">
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+          <button class="btn btn-ghost btn-sm" onclick="document.getElementById('noticeVideoFile').click()">파일 선택</button>
+          <input class="input" id="noticeVideoUrl" placeholder="또는 동영상 URL (YouTube 등)" style="flex:1;min-width:180px;margin:0;">
+        </div>
+        <div id="noticeVideoPreview" style="margin-top:6px;"></div>
+      </div>
+
+      <!-- 음악 -->
+      <div style="margin-bottom:12px;">
+        <label style="font-size:12px;font-weight:600;color:var(--sub);display:block;margin-bottom:4px;">🎵 음악</label>
+        <input type="file" id="noticeAudioFile" accept="audio/*" style="display:none;" onchange="previewNoticeMedia('audio')">
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+          <button class="btn btn-ghost btn-sm" onclick="document.getElementById('noticeAudioFile').click()">파일 선택</button>
+          <input class="input" id="noticeAudioUrl" placeholder="또는 음악 URL 직접 입력" style="flex:1;min-width:180px;margin:0;">
+        </div>
+        <div id="noticeAudioPreview" style="margin-top:6px;"></div>
+      </div>
+
+      <button class="btn btn-blue" onclick="publishNotice()">📌 공지 등록</button>
       <div class="status" id="noticeStatus"></div>
     </div>
 
@@ -557,6 +594,51 @@
     input.value = '';
   }
 
+  // ── 공지 미디어 미리보기 + 업로드 ──────────────────
+  const noticeMedia = { image: null, video: null, audio: null };
+
+  async function previewNoticeMedia(type) {
+    const file = document.getElementById(`notice${cap(type)}File`).files[0];
+    if (!file) return;
+    const previewEl = document.getElementById(`notice${cap(type)}Preview`);
+    const urlInput  = document.getElementById(`notice${cap(type)}Url`);
+
+    // 로컬 미리보기
+    const localUrl = URL.createObjectURL(file);
+    previewEl.innerHTML = renderMediaPreview(type, localUrl);
+    previewEl.style.opacity = '0.6';
+    urlInput.value = '업로드 중...';
+
+    try {
+      const form = new FormData();
+      form.append('file', file);
+      form.append('type', type);
+      const r = await adminFetch('/admin/upload-media', { method: 'POST', body: form });
+      const d = await r.json();
+      if (d.ok) {
+        noticeMedia[type] = d.url;
+        urlInput.value = d.url;
+        previewEl.innerHTML = renderMediaPreview(type, d.url);
+        previewEl.style.opacity = '1';
+      } else {
+        urlInput.value = '';
+        previewEl.innerHTML = `<span style="color:red;font-size:12px;">❌ 업로드 실패: ${d.error}</span>`;
+      }
+    } catch (e) {
+      urlInput.value = '';
+      previewEl.innerHTML = `<span style="color:red;font-size:12px;">❌ ${e.message}</span>`;
+    }
+  }
+
+  function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+  function renderMediaPreview(type, url) {
+    if (type === 'image') return `<img src="${url}" style="max-width:100%;max-height:200px;border-radius:10px;display:block;">`;
+    if (type === 'video') return `<video src="${url}" controls style="max-width:100%;max-height:200px;border-radius:10px;display:block;"></video>`;
+    if (type === 'audio') return `<audio src="${url}" controls style="width:100%;margin-top:4px;"></audio>`;
+    return '';
+  }
+
   // ── 공지사항 작성 ────────────────────────────────
   async function publishNotice() {
     const title = document.getElementById('noticeTitle').value.trim();
@@ -565,16 +647,30 @@
     if (!body)  { showStatus('noticeStatus', '내용을 입력하세요', 'error'); return; }
     const teacher = characters.find(c => c.group_type === 'teacher');
     if (!teacher) { showStatus('noticeStatus', '❌ 선생님 캐릭터를 찾을 수 없어요', 'error'); return; }
+
+    // URL 입력란 값도 확인 (직접 입력 or 업로드 완료)
+    const imageUrl = document.getElementById('noticeImageUrl').value.trim() || null;
+    const videoUrl = document.getElementById('noticeVideoUrl').value.trim() || null;
+    const audioUrl = document.getElementById('noticeAudioUrl').value.trim() || null;
+
     showStatus('noticeStatus', '등록 중...', 'info');
     try {
       const r = await adminFetch('/system/posts', {
         method: 'POST',
-        body: JSON.stringify({ system_user_id: teacher.id, title, body, is_notice: true }),
+        body: JSON.stringify({
+          system_user_id: teacher.id, title, body, is_notice: true,
+          image_url: imageUrl,
+          video_url: videoUrl,
+          audio_url: audioUrl,
+        }),
       });
       const d = await r.json();
       if (d.ok) {
-        document.getElementById('noticeTitle').value = '';
-        document.getElementById('noticeBody').value  = '';
+        // 입력 초기화
+        ['noticeTitle','noticeBody','noticeImageUrl','noticeVideoUrl','noticeAudioUrl'].forEach(id => document.getElementById(id).value = '');
+        ['noticeImagePreview','noticeVideoPreview','noticeAudioPreview'].forEach(id => document.getElementById(id).innerHTML = '');
+        ['noticeImageFile','noticeVideoFile','noticeAudioFile'].forEach(id => document.getElementById(id).value = '');
+        noticeMedia.image = noticeMedia.video = noticeMedia.audio = null;
         showStatus('noticeStatus', '✅ 공지 등록 완료', 'success');
         loadManageNotices();
       } else { showStatus('noticeStatus', `❌ ${d.error}`, 'error'); }
