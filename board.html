@@ -197,7 +197,10 @@
 <!-- 닉네임 모달 -->
 <div class="nick-modal hidden" id="nickModal" onclick="handleNickOverlay(event)">
   <div class="nick-box" onclick="event.stopPropagation()">
-    <div class="nick-title">닉네임 설정</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+      <div class="nick-title" style="margin-bottom:0;">닉네임 설정</div>
+      <button onclick="document.getElementById('nickModal').classList.add('hidden')" style="border:none;background:none;font-size:20px;cursor:pointer;color:var(--sub);padding:4px;">✕</button>
+    </div>
     <div class="nick-sub" id="nickModalSub">닉네임이 필요해요!</div>
     <input class="nick-input" id="nickInput" placeholder="닉네임 입력 (1~10자)" maxlength="10" autocomplete="off">
     <div class="nick-error" id="nickError"></div>
