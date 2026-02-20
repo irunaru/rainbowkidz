@@ -89,6 +89,7 @@
     .char-tile { background:var(--card); border:1.5px solid var(--border); border-radius:14px; padding:10px 8px; cursor:pointer; text-align:center; transition:border-color .15s; }
     .char-tile:hover { border-color:var(--blue); }
     .char-emoji { font-size:26px; }
+    .char-thumb { width:44px; height:44px; border-radius:10px; object-fit:cover; display:block; margin:0 auto; }
     .char-name  { font-size:11px; font-weight:900; color:var(--sub); margin-top:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .char-group { font-size:10px; color:var(--sub); opacity:.8; margin-top:1px; }
 
@@ -413,12 +414,16 @@
       !q || `${c.display_name} ${c.group_type} ${c.mbti || ''} ${c.animal_type || ''}`.toLowerCase().includes(q)
     );
     document.getElementById('charGrid').innerHTML = filtered.length
-      ? filtered.map(c => `
-          <div class="char-tile" onclick="openPanel(${c.id})">
-            <div class="char-emoji">${esc(c.emoji || '🙂')}</div>
+      ? filtered.map(c => {
+          const avatar = c.image_url
+            ? `<img class="char-thumb" src="${esc(c.image_url)}" alt="${esc(c.display_name)}" data-emoji="${esc(c.emoji||'🙂')}" onerror="this.outerHTML='<div class=\'char-emoji\'>' + this.dataset.emoji + '</div>'">`
+            : `<div class="char-emoji">${esc(c.emoji || '🙂')}</div>`;
+          return `<div class="char-tile" onclick="openPanel(${c.id})">
+            ${avatar}
             <div class="char-name">${esc(c.display_name)}</div>
             <div class="char-group">${groupLabel(c.group_type)} · ${esc(c.mbti || '')}</div>
-          </div>`).join('')
+          </div>`;
+        }).join('')
       : '<div style="color:var(--sub);font-size:13px;grid-column:1/-1;">검색 결과 없음</div>';
   }
 
