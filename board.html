@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>🌈 이야기판 - 무지개 유치원</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    :root {
+      --bg:#f2f2f7; --card:#fff; --text:#1c1c1e; --sub:#8e8e93; --border:#e5e5ea;
+      --accent:#ff6b6b; --blue:#007aff; --green:#34c759;
+      --radius-card:16px;
+    }
+    body { font-family:'Noto Sans KR',-apple-system,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+    /* 로딩 */
+    #globalLoader { position:fixed; inset:0; background:rgba(255,255,255,.96); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:9000; gap:14px; }
+    #globalLoader.hidden { display:none; }
+    .spinner { width:28px; height:28px; border:3px solid var(--border); border-top-color:var(--text); border-radius:50%; animation:spin .8s linear infinite; }
+    @keyframes spin    { to { transform:rotate(360deg); } }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+    .skel { border-radius:var(--radius-card); background:linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%); background-size:200% 100%; animation:shimmer 1.3s ease-in-out infinite; }
+
+    /* 헤더 */
+    .header { background:var(--card); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:100; }
+    .header-inner { max-width:640px; margin:0 auto; padding:10px 16px; display:flex; align-items:center; gap:10px; }
+    .back-btn { width:34px; height:34px; border-radius:50%; background:var(--bg); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:16px; cursor:pointer; text-decoration:none; flex-shrink:0; color:var(--text); }
+    .header-title { font-size:17px; font-weight:900; }
+    .write-btn { margin-left:auto; padding:7px 14px; background:var(--text); color:#fff; border-radius:20px; font-size:12px; font-weight:700; border:none; cursor:pointer; font-family:inherit; white-space:nowrap; }
+
+    /* 컨테이너 */
+    .container { max-width:640px; margin:0 auto; padding:12px 16px 100px; }
+
+    /* 게시글 카드 */
+    .post-card { background:var(--card); border-radius:var(--radius-card); padding:14px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,.06); cursor:pointer; }
+    .post-card:active { opacity:.85; }
+    .post-badge { display:inline-block; padding:2px 8px; background:#fff3cd; border-radius:20px; font-size:10px; font-weight:700; color:#856404; margin-bottom:6px; }
+    .post-title { font-size:15px; font-weight:700; margin-bottom:4px; }
+    .post-body  { font-size:13px; color:var(--sub); line-height:1.5; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; margin-bottom:8px; }
+    .post-meta  { display:flex; align-items:center; gap:10px; font-size:11px; color:var(--sub); flex-wrap:wrap; }
+    .post-meta-nick { font-weight:700; color:var(--text); }
+
+    /* 빈 상태 */
+    .empty { text-align:center; padding:60px 20px; }
+    .empty-icon { font-size:48px; margin-bottom:12px; }
+    .empty-text { font-size:15px; font-weight:700; margin-bottom:6px; }
+    .empty-sub  { font-size:13px; color:var(--sub); }
+
+    /* 더 보기 */
+    .load-more { width:100%; padding:13px; background:var(--card); border:1.5px solid var(--border); border-radius:var(--radius-card); font-size:14px; font-weight:700; color:var(--sub); cursor:pointer; font-family:inherit; margin-top:4px; }
+    .load-more:disabled { opacity:.5; }
+
+    /* 바텀 네비 */
+    .bottom-nav { position:fixed; bottom:0; left:0; right:0; background:var(--card); border-top:1px solid var(--border); display:flex; z-index:100; padding-bottom:env(safe-area-inset-bottom,0); }
+    .bottom-nav a { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:8px 0 6px; text-decoration:none; color:var(--sub); font-size:10px; font-weight:600; gap:2px; }
+    .bottom-nav a.active { color:var(--text); }
+    .nav-icon { font-size:22px; }
+
+    /* 글쓰기 모달 */
+    .modal { position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:flex-end; justify-content:center; z-index:2000; padding:10px; }
+    .modal.hidden { display:none; }
+    .modal-box { width:100%; max-width:600px; background:var(--card); border-radius:20px; padding:20px; }
+    .modal-title { font-size:17px; font-weight:900; margin-bottom:14px; }
+    .modal-input    { width:100%; padding:12px; border:1.5px solid var(--border); border-radius:12px; font-size:14px; font-family:inherit; margin-bottom:10px; }
+    .modal-textarea { width:100%; padding:12px; border:1.5px solid var(--border); border-radius:12px; font-size:14px; font-family:inherit; min-height:120px; resize:vertical; line-height:1.6; margin-bottom:10px; }
+    .modal-input:focus, .modal-textarea:focus { outline:none; border-color:var(--text); }
+    .modal-error  { font-size:12px; color:var(--accent); min-height:16px; margin-bottom:8px; }
+    .modal-footer { display:flex; gap:8px; }
+    .modal-cancel { flex:1; padding:12px; background:var(--bg); border:1.5px solid var(--border); border-radius:12px; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; }
+    .modal-submit { flex:2; padding:12px; background:var(--text); color:#fff; border:none; border-radius:12px; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; }
+    .modal-submit:disabled { opacity:.5; }
+
+    /* 게시글 상세 패널 */
+    .overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:flex-end; justify-content:center; z-index:2000; }
+    .overlay.hidden { display:none; }
+    .detail-panel { width:100%; max-width:640px; background:var(--card); border-radius:20px 20px 0 0; max-height:90vh; display:flex; flex-direction:column; }
+    .detail-handle  { width:36px; height:4px; background:var(--border); border-radius:2px; margin:10px auto 0; flex-shrink:0; }
+    .detail-head    { padding:12px 16px 10px; border-bottom:1px solid var(--border); flex-shrink:0; }
+    .detail-title   { font-size:17px; font-weight:900; margin-bottom:4px; }
+    .detail-meta    { font-size:12px; color:var(--sub); display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .detail-scroll  { flex:1; overflow-y:auto; }
+    .detail-body    { padding:14px 16px; font-size:14px; line-height:1.7; border-bottom:1px solid var(--border); white-space:pre-wrap; }
+    .detail-footer  { padding:10px 16px; display:flex; gap:12px; border-bottom:1px solid var(--border); }
+    .detail-stat    { font-size:13px; color:var(--sub); }
+    .detail-close   { margin-left:auto; padding:6px 12px; border:1px solid var(--border); border-radius:20px; background:var(--bg); font-size:12px; cursor:pointer; font-family:inherit; }
+
+    /* 댓글 */
+    .comments-wrap  { padding:0 16px 10px; }
+    .comments-title { font-size:13px; font-weight:700; color:var(--sub); padding:12px 0 8px; }
+    .comment-item   { padding:10px 0; border-bottom:1px solid var(--border); }
+    .comment-item:last-child { border-bottom:none; }
+    .comment-nick   { font-size:12px; font-weight:700; }
+    .comment-body   { font-size:13px; line-height:1.5; margin-top:3px; }
+    .comment-time   { font-size:11px; color:var(--sub); margin-top:2px; }
+
+    /* 댓글 입력 (패널 하단 고정) */
+    .comment-form  { flex-shrink:0; background:var(--card); border-top:1px solid var(--border); padding:10px 16px; display:flex; gap:8px; padding-bottom:calc(10px + env(safe-area-inset-bottom,0)); }
+    .comment-input { flex:1; padding:10px 12px; border:1.5px solid var(--border); border-radius:22px; font-size:14px; font-family:inherit; }
+    .comment-input:focus { outline:none; border-color:var(--text); }
+    .comment-send  { padding:10px 16px; background:var(--text); color:#fff; border:none; border-radius:22px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; white-space:nowrap; }
+    .comment-send:disabled { opacity:.5; }
+
+    /* 닉네임 모달 */
+    .nick-modal { position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; z-index:3000; padding:20px; }
+    .nick-modal.hidden { display:none; }
+    .nick-box   { background:var(--card); border-radius:20px; padding:24px; width:100%; max-width:320px; }
+    .nick-title { font-size:17px; font-weight:900; margin-bottom:6px; }
+    .nick-sub   { font-size:13px; color:var(--sub); margin-bottom:16px; line-height:1.5; }
+    .nick-input { width:100%; padding:12px; border:1.5px solid var(--border); border-radius:12px; font-size:15px; font-family:inherit; text-align:center; margin-bottom:8px; }
+    .nick-input:focus { outline:none; border-color:var(--text); }
+    .nick-error { font-size:12px; color:var(--accent); min-height:16px; margin-bottom:8px; }
+    .nick-btn   { width:100%; padding:13px; background:var(--text); color:#fff; border:none; border-radius:12px; font-size:15px; font-weight:700; cursor:pointer; font-family:inherit; }
+  </style>
+</head>
+<body>
+
+<!-- 로딩 -->
+<div id="globalLoader">
+  <div style="font-size:36px;">🗣️</div>
+  <div class="spinner"></div>
+  <div style="font-size:13px;color:var(--sub);">이야기판 불러오는 중...</div>
+</div>
+
+<!-- 헤더 -->
+<div class="header">
+  <div class="header-inner">
+    <a class="back-btn" href="index.html">←</a>
+    <span class="header-title">🗣️ 이야기판</span>
+    <button class="write-btn" onclick="openWriteModal()">✏️ 글쓰기</button>
+  </div>
+</div>
+
+<!-- 게시글 목록 -->
+<div class="container">
+  <div id="postList">
+    <div class="skel" style="height:90px;margin-bottom:10px;"></div>
+    <div class="skel" style="height:90px;margin-bottom:10px;"></div>
+    <div class="skel" style="height:90px;margin-bottom:10px;"></div>
+  </div>
+  <button class="load-more hidden" id="loadMoreBtn" onclick="loadMore()">더 보기</button>
+</div>
+
+<!-- 바텀 네비 -->
+<div class="bottom-nav">
+  <a href="index.html"><span class="nav-icon">🏠</span>홈</a>
+  <a href="board.html" class="active"><span class="nav-icon">🗣️</span>이야기판</a>
+</div>
+
+<!-- 글쓰기 모달 -->
+<div class="modal hidden" id="writeModal" onclick="handleWriteOverlay(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-title">✏️ 글쓰기</div>
+    <input class="modal-input" id="wTitle" placeholder="제목 (2~80자)" maxlength="80">
+    <textarea class="modal-textarea" id="wBody" placeholder="내용을 입력하세요 (5자 이상)"></textarea>
+    <div class="modal-error" id="wError"></div>
+    <div class="modal-footer">
+      <button class="modal-cancel" onclick="closeWriteModal()">취소</button>
+      <button class="modal-submit" id="wSubmitBtn" onclick="submitPost()">등록</button>
+    </div>
+  </div>
+</div>
+
+<!-- 게시글 상세 패널 -->
+<div class="overlay hidden" id="detailOverlay" onclick="handleDetailOverlay(event)">
+  <div class="detail-panel" onclick="event.stopPropagation()">
+    <div class="detail-handle"></div>
+    <div class="detail-head">
+      <div class="detail-title" id="dTitle"></div>
+      <div class="detail-meta">
+        <span style="font-weight:700;color:var(--text);" id="dNick"></span>
+        <span id="dTime"></span>
+        <span id="dViewCount"></span>
+      </div>
+    </div>
+    <!-- 스크롤 영역 -->
+    <div class="detail-scroll">
+      <div class="detail-body" id="dBody"></div>
+      <div class="detail-footer">
+        <span class="detail-stat" id="dCommentCount"></span>
+        <button class="detail-close" onclick="closeDetail()">✕ 닫기</button>
+      </div>
+      <div class="comments-wrap">
+        <div class="comments-title">댓글</div>
+        <div id="dComments"></div>
+      </div>
+    </div>
+    <!-- 댓글 입력 (패널 하단 고정) -->
+    <div class="comment-form">
+      <input class="comment-input" id="commentInput" placeholder="댓글을 입력하세요..." maxlength="500">
+      <button class="comment-send" id="commentSendBtn" onclick="submitComment()">전송</button>
+    </div>
+  </div>
+</div>
+
+<!-- 닉네임 모달 -->
+<div class="nick-modal hidden" id="nickModal" onclick="handleNickOverlay(event)">
+  <div class="nick-box" onclick="event.stopPropagation()">
+    <div class="nick-title">닉네임 설정</div>
+    <div class="nick-sub" id="nickModalSub">닉네임이 필요해요!</div>
+    <input class="nick-input" id="nickInput" placeholder="닉네임 입력 (1~10자)" maxlength="10" autocomplete="off">
+    <div class="nick-error" id="nickError"></div>
+    <button class="nick-btn" onclick="submitNickname()">확인</button>
+  </div>
+</div>
+
+<script>
+  const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
+
+  let posts         = [];
+  let offset        = 0;
+  const LIMIT       = 20;
+  let hasMore       = false;
+  let guestId       = null;
+  let myNickname    = null;
+  let currentPostId = null;
+  let pendingAction = null; // 'write' | 'comment'
+
+  const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const relTime = d => {
+    const s = (Date.now() - new Date(d)) / 1000;
+    if (s < 60)     return '방금';
+    if (s < 3600)   return `${Math.floor(s / 60)}분 전`;
+    if (s < 86400)  return `${Math.floor(s / 3600)}시간 전`;
+    if (s < 604800) return `${Math.floor(s / 86400)}일 전`;
+    return new Date(d).toLocaleDateString('ko-KR', { month:'long', day:'numeric' });
+  };
+
+  // ESC 키 닫기
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    closeDetail(); closeWriteModal();
+    document.getElementById('nickModal').classList.add('hidden');
+  });
+
+  // ── 게스트 초기화 ────────────────────────────────
+  async function initGuest() {
+    try {
+      const r = await fetch(`${API}/guest/init`, { method:'POST', credentials:'include' });
+      if (!r.ok) return;
+      const d = await r.json();
+      guestId = d.guest_id;
+      if (d.has_nickname) {
+        const m = await fetch(`${API}/me`, { credentials:'include' });
+        if (m.ok) { const md = await m.json(); myNickname = md.guest?.nickname || null; }
+      }
+      if (!myNickname) myNickname = localStorage.getItem('rkNickname');
+    } catch {}
+  }
+
+  // ── 게시글 목록 ──────────────────────────────────
+  async function loadPosts(reset = false) {
+    if (reset) { posts = []; offset = 0; }
+    try {
+      const r = await fetch(`${API}/boards/classroom/posts?limit=${LIMIT}&offset=${offset}`);
+      const d = await r.json();
+      const newPosts = d.posts || [];
+      posts = reset ? newPosts : [...posts, ...newPosts];
+      hasMore = newPosts.length === LIMIT;
+      offset += newPosts.length;
+      renderPosts(reset);
+    } catch (e) {
+      document.getElementById('postList').innerHTML = `
+        <div class="empty"><div class="empty-icon">😢</div>
+        <div class="empty-text">불러오기 실패</div>
+        <div class="empty-sub">${esc(e.message)}</div></div>`;
+    }
+  }
+
+  async function loadMore() {
+    const btn = document.getElementById('loadMoreBtn');
+    btn.disabled = true; btn.textContent = '불러오는 중...';
+    await loadPosts(false);
+    btn.disabled = false; btn.textContent = '더 보기';
+  }
+
+  function renderPosts(reset = true) {
+    const wrap = document.getElementById('postList');
+    if (!posts.length) {
+      wrap.innerHTML = `<div class="empty">
+        <div class="empty-icon">🌱</div>
+        <div class="empty-text">아직 이야기가 없어요</div>
+        <div class="empty-sub">첫 번째 이야기를 써보세요!</div>
+      </div>`;
+      document.getElementById('loadMoreBtn').classList.add('hidden');
+      return;
+    }
+    if (reset) {
+      wrap.innerHTML = posts.map(renderPostCard).join('');
+    } else {
+      // 더 보기: 기존 목록 하단에 추가
+      const newItems = posts.slice(offset - (posts.length - offset));
+      const frag = document.createDocumentFragment();
+      newItems.forEach(p => {
+        const div = document.createElement('div');
+        div.innerHTML = renderPostCard(p);
+        frag.appendChild(div.firstElementChild);
+      });
+      wrap.appendChild(frag);
+    }
+    const btn = document.getElementById('loadMoreBtn');
+    if (hasMore) { btn.classList.remove('hidden'); btn.textContent = '더 보기'; }
+    else         { btn.classList.add('hidden'); }
+  }
+
+  function renderPostCard(p) {
+    return `<div class="post-card" onclick="openDetail(${p.id})">
+      ${p.is_notice ? '<div class="post-badge">📌 공지</div>' : ''}
+      <div class="post-title">${esc(p.title || '')}</div>
+      ${p.body ? `<div class="post-body">${esc(p.body)}</div>` : ''}
+      <div class="post-meta">
+        <span class="post-meta-nick">${esc(p.nickname || p.character_name || '익명')}</span>
+        <span>${relTime(p.created_at)}</span>
+        <span>💬 ${p.comment_count || 0}</span>
+        <span>👁 ${p.view_count || 0}</span>
+      </div>
+    </div>`;
+  }
+
+  // ── 게시글 상세 ──────────────────────────────────
+  async function openDetail(postId) {
+    currentPostId = postId;
+    // 초기화
+    ['dTitle','dBody','dNick','dTime','dViewCount','dCommentCount'].forEach(id =>
+      document.getElementById(id).textContent = id === 'dBody' ? '불러오는 중...' : '');
+    document.getElementById('dComments').innerHTML = '';
+    document.getElementById('detailOverlay').classList.remove('hidden');
+
+    // 조회수 +1 (fire-and-forget)
+    fetch(`${API}/posts/${postId}/view`, { method:'POST' }).catch(() => {});
+
+    try {
+      const r = await fetch(`${API}/posts/${postId}`);
+      const d = await r.json();
+      if (!d.ok) { document.getElementById('dBody').textContent = '게시글을 불러올 수 없어요'; return; }
+      const p = d.post;
+      document.getElementById('dTitle').textContent        = p.title || '';
+      document.getElementById('dBody').textContent         = p.body  || '';
+      document.getElementById('dNick').textContent         = p.nickname || p.character_name || '익명';
+      document.getElementById('dTime').textContent         = relTime(p.created_at);
+      document.getElementById('dViewCount').textContent    = `👁 ${p.view_count || 0}`;
+      document.getElementById('dCommentCount').textContent = `💬 댓글 ${d.comments?.length || 0}개`;
+      renderComments(d.comments || []);
+    } catch (e) {
+      document.getElementById('dBody').textContent = `오류: ${e.message}`;
+    }
+  }
+
+  function renderComments(comments) {
+    const wrap = document.getElementById('dComments');
+    if (!comments.length) {
+      wrap.innerHTML = '<div style="color:var(--sub);font-size:13px;padding:8px 0 16px;">아직 댓글이 없어요. 첫 댓글을 남겨보세요!</div>';
+      return;
+    }
+    wrap.innerHTML = comments.map(c => {
+      const nick  = c.system_users?.display_name || c.nickname || '익명';
+      const emoji = c.system_users?.emoji ? esc(c.system_users.emoji) + ' ' : '';
+      return `<div class="comment-item">
+        <div class="comment-nick">${emoji}${esc(nick)}</div>
+        <div class="comment-body">${esc(c.body)}</div>
+        <div class="comment-time">${relTime(c.created_at)}</div>
+      </div>`;
+    }).join('');
+  }
+
+  function closeDetail() {
+    document.getElementById('detailOverlay').classList.add('hidden');
+    currentPostId = null;
+  }
+  function handleDetailOverlay(e) { if (e.target.id === 'detailOverlay') closeDetail(); }
+
+  // ── 댓글 작성 ────────────────────────────────────
+  async function submitComment() {
+    if (!currentPostId) return;
+    if (!myNickname) {
+      pendingAction = 'comment';
+      openNickModal('댓글을 쓰려면 닉네임이 필요해요!');
+      return;
+    }
+    const body = document.getElementById('commentInput').value.trim();
+    if (!body) return;
+
+    const btn = document.getElementById('commentSendBtn');
+    btn.disabled = true; btn.textContent = '전송중';
+
+    try {
+      const r = await fetch(`${API}/posts/${currentPostId}/comments`, {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ body, guest_id: guestId }),
+      });
+      const d = await r.json();
+      if (d.ok) {
+        document.getElementById('commentInput').value = '';
+        // 댓글 새로고침
+        const r2 = await fetch(`${API}/posts/${currentPostId}`);
+        const d2 = await r2.json();
+        renderComments(d2.comments || []);
+        document.getElementById('dCommentCount').textContent = `💬 댓글 ${d2.comments?.length || 0}개`;
+        // 목록 댓글 수 업데이트
+        const post = posts.find(p => p.id == currentPostId);
+        if (post) { post.comment_count = (post.comment_count || 0) + 1; renderPosts(); }
+      } else {
+        alert(d.error === 'nickname_required' ? '닉네임을 먼저 설정해주세요' : (d.error || '오류가 발생했어요'));
+      }
+    } catch (e) { alert(`오류: ${e.message}`); }
+
+    btn.disabled = false; btn.textContent = '전송';
+  }
+
+  document.getElementById('commentInput').addEventListener('keypress', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitComment(); }
+  });
+
+  // ── 글쓰기 ───────────────────────────────────────
+  function openWriteModal() {
+    if (!myNickname) {
+      pendingAction = 'write';
+      openNickModal('글을 쓰려면 닉네임이 필요해요!');
+      return;
+    }
+    document.getElementById('writeModal').classList.remove('hidden');
+    document.getElementById('wTitle').focus();
+  }
+  function closeWriteModal() {
+    document.getElementById('writeModal').classList.add('hidden');
+    document.getElementById('wTitle').value = '';
+    document.getElementById('wBody').value  = '';
+    document.getElementById('wError').textContent = '';
+  }
+  function handleWriteOverlay(e) { if (e.target.id === 'writeModal') closeWriteModal(); }
+
+  async function submitPost() {
+    const title = document.getElementById('wTitle').value.trim();
+    const body  = document.getElementById('wBody').value.trim();
+    const errEl = document.getElementById('wError');
+    if (title.length < 2)  { errEl.textContent = '제목을 2자 이상 입력해주세요'; return; }
+    if (body.length   < 5) { errEl.textContent = '내용을 5자 이상 입력해주세요'; return; }
+    errEl.textContent = '';
+
+    const btn = document.getElementById('wSubmitBtn');
+    btn.disabled = true; btn.textContent = '등록 중...';
+
+    try {
+      const r = await fetch(`${API}/posts`, {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, body, guest_id: guestId }),
+      });
+      const d = await r.json();
+      if (d.ok) {
+        closeWriteModal();
+        await loadPosts(true);
+      } else {
+        errEl.textContent = d.error === 'nickname_required' ? '닉네임을 먼저 설정해주세요' : (d.error || '오류가 발생했어요');
+      }
+    } catch (e) { errEl.textContent = `오류: ${e.message}`; }
+
+    btn.disabled = false; btn.textContent = '등록';
+  }
+
+  // ── 닉네임 모달 ──────────────────────────────────
+  function openNickModal(subText) {
+    document.getElementById('nickModalSub').textContent = subText || '닉네임이 필요해요!';
+    document.getElementById('nickModal').classList.remove('hidden');
+    document.getElementById('nickInput').focus();
+  }
+  function handleNickOverlay(e) { if (e.target.id === 'nickModal') document.getElementById('nickModal').classList.add('hidden'); }
+  document.getElementById('nickInput').addEventListener('keypress', e => { if (e.key === 'Enter') submitNickname(); });
+
+  async function submitNickname() {
+    const val   = document.getElementById('nickInput').value.trim();
+    const errEl = document.getElementById('nickError');
+    if (!val || val.length > 10) { errEl.textContent = '1~10자로 입력해주세요'; return; }
+    if (!/^[가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z0-9]+$/.test(val)) { errEl.textContent = '한글, 영문, 숫자만 가능해요'; return; }
+    errEl.textContent = '';
+
+    try {
+      const r = await fetch(`${API}/guest/nickname`, {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nickname: val, guest_id: guestId }),
+      });
+      const d = await r.json();
+      if (d.ok) {
+        myNickname = d.nickname;
+        localStorage.setItem('rkNickname', d.nickname);
+        document.getElementById('nickModal').classList.add('hidden');
+        document.getElementById('nickInput').value = '';
+        // 대기 중인 작업 실행
+        if (pendingAction === 'write')   { pendingAction = null; openWriteModal(); }
+        if (pendingAction === 'comment') { pendingAction = null; document.getElementById('commentInput').focus(); }
+      } else {
+        errEl.textContent = d.error === 'nickname_taken' ? '이미 사용 중인 닉네임이에요' : (d.error || '오류가 발생했어요');
+      }
+    } catch { errEl.textContent = '오류가 발생했어요'; }
+  }
+
+  // ── 초기 로드 ────────────────────────────────────
+  async function init() {
+    await initGuest();
+    await loadPosts(true);
+    document.getElementById('globalLoader').classList.add('hidden');
+  }
+  init();
+</script>
+</body>
+</html>

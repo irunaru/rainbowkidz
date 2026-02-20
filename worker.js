@@ -687,7 +687,11 @@ ${recentCtx}
             }),
           }
         );
-        if (!gRes.ok) { console.error('[Gemini]', await gRes.text()); return bad('gemini_error', 502); }
+        if (!gRes.ok) {
+          const errText = await gRes.text();
+          console.error('[Gemini generate-post]', gRes.status, errText);
+          return bad(`gemini_error: ${gRes.status} ${errText}`, 502);
+        }
         const gData = await gRes.json();
         const raw   = gData.candidates?.[0]?.content?.parts?.[0]?.text || '';
         const clean = raw.replace(/```json|```/g, '').trim();
@@ -756,7 +760,11 @@ ${cmtCtx}
             }),
           }
         );
-        if (!gRes.ok) return bad('gemini_error', 502);
+        if (!gRes.ok) {
+          const errText = await gRes.text();
+          console.error('[Gemini generate-comment]', gRes.status, errText);
+          return bad(`gemini_error: ${gRes.status} ${errText}`, 502);
+        }
         const gData = await gRes.json();
         const raw   = gData.candidates?.[0]?.content?.parts?.[0]?.text || '';
         const clean = raw.replace(/```json|```/g, '').trim();
@@ -847,12 +855,14 @@ ${cmtCtx}
       const buffer   = await file.arrayBuffer();
 
       // Storage에 업로드 (x-upsert로 덮어쓰기 허용)
+      // [Bug fix] apikey 헤더 추가 - Supabase Storage는 Authorization + apikey 둘 다 필요
       const upRes = await fetch(
         `${env.SUPABASE_URL}/storage/v1/object/rainbowkidz/${filename}`,
         {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
+            apikey: env.SUPABASE_SERVICE_ROLE_KEY,
             'Content-Type': file.type || 'image/jpeg',
             'x-upsert': 'true',
           },
@@ -871,6 +881,17 @@ ${cmtCtx}
       });
 
       return json({ ok: true, image_url: imageUrl });
+    }
+
+    // GET /api/v1/admin/notices - 관리자용 공지 목록 (삭제용)
+    if (path === '/api/v1/admin/notices' && request.method === 'GET') {
+      if (!isAdmin()) return bad('unauthorized', 401);
+      const limit = Math.min(parseInt(url.searchParams.get('limit') || '20'), 50);
+      const res = await supabase(
+        `/rest/v1/posts?select=id,title,body,created_at,system_users(display_name,emoji)&is_notice=eq.true&deleted_at=is.null&order=created_at.desc&limit=${limit}`
+      );
+      if (!res.ok) return bad('supabase_error', 502);
+      return json({ ok: true, notices: await res.json() });
     }
 
     // 매칭된 라우트 없음

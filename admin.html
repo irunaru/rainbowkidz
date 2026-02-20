@@ -7,26 +7,16 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
   <style>
-    /* ── 리셋 & CSS 변수 ─────────────────────────────── */
     * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
     :root {
-      --bg:#f2f2f7;
-      --card:#fff;
-      --text:#1c1c1e;
-      --sub:#6e6e73;
-      --border:#e5e5ea;
-      --blue:#007aff;
-      --green:#34c759;
-      --orange:#ff9f0a;
-      --red:#ff3b30;
-      --purple:#af52de;
+      --bg:#f2f2f7; --card:#fff; --text:#1c1c1e; --sub:#6e6e73; --border:#e5e5ea;
+      --blue:#007aff; --green:#34c759; --orange:#ff9f0a; --red:#ff3b30; --purple:#af52de;
       --radius:16px;
     }
     body { font-family:'Noto Sans KR',-apple-system,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
     .hidden { display:none !important; }
 
-    /* ── 비밀번호 게이트 ─────────────────────────────── */
-    /* 페이지 진입 시 가장 먼저 보이는 화면 */
+    /* 비밀번호 게이트 */
     #pwGate { position:fixed; inset:0; background:#fff; display:flex; align-items:center; justify-content:center; z-index:9999; }
     .pw-box   { text-align:center; padding:40px 32px; max-width:360px; width:90%; }
     .pw-logo  { font-size:52px; margin-bottom:16px; }
@@ -37,7 +27,7 @@
     .pw-btn   { width:100%; padding:14px; background:var(--text); color:#fff; border:none; border-radius:14px; font-size:16px; font-weight:800; cursor:pointer; font-family:inherit; }
     .pw-error { margin-top:10px; font-size:13px; color:var(--red); min-height:18px; }
 
-    /* ── 헤더 ──────────────────────────────────────── */
+    /* 헤더 */
     .header { background:var(--card); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:100; }
     .header-inner { max-width:980px; margin:0 auto; padding:12px 16px; display:flex; align-items:center; justify-content:space-between; }
     .logo       { display:flex; align-items:center; gap:8px; }
@@ -45,16 +35,14 @@
     .logo-badge { padding:3px 10px; background:var(--red); color:#fff; border-radius:20px; font-size:11px; font-weight:800; }
     .logout-btn { padding:7px 14px; border:1px solid var(--border); border-radius:20px; background:var(--bg); font-size:12px; color:var(--sub); cursor:pointer; font-family:inherit; }
 
-    /* ── 컨테이너 ──────────────────────────────────── */
     .container { max-width:980px; margin:0 auto; padding:16px 16px 80px; }
 
-    /* ── 글로벌 도구 카드 영역 ───────────────────────── */
-    /* 공지사항 + 게시글 관리 두 카드가 나란히 배치됨 */
+    /* 글로벌 도구 카드 (공지 + 게시글관리 + 공지관리) */
     .tools     { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:16px; }
-    .tool-card { flex:1; min-width:260px; background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:16px; }
+    .tool-card { flex:1; min-width:240px; background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:16px; }
     .tool-title { font-size:14px; font-weight:900; margin-bottom:10px; }
 
-    /* ── 공통 폼 요소 ──────────────────────────────── */
+    /* 폼 요소 */
     .input, .textarea, .select {
       width:100%; padding:10px 12px; border:1.5px solid var(--border);
       border-radius:10px; font-size:14px; font-family:inherit; margin-bottom:8px;
@@ -62,8 +50,8 @@
     .textarea { min-height:80px; resize:vertical; line-height:1.6; }
     .input:focus, .textarea:focus, .select:focus { outline:none; border-color:var(--blue); }
 
-    /* ── 버튼 ──────────────────────────────────────── */
-    .btn { padding:10px 16px; border-radius:10px; border:none; cursor:pointer; font-size:13px; font-weight:900; font-family:inherit; display:inline-flex; align-items:center; gap:6px; transition:opacity .15s; }
+    /* 버튼 */
+    .btn { padding:10px 16px; border-radius:10px; border:none; cursor:pointer; font-size:13px; font-weight:900; font-family:inherit; display:inline-flex; align-items:center; gap:6px; transition:opacity .15s; white-space:nowrap; }
     .btn:active   { opacity:.75; }
     .btn:disabled { opacity:.5; cursor:not-allowed; }
     .btn-ghost  { background:var(--bg); color:var(--text); border:1px solid var(--border); }
@@ -73,26 +61,28 @@
     .btn-red    { background:var(--red);    color:#fff; }
     .btn-sm     { padding:7px 12px; font-size:12px; }
 
-    /* ── 상태 메시지 바 ─────────────────────────────── */
-    .status { display:none; padding:10px 12px; border-radius:10px; font-size:13px; margin-top:8px; }
+    /* 상태 메시지 */
+    .status { display:none; padding:10px 12px; border-radius:10px; font-size:13px; margin-top:8px; word-break:break-all; }
     .status.show    { display:block; }
     .status.info    { background:#dbeafe; color:#1e40af; }
     .status.success { background:#d1fae5; color:#065f46; }
     .status.error   { background:#fee2e2; color:#991b1b; }
 
-    /* ── 게시글 관리 목록 ───────────────────────────── */
-    .manage-list { max-height:260px; overflow-y:auto; }
+    /* 게시글/공지 관리 목록 */
+    .manage-list { max-height:240px; overflow-y:auto; }
     .manage-item { display:flex; align-items:flex-start; gap:10px; background:var(--bg); border-radius:12px; padding:10px; margin-bottom:8px; }
-    .manage-emoji { font-size:22px; flex-shrink:0; }
+    .manage-emoji { font-size:20px; flex-shrink:0; }
     .manage-info  { flex:1; min-width:0; }
     .manage-title { font-size:13px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .manage-meta  { font-size:11px; color:var(--sub); margin-top:2px; }
-    .manage-del   { padding:6px 10px; background:var(--red); color:#fff; border:none; border-radius:8px; font-size:11px; font-weight:700; cursor:pointer; font-family:inherit; flex-shrink:0; }
+    .manage-del   { padding:5px 9px; background:var(--red); color:#fff; border:none; border-radius:8px; font-size:11px; font-weight:700; cursor:pointer; font-family:inherit; flex-shrink:0; }
 
-    /* ── 캐릭터 그리드 ──────────────────────────────── */
-    .list-head   { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
-    .search-input { flex:1; padding:10px 14px; border:1.5px solid var(--border); border-radius:10px; font-size:14px; font-family:inherit; }
+    /* ── 캐릭터 그리드 ────────────────────────────── */
+    .list-head { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+    /* [Fix] 검색창 너비 고정 - flex:1 제거하고 max-width 설정 */
+    .search-input { flex:1; min-width:0; max-width:320px; padding:10px 14px; border:1.5px solid var(--border); border-radius:10px; font-size:14px; font-family:inherit; }
     .search-input:focus { outline:none; border-color:var(--blue); }
+
     .char-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
     @media (min-width:520px) { .char-grid { grid-template-columns:repeat(6,1fr); } }
     @media (min-width:720px) { .char-grid { grid-template-columns:repeat(8,1fr); } }
@@ -102,64 +92,57 @@
     .char-name  { font-size:11px; font-weight:900; color:var(--sub); margin-top:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .char-group { font-size:10px; color:var(--sub); opacity:.8; margin-top:1px; }
 
-    /* ── 캐릭터 프로필 패널 오버레이 ────────────────── */
+    /* 캐릭터 패널 오버레이 */
     .overlay { position:fixed; inset:0; background:rgba(0,0,0,.45); display:flex; align-items:flex-end; justify-content:center; z-index:2000; padding:10px; }
     .panel { width:100%; max-width:720px; background:var(--card); border-radius:20px; max-height:92vh; overflow-y:auto; border:1px solid var(--border); }
-
-    /* 패널 상단 고정 헤더 */
     .panel-head { position:sticky; top:0; background:var(--card); border-bottom:1px solid var(--border); padding:12px 16px; display:flex; align-items:center; gap:10px; border-radius:20px 20px 0 0; z-index:10; }
     .panel-emoji { font-size:28px; }
     .panel-name  { font-size:16px; font-weight:900; }
     .panel-sub   { font-size:12px; color:var(--sub); }
-    .panel-close { margin-left:auto; border:none; background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:8px 12px; cursor:pointer; font-weight:900; font-family:inherit; font-size:13px; }
+    .panel-close { margin-left:auto; border:1px solid var(--border); background:var(--bg); border-radius:12px; padding:8px 12px; cursor:pointer; font-weight:900; font-family:inherit; font-size:13px; }
     .panel-body  { padding:14px; }
 
-    /* ── 패널 내 섹션 카드 ──────────────────────────── */
+    /* 패널 내 섹션 */
     .section       { background:var(--bg); border:1px solid var(--border); border-radius:14px; padding:14px; margin-bottom:12px; }
     .section-title { font-size:13px; font-weight:900; margin-bottom:10px; }
-
-    /* 2칸/3칸 그리드 레이아웃 */
     .row2 { display:grid; grid-template-columns:1fr 1fr;     gap:10px; margin-bottom:8px; }
     .row3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:8px; }
     @media (max-width:480px) { .row2, .row3 { grid-template-columns:1fr; } }
-
-    /* 필드 레이블 */
-    .field label    { font-size:11px; font-weight:700; color:var(--sub); display:block; margin-bottom:4px; }
+    .field label   { font-size:11px; font-weight:700; color:var(--sub); display:block; margin-bottom:4px; }
     .field .input,
-    .field .select  { margin-bottom:0; }
+    .field .select { margin-bottom:0; }
 
-    /* ── 이미지 프리뷰 ──────────────────────────────── */
+    /* 이미지 프리뷰 */
     .avatar-wrap { width:72px; height:72px; border-radius:18px; background:var(--card); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:34px; overflow:hidden; flex-shrink:0; }
     .avatar-wrap img { width:100%; height:100%; object-fit:cover; }
 
-    /* ── AI 댓글용 게시글 피커 ──────────────────────── */
+    /* AI 댓글용 게시글 피커 */
     .postpick { max-height:200px; overflow-y:auto; display:flex; flex-direction:column; gap:6px; margin-bottom:10px; }
     .postitem         { background:var(--card); border:1.5px solid var(--border); border-radius:10px; padding:10px; cursor:pointer; transition:border-color .15s; }
     .postitem.selected { border-color:var(--blue); }
-    .postitem-title   { font-size:13px; font-weight:700; }
+    .postitem-title   { font-size:13px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .postitem-meta    { font-size:11px; color:var(--sub); margin-top:2px; }
 
-    /* ── 로딩 스피너 (버튼 내부) ────────────────────── */
+    /* 버튼 내 스피너 */
     .spin { display:inline-block; width:13px; height:13px; border:2px solid rgba(255,255,255,.4); border-top-color:#fff; border-radius:50%; animation:spn .8s linear infinite; }
     @keyframes spn { to { transform:rotate(360deg); } }
   </style>
 </head>
 <body>
 
-<!-- ── 비밀번호 게이트 ────────────────────────────── -->
-<!-- sessionStorage에 인증 정보 저장 → 새로고침 시 재입력 불필요 -->
+<!-- 비밀번호 게이트 -->
 <div id="pwGate">
   <div class="pw-box">
     <div class="pw-logo">🌈</div>
     <div class="pw-title">관리자 로그인</div>
     <div class="pw-sub">RainbowKidz 관리자 전용 페이지</div>
-    <input type="password" class="pw-input" id="pwInput" placeholder="비밀번호 입력" autocomplete="current-password" aria-label="관리자 비밀번호">
+    <input type="password" class="pw-input" id="pwInput" placeholder="비밀번호 입력" autocomplete="current-password">
     <button class="pw-btn" onclick="checkPw()">입장하기</button>
     <div class="pw-error" id="pwError"></div>
   </div>
 </div>
 
-<!-- ── 헤더 ──────────────────────────────────────── -->
+<!-- 헤더 -->
 <div class="header">
   <div class="header-inner">
     <div class="logo">
@@ -171,22 +154,21 @@
   </div>
 </div>
 
-<!-- ── 메인 컨테이너 ──────────────────────────────── -->
 <div class="container">
 
-  <!-- 글로벌 도구: 공지사항 + 게시글 관리 -->
+  <!-- 글로벌 도구: 공지 작성 / 게시글 관리 / 공지 관리 -->
   <div class="tools">
 
-    <!-- 공지사항 작성 (선생님 쑤갈쌈 명의 고정) -->
+    <!-- 공지사항 작성 (쑤갈쌈 고정) -->
     <div class="tool-card">
-      <div class="tool-title">📌 공지사항 (선생님 쑤갈쌈 명의)</div>
-      <input class="input" id="noticeTitle" placeholder="공지 제목" aria-label="공지 제목">
-      <textarea class="textarea" id="noticeBody" placeholder="공지 내용..." aria-label="공지 내용"></textarea>
+      <div class="tool-title">📌 공지사항 작성 (쑤갈쌈 명의)</div>
+      <input class="input" id="noticeTitle" placeholder="공지 제목">
+      <textarea class="textarea" id="noticeBody" placeholder="공지 내용..."></textarea>
       <button class="btn btn-blue" onclick="publishNotice()">등록</button>
       <div class="status" id="noticeStatus"></div>
     </div>
 
-    <!-- 게시글 관리 (전체 목록, 삭제 가능) -->
+    <!-- 게시글 관리 -->
     <div class="tool-card">
       <div class="tool-title">📋 게시글 관리</div>
       <button class="btn btn-ghost btn-sm" onclick="loadManagePosts()" style="margin-bottom:10px;">🔄 새로고침</button>
@@ -196,12 +178,23 @@
       <div class="status" id="manageStatus"></div>
     </div>
 
+    <!-- 공지 관리 (삭제 가능) -->
+    <div class="tool-card">
+      <div class="tool-title">🗑️ 공지 관리</div>
+      <button class="btn btn-ghost btn-sm" onclick="loadManageNotices()" style="margin-bottom:10px;">🔄 새로고침</button>
+      <div class="manage-list" id="manageNotices">
+        <div style="color:var(--sub);font-size:13px;">로딩 중...</div>
+      </div>
+      <div class="status" id="noticeManageStatus"></div>
+    </div>
+
   </div>
 
   <!-- 캐릭터 검색 + 그리드 -->
   <div class="list-head">
-    <input class="search-input" id="charSearch" placeholder="캐릭터 검색..." oninput="renderGrid()" aria-label="캐릭터 검색">
-    <button class="btn btn-ghost btn-sm" onclick="reloadAll()">새로고침</button>
+    <!-- [Fix] max-width로 검색창 너비 제한 → 버튼 공간 확보 -->
+    <input class="search-input" id="charSearch" placeholder="캐릭터 검색..." oninput="renderGrid()">
+    <button class="btn btn-ghost btn-sm" onclick="reloadAll()" style="flex-shrink:0;">전체 새로고침</button>
   </div>
   <div class="char-grid" id="charGrid">
     <div style="color:var(--sub);font-size:13px;grid-column:1/-1;">로딩 중...</div>
@@ -209,12 +202,10 @@
 
 </div>
 
-<!-- ── 캐릭터 프로필 편집 패널 ───────────────────── -->
-<!-- 캐릭터 클릭 시 열리는 하단 슬라이드업 패널 -->
+<!-- 캐릭터 프로필 패널 -->
 <div id="overlay" class="overlay hidden" onclick="handleOverlayClick(event)">
   <div class="panel" onclick="event.stopPropagation()">
 
-    <!-- 패널 상단: 캐릭터 기본 정보 + 닫기 버튼 -->
     <div class="panel-head">
       <div class="panel-emoji" id="pEmoji">🙂</div>
       <div>
@@ -230,78 +221,23 @@
       <div class="section">
         <div class="section-title">🖼️ 프로필 이미지</div>
         <div style="display:flex;align-items:center;gap:14px;">
-          <!-- 현재 이미지 미리보기 -->
           <div class="avatar-wrap" id="pAvatar">🙂</div>
           <div style="flex:1;">
-            <div style="font-size:12px;color:var(--sub);margin-bottom:10px;">Supabase Storage에 업로드됩니다</div>
-            <!-- [중요] accept="image/*" — 이미지 파일만 허용 -->
-            <input type="file" id="pImgFile" accept="image/*" style="display:none;" onchange="uploadImage()" aria-label="이미지 파일 선택">
+            <div style="font-size:12px;color:var(--sub);margin-bottom:10px;">Supabase Storage에 업로드됩니다 (최대 5MB)</div>
+            <input type="file" id="pImgFile" accept="image/*" style="display:none;" onchange="uploadImage()">
             <button class="btn btn-blue btn-sm" onclick="document.getElementById('pImgFile').click()">📸 이미지 업로드</button>
             <div class="status" id="pImgStatus"></div>
           </div>
         </div>
       </div>
 
-      <!-- ② 캐릭터 정보 편집 -->
-      <div class="section">
-        <div class="section-title">👥 캐릭터 정보 편집</div>
-
-        <div class="row2">
-          <div class="field"><label>이름 (display_name)</label><input class="input" id="fName"  aria-label="이름"></div>
-          <div class="field"><label>이모지</label>              <input class="input" id="fEmoji" aria-label="이모지"></div>
-        </div>
-        <div class="row3">
-          <div class="field">
-            <label>소속</label>
-            <!-- [중요] group_type 값: kindergarten / daycare / teacher -->
-            <select class="select" id="fGroup" aria-label="소속">
-              <option value="kindergarten">유치원</option>
-              <option value="daycare">어린이집</option>
-              <option value="teacher">선생님</option>
-            </select>
-          </div>
-          <!-- [중요] 성별은 select가 아닌 text input — 임일후처럼 '고자' 같은 자유값 지원 -->
-          <div class="field"><label>성별 (자유 입력)</label><input class="input" id="fGender"  placeholder="예: female, male, 고자..." aria-label="성별"></div>
-          <div class="field"><label>MBTI</label>              <input class="input" id="fMbti"    placeholder="예: ENFP"                 aria-label="MBTI"></div>
-        </div>
-        <div class="row2">
-          <div class="field"><label>동물종류 (animal_type)</label><input class="input" id="fAnimal"      aria-label="동물종류"></div>
-          <div class="field"><label>특징 (personality)</label>    <input class="input" id="fPersonality" aria-label="특징"></div>
-        </div>
-        <div class="row2">
-          <!-- [중요] birthday: DATE 타입이라 type="date" 사용 -->
-          <div class="field"><label>생년월일</label><input class="input" type="date"   id="fBirthday" aria-label="생년월일"></div>
-          <div class="field"><label>나이</label>    <input class="input" type="number" id="fAge"      placeholder="3" min="0" max="20" aria-label="나이"></div>
-        </div>
-        <div class="row2">
-          <div class="field"><label>좋아하는 것 (likes)</label>    <input class="input" id="fLikes"    aria-label="좋아하는 것"></div>
-          <div class="field"><label>싫어하는 것 (dislikes)</label>  <input class="input" id="fDislikes" aria-label="싫어하는 것"></div>
-        </div>
-        <div class="row2">
-          <div class="field"><label>취미 (hobby)</label>  <input class="input" id="fHobby"  aria-label="취미"></div>
-          <div class="field"><label>비밀 (secret)</label> <input class="input" id="fSecret" aria-label="비밀"></div>
-        </div>
-        <div class="field" style="margin-bottom:12px;">
-          <!-- speech_style: Gemini AI 생성 프롬프트에서 캐릭터 말투 힌트로 사용 -->
-          <label>말투 힌트 (speech_style) — AI 게시글 생성에 사용됩니다</label>
-          <input class="input" id="fSpeech" placeholder="예: 밝고 장난기 많은 말투, 민초 덕후" aria-label="말투 힌트" style="margin-bottom:0;">
-        </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button class="btn btn-green" id="btnSave" onclick="saveProfile()">💾 저장</button>
-          <button class="btn btn-ghost btn-sm" onclick="resetForm()">되돌리기</button>
-        </div>
-        <div class="status" id="pSaveStatus"></div>
-      </div>
-
-      <!-- ③ AI 게시글 생성 -->
+      <!-- ② AI 게시글 생성 -->
+      <!-- [Fix] 섹션 순서 변경: 이미지 → AI게시글 → AI댓글 → 캐릭터편집 -->
       <div class="section">
         <div class="section-title">🤖 AI 게시글 생성</div>
-        <div style="font-size:12px;color:var(--sub);margin-bottom:10px;">
-          Gemini 2.0 Flash가 선택된 캐릭터 말투로 게시글을 생성합니다.<br>
-          생성 후 내용을 수정하고 게시 버튼을 눌러주세요.
-        </div>
-        <input class="input" id="aiTitle" placeholder="제목 (15자 권장)" aria-label="AI 게시글 제목">
-        <textarea class="textarea" id="aiBody" placeholder="본문 (생성 후 여기에 나타납니다)" aria-label="AI 게시글 본문"></textarea>
+        <div style="font-size:12px;color:var(--sub);margin-bottom:10px;">Gemini 2.0 Flash가 이 캐릭터 말투로 게시글을 생성합니다. 수정 후 게시하세요.</div>
+        <input class="input" id="aiTitle" placeholder="제목 (생성 후 나타남)">
+        <textarea class="textarea" id="aiBody" placeholder="본문 (생성 후 나타남)"></textarea>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
           <button class="btn btn-purple" id="btnGenPost"  onclick="generatePost()">✨ 생성</button>
           <button class="btn btn-green"  id="btnPubPost"  onclick="publishPost()">📤 게시</button>
@@ -310,23 +246,68 @@
         <div class="status" id="aiPostStatus"></div>
       </div>
 
-      <!-- ④ AI 댓글 생성 -->
+      <!-- ③ AI 댓글 생성 -->
       <div class="section">
         <div class="section-title">💬 AI 댓글 생성</div>
-        <div style="font-size:12px;color:var(--sub);margin-bottom:8px;">
-          게시글을 선택하고 댓글을 생성합니다.
-        </div>
-        <!-- 게시글 선택 피커 (스크롤 가능) -->
+        <div style="font-size:12px;color:var(--sub);margin-bottom:8px;">게시글을 선택 후 이 캐릭터 말투로 댓글을 생성합니다.</div>
         <div class="postpick" id="postPicker">
           <div style="color:var(--sub);font-size:13px;">게시글이 없습니다</div>
         </div>
-        <textarea class="textarea" id="aiComment" placeholder="댓글 내용..." style="min-height:60px;" aria-label="AI 댓글 내용"></textarea>
+        <textarea class="textarea" id="aiComment" placeholder="댓글 내용..." style="min-height:60px;"></textarea>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button class="btn btn-purple" id="btnGenComment"  onclick="generateComment()">✨ 댓글 생성</button>
-          <button class="btn btn-green"  id="btnPubComment"  onclick="publishComment()">📤 댓글 게시</button>
+          <button class="btn btn-purple" id="btnGenComment" onclick="generateComment()">✨ 댓글 생성</button>
+          <button class="btn btn-green"  id="btnPubComment" onclick="publishComment()">📤 댓글 게시</button>
           <button class="btn btn-ghost btn-sm" onclick="document.getElementById('aiComment').value=''">초기화</button>
         </div>
         <div class="status" id="aiCommentStatus"></div>
+      </div>
+
+      <!-- ④ 캐릭터 정보 편집 (맨 아래로 이동) -->
+      <div class="section">
+        <div class="section-title">👥 캐릭터 정보 편집</div>
+
+        <div class="row2">
+          <div class="field"><label>이름 (display_name)</label><input class="input" id="fName"></div>
+          <div class="field"><label>이모지</label><input class="input" id="fEmoji"></div>
+        </div>
+        <div class="row3">
+          <div class="field">
+            <label>소속</label>
+            <select class="select" id="fGroup">
+              <option value="kindergarten">유치원</option>
+              <option value="daycare">어린이집</option>
+              <option value="teacher">선생님</option>
+            </select>
+          </div>
+          <!-- 성별: 자유입력 (임일후 = '고자' 지원) -->
+          <div class="field"><label>성별 (자유입력)</label><input class="input" id="fGender" placeholder="female, male, 고자..."></div>
+          <div class="field"><label>MBTI</label><input class="input" id="fMbti" placeholder="ENFP"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>동물종류 (animal_type)</label><input class="input" id="fAnimal"></div>
+          <div class="field"><label>특징 (personality)</label><input class="input" id="fPersonality"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>생년월일</label><input class="input" type="date" id="fBirthday"></div>
+          <div class="field"><label>나이</label><input class="input" type="number" id="fAge" placeholder="3" min="0" max="20"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>좋아하는 것 (likes)</label><input class="input" id="fLikes"></div>
+          <div class="field"><label>싫어하는 것 (dislikes)</label><input class="input" id="fDislikes"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>취미 (hobby)</label><input class="input" id="fHobby"></div>
+          <div class="field"><label>비밀 (secret)</label><input class="input" id="fSecret"></div>
+        </div>
+        <div class="field" style="margin-bottom:12px;">
+          <label>말투 힌트 (speech_style) — AI 생성 프롬프트에 사용됩니다</label>
+          <input class="input" id="fSpeech" placeholder="밝고 장난기 많은 말투, 민초 덕후" style="margin-bottom:0;">
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-green" id="btnSave" onclick="saveProfile()">💾 저장</button>
+          <button class="btn btn-ghost btn-sm" onclick="resetForm()">되돌리기</button>
+        </div>
+        <div class="status" id="pSaveStatus"></div>
       </div>
 
     </div><!-- /panel-body -->
@@ -334,18 +315,16 @@
 </div><!-- /overlay -->
 
 <script>
-  // ── 설정 ─────────────────────────────────────────
   const API       = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
-  const ADMIN_KEY = 'yimkim1221'; // worker.js의 ADMIN_KEY 시크릿과 동일해야 함
-  const PW        = 'yimkim1221'; // 관리자 비밀번호 (필요시 변경)
+  const ADMIN_KEY = 'yimkim1221';
+  const PW        = 'yimkim1221';
 
-  // ── 앱 상태 ──────────────────────────────────────
-  let characters    = [];   // 전체 캐릭터 배열
-  let cachedFeed    = [];   // 피드 게시글 캐시 (게시글 관리 + 댓글 피커 공용)
-  let selectedChar  = null; // 현재 열린 패널의 캐릭터 객체
-  let selectedPostId = null; // AI 댓글용 선택된 게시글 ID
+  let characters    = [];
+  let cachedFeed    = [];
+  let selectedChar  = null;
+  let selectedPostId = null;
 
-  // ── 유틸 함수 ────────────────────────────────────
+  // ── 유틸 ─────────────────────────────────────────
   const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   const groupLabel = g => g === 'kindergarten' ? '유치원' : g === 'daycare' ? '어린이집' : '선생님';
   const relTime = d => {
@@ -356,20 +335,17 @@
     return `${Math.floor(s / 86400)}일 전`;
   };
 
-  /** 상태 메시지 표시. type: 'info' | 'success' | 'error' */
   function showStatus(id, msg, type = 'info') {
     const el = document.getElementById(id);
     if (!el) return;
     el.textContent = msg;
     el.className = `status show ${type}`;
-    if (type !== 'info') setTimeout(() => { el.classList.remove('show'); }, 4000);
+    if (type !== 'info') setTimeout(() => el.classList.remove('show'), 6000);
   }
 
-  /** 관리자 인증 헤더 포함한 fetch */
   async function adminFetch(path, opts = {}) {
     const headers = new Headers(opts.headers || {});
     headers.set('X-Admin-Key', ADMIN_KEY);
-    // FormData는 Content-Type을 자동 설정하므로 직접 세팅 안 함
     if (!(opts.body instanceof FormData) && !headers.has('Content-Type')) {
       headers.set('Content-Type', 'application/json');
     }
@@ -377,7 +353,6 @@
   }
 
   // ── 비밀번호 인증 ────────────────────────────────
-  /** 비밀번호 확인. 세션에 저장해서 새로고침 시 재입력 불필요 */
   function checkPw() {
     if (document.getElementById('pwInput').value === PW) {
       document.getElementById('pwGate').classList.add('hidden');
@@ -391,17 +366,9 @@
       setTimeout(() => { errEl.textContent = ''; }, 2000);
     }
   }
-
-  function logout() {
-    sessionStorage.removeItem('rk_admin');
-    location.reload();
-  }
-
-  // 엔터키 로그인
+  function logout() { sessionStorage.removeItem('rk_admin'); location.reload(); }
   document.getElementById('pwInput').addEventListener('keypress', e => { if (e.key === 'Enter') checkPw(); });
-  // ESC 키로 패널 닫기
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel(); });
-  // 페이지 로드 시 세션 체크
   if (sessionStorage.getItem('rk_admin') === '1') {
     document.getElementById('pwGate').classList.add('hidden');
     window.addEventListener('DOMContentLoaded', init);
@@ -411,32 +378,26 @@
   async function init() {
     await loadCharacters();
     renderGrid();
-    await Promise.all([loadManagePosts(), loadFeed()]);
+    await Promise.all([loadManagePosts(), loadManageNotices(), loadFeed()]);
   }
 
-  /** 전체 데이터 새로고침 */
   async function reloadAll() {
     await loadCharacters();
     renderGrid();
-    await Promise.all([loadManagePosts(), loadFeed()]);
-    // 패널이 열려있으면 피커도 갱신
+    await Promise.all([loadManagePosts(), loadManageNotices(), loadFeed()]);
     if (selectedChar) renderPostPicker();
   }
 
-  // ── 캐릭터 로드 ──────────────────────────────────
   async function loadCharacters() {
     try {
       const r = await fetch(API + '/characters');
       if (r.ok) {
         const d = await r.json();
         characters = d.characters?.length ? d.characters : MOCK_CHARS;
-      } else {
-        characters = MOCK_CHARS;
-      }
+      } else { characters = MOCK_CHARS; }
     } catch { characters = MOCK_CHARS; }
   }
 
-  /** 피드 게시글 로드 (게시글 관리 + 댓글 피커 공용) */
   async function loadFeed(limit = 30) {
     try {
       const r = await fetch(API + `/feed?limit=${limit}`);
@@ -445,13 +406,12 @@
     } catch { cachedFeed = []; }
   }
 
-  // ── 캐릭터 그리드 렌더 ───────────────────────────
+  // ── 캐릭터 그리드 ────────────────────────────────
   function renderGrid() {
     const q = (document.getElementById('charSearch').value || '').toLowerCase();
-    const filtered = characters.filter(c => {
-      const haystack = `${c.display_name} ${c.group_type} ${c.mbti || ''} ${c.animal_type || ''}`.toLowerCase();
-      return !q || haystack.includes(q);
-    });
+    const filtered = characters.filter(c =>
+      !q || `${c.display_name} ${c.group_type} ${c.mbti || ''} ${c.animal_type || ''}`.toLowerCase().includes(q)
+    );
     document.getElementById('charGrid').innerHTML = filtered.length
       ? filtered.map(c => `
           <div class="char-tile" onclick="openPanel(${c.id})">
@@ -462,7 +422,7 @@
       : '<div style="color:var(--sub);font-size:13px;grid-column:1/-1;">검색 결과 없음</div>';
   }
 
-  // ── 캐릭터 패널 ──────────────────────────────────
+  // ── 패널 열기/닫기 ───────────────────────────────
   function handleOverlayClick(e) { if (e.target.id === 'overlay') closePanel(); }
   function closePanel() {
     document.getElementById('overlay').classList.add('hidden');
@@ -471,45 +431,39 @@
   }
 
   async function openPanel(charId) {
-    // [Bug fix] == 사용 (id가 number/string 혼용 가능)
     const c = characters.find(x => x.id == charId);
     if (!c) return;
     selectedChar   = c;
     selectedPostId = null;
 
-    // 패널 헤더 업데이트
     document.getElementById('pEmoji').textContent = c.emoji || '🙂';
     document.getElementById('pName').textContent  = c.display_name;
     document.getElementById('pSub').textContent   = `${groupLabel(c.group_type)} · ${c.animal_type || ''} · ${c.mbti || ''}`;
 
-    // 아바타 이미지 - [Bug fix] data-emoji로 onerror 처리 (따옴표 이스케이프 방지)
     const av = document.getElementById('pAvatar');
     if (c.image_url) {
       av.innerHTML = `<img src="${esc(c.image_url)}" alt="${esc(c.display_name)}" data-emoji="${esc(c.emoji || '🙂')}" onerror="this.parentElement.removeChild(this);this.parentElement.textContent=this.dataset.emoji">`;
     } else {
-      av.innerHTML = esc(c.emoji || '🙂');
+      av.textContent = c.emoji || '🙂';
     }
 
     fillForm(c);
     clearPost();
     document.getElementById('aiComment').value = '';
-
-    // 상태 메시지 전부 초기화
     ['pImgStatus','pSaveStatus','aiPostStatus','aiCommentStatus'].forEach(id => {
       const el = document.getElementById(id);
       el.textContent = '';
       el.className = 'status';
     });
 
-    // 피드 로드 후 게시글 피커 렌더
-    await loadFeed(30);
+    // 캐시에 피드가 없을 때만 새로 로드
+    if (!cachedFeed.length) await loadFeed(30);
     renderPostPicker();
 
     document.getElementById('overlay').classList.remove('hidden');
-    document.getElementById('fName').focus();
+    document.getElementById('aiTitle').focus();
   }
 
-  /** 캐릭터 데이터를 폼에 채우기 */
   function fillForm(c) {
     document.getElementById('fName').value        = c.display_name || '';
     document.getElementById('fEmoji').value       = c.emoji        || '';
@@ -527,24 +481,18 @@
     document.getElementById('fSpeech').value      = c.speech_style || '';
   }
 
-  /** 폼을 원래 값으로 되돌리기 */
   function resetForm() {
-    if (selectedChar) {
-      fillForm(selectedChar);
-      showStatus('pSaveStatus', '되돌렸습니다', 'info');
-    }
+    if (selectedChar) { fillForm(selectedChar); showStatus('pSaveStatus', '되돌렸습니다', 'info'); }
   }
 
-  // ── 캐릭터 정보 저장 ────────────────────────────
+  // ── 캐릭터 저장 ──────────────────────────────────
   async function saveProfile() {
     if (!selectedChar) return;
-
-    // [중요] 수정 허용 필드 화이트리스트 - worker.js의 ALLOWED 배열과 일치해야 함
     const update = {
       display_name: document.getElementById('fName').value.trim(),
       emoji:        document.getElementById('fEmoji').value.trim(),
       group_type:   document.getElementById('fGroup').value,
-      gender:       document.getElementById('fGender').value.trim(),      // 자유 입력 (임일후: '고자')
+      gender:       document.getElementById('fGender').value.trim(),
       mbti:         document.getElementById('fMbti').value.trim(),
       animal_type:  document.getElementById('fAnimal').value.trim(),
       personality:  document.getElementById('fPersonality').value.trim(),
@@ -556,37 +504,22 @@
       secret:       document.getElementById('fSecret').value.trim(),
       speech_style: document.getElementById('fSpeech').value.trim(),
     };
-
     const btn = document.getElementById('btnSave');
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spin"></span> 저장중';
+    btn.disabled = true; btn.innerHTML = '<span class="spin"></span> 저장중';
     showStatus('pSaveStatus', '저장 중...', 'info');
-
     try {
-      const r = await adminFetch(`/admin/characters/${selectedChar.id}`, {
-        method: 'PATCH',
-        body: JSON.stringify(update),
-      });
+      const r = await adminFetch(`/admin/characters/${selectedChar.id}`, { method:'PATCH', body:JSON.stringify(update) });
       const d = await r.json();
-
       if (d.ok) {
-        // 로컬 캐릭터 데이터 업데이트
         Object.assign(selectedChar, update);
-        // 패널 헤더 갱신
         document.getElementById('pEmoji').textContent = update.emoji || '🙂';
         document.getElementById('pName').textContent  = update.display_name;
         document.getElementById('pSub').textContent   = `${groupLabel(update.group_type)} · ${update.animal_type || ''} · ${update.mbti || ''}`;
-        renderGrid(); // 그리드도 반영
+        renderGrid();
         showStatus('pSaveStatus', '✅ 저장 완료', 'success');
-      } else {
-        showStatus('pSaveStatus', `❌ ${d.error}`, 'error');
-      }
-    } catch (e) {
-      showStatus('pSaveStatus', `❌ 오류: ${e.message}`, 'error');
-    }
-
-    btn.disabled = false;
-    btn.innerHTML = '💾 저장';
+      } else { showStatus('pSaveStatus', `❌ ${d.error}`, 'error'); }
+    } catch (e) { showStatus('pSaveStatus', `❌ ${e.message}`, 'error'); }
+    btn.disabled = false; btn.innerHTML = '💾 저장';
   }
 
   // ── 이미지 업로드 ────────────────────────────────
@@ -595,53 +528,38 @@
     const input = document.getElementById('pImgFile');
     const file  = input.files?.[0];
     if (!file) return;
-
-    // 파일 크기 제한: 5MB
     if (file.size > 5 * 1024 * 1024) {
-      showStatus('pImgStatus', '❌ 5MB 이하 이미지만 업로드 가능합니다', 'error');
-      input.value = '';
-      return;
+      showStatus('pImgStatus', '❌ 5MB 이하 이미지만 가능합니다', 'error');
+      input.value = ''; return;
     }
-
     showStatus('pImgStatus', '업로드 중...', 'info');
     const form = new FormData();
     form.append('image', file);
     form.append('character_id', selectedChar.id);
-
     try {
       const r = await fetch(API + '/admin/upload-image', {
-        method: 'POST',
-        headers: { 'X-Admin-Key': ADMIN_KEY },
-        body: form,
+        method: 'POST', headers: { 'X-Admin-Key': ADMIN_KEY }, body: form,
       });
       const d = await r.json();
       if (d.ok) {
         selectedChar.image_url = d.image_url;
-        // 아바타 미리보기 즉시 갱신
         const av = document.getElementById('pAvatar');
-        av.innerHTML = `<img src="${esc(d.image_url)}" alt="${esc(selectedChar.display_name)}">`;
+        av.innerHTML = `<img src="${esc(d.image_url)}" alt="">`;
         renderGrid();
         showStatus('pImgStatus', '✅ 업로드 완료', 'success');
-      } else {
-        showStatus('pImgStatus', `❌ ${d.error}`, 'error');
-      }
-    } catch (e) {
-      showStatus('pImgStatus', `❌ ${e.message}`, 'error');
-    }
-    input.value = ''; // 같은 파일 재선택 가능하게
+      } else { showStatus('pImgStatus', `❌ ${d.error}`, 'error'); }
+    } catch (e) { showStatus('pImgStatus', `❌ ${e.message}`, 'error'); }
+    input.value = '';
   }
 
-  // ── 공지사항 게시 ────────────────────────────────
+  // ── 공지사항 작성 ────────────────────────────────
   async function publishNotice() {
     const title = document.getElementById('noticeTitle').value.trim();
     const body  = document.getElementById('noticeBody').value.trim();
     if (!title) { showStatus('noticeStatus', '제목을 입력하세요', 'error'); return; }
     if (!body)  { showStatus('noticeStatus', '내용을 입력하세요', 'error'); return; }
-
-    // 선생님 캐릭터(쑤갈쌈) 고정 - group_type이 'teacher'인 캐릭터
     const teacher = characters.find(c => c.group_type === 'teacher');
     if (!teacher) { showStatus('noticeStatus', '❌ 선생님 캐릭터를 찾을 수 없어요', 'error'); return; }
-
     showStatus('noticeStatus', '등록 중...', 'info');
     try {
       const r = await adminFetch('/system/posts', {
@@ -653,12 +571,9 @@
         document.getElementById('noticeTitle').value = '';
         document.getElementById('noticeBody').value  = '';
         showStatus('noticeStatus', '✅ 공지 등록 완료', 'success');
-      } else {
-        showStatus('noticeStatus', `❌ ${d.error}`, 'error');
-      }
-    } catch (e) {
-      showStatus('noticeStatus', `❌ ${e.message}`, 'error');
-    }
+        loadManageNotices();
+      } else { showStatus('noticeStatus', `❌ ${d.error}`, 'error'); }
+    } catch (e) { showStatus('noticeStatus', `❌ ${e.message}`, 'error'); }
   }
 
   // ── 게시글 관리 ──────────────────────────────────
@@ -666,7 +581,6 @@
     const wrap = document.getElementById('manageList');
     wrap.innerHTML = '<div style="color:var(--sub);font-size:13px;">로딩 중...</div>';
     await loadFeed(30);
-
     if (!cachedFeed.length) {
       wrap.innerHTML = '<div style="color:var(--sub);font-size:13px;">게시글이 없습니다</div>';
       return;
@@ -688,21 +602,52 @@
       const r = await adminFetch(`/admin/posts/${postId}`, { method: 'DELETE' });
       const d = await r.json();
       if (d.ok) {
-        // DOM에서 즉시 제거
         document.getElementById(`mpost-${postId}`)?.remove();
         cachedFeed = cachedFeed.filter(p => p.id !== postId);
-        // 패널이 열려있으면 피커도 갱신
         if (selectedChar) renderPostPicker();
         showStatus('manageStatus', '✅ 삭제 완료', 'success');
-      } else {
-        showStatus('manageStatus', `❌ ${d.error}`, 'error');
+      } else { showStatus('manageStatus', `❌ ${d.error}`, 'error'); }
+    } catch (e) { showStatus('manageStatus', `❌ ${e.message}`, 'error'); }
+  }
+
+  // ── 공지 관리 (삭제) ─────────────────────────────
+  async function loadManageNotices() {
+    const wrap = document.getElementById('manageNotices');
+    wrap.innerHTML = '<div style="color:var(--sub);font-size:13px;">로딩 중...</div>';
+    try {
+      const r = await adminFetch('/admin/notices?limit=20');
+      const d = await r.json();
+      if (!d.notices?.length) {
+        wrap.innerHTML = '<div style="color:var(--sub);font-size:13px;">공지가 없습니다</div>';
+        return;
       }
+      wrap.innerHTML = d.notices.map(n => `
+        <div class="manage-item" id="mnotice-${n.id}">
+          <div class="manage-emoji">📌</div>
+          <div class="manage-info">
+            <div class="manage-title">${esc(n.title || '제목없음')}</div>
+            <div class="manage-meta">${esc(n.system_users?.display_name || '')} · ${relTime(n.created_at)}</div>
+          </div>
+          <button class="manage-del" onclick="deleteNotice(${n.id})">삭제</button>
+        </div>`).join('');
     } catch (e) {
-      showStatus('manageStatus', `❌ ${e.message}`, 'error');
+      wrap.innerHTML = `<div style="color:var(--sub);font-size:13px;">불러오기 실패: ${e.message}</div>`;
     }
   }
 
-  // ── AI 게시글 생성 ───────────────────────────────
+  async function deleteNotice(postId) {
+    if (!confirm('이 공지를 삭제할까요?')) return;
+    try {
+      const r = await adminFetch(`/admin/posts/${postId}`, { method: 'DELETE' });
+      const d = await r.json();
+      if (d.ok) {
+        document.getElementById(`mnotice-${postId}`)?.remove();
+        showStatus('noticeManageStatus', '✅ 공지 삭제 완료', 'success');
+      } else { showStatus('noticeManageStatus', `❌ ${d.error}`, 'error'); }
+    } catch (e) { showStatus('noticeManageStatus', `❌ ${e.message}`, 'error'); }
+  }
+
+  // ── AI 게시글 ────────────────────────────────────
   function clearPost() {
     document.getElementById('aiTitle').value = '';
     document.getElementById('aiBody').value  = '';
@@ -710,16 +655,12 @@
 
   async function generatePost() {
     if (!selectedChar) { alert('캐릭터를 선택해주세요'); return; }
-
     const btn = document.getElementById('btnGenPost');
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spin"></span> 생성중';
+    btn.disabled = true; btn.innerHTML = '<span class="spin"></span> 생성중';
     showStatus('aiPostStatus', `${selectedChar.display_name} 글 생성 중...`, 'info');
-
     try {
       const r = await adminFetch('/admin/generate-post', {
-        method: 'POST',
-        body: JSON.stringify({ character_id: selectedChar.id }),
+        method: 'POST', body: JSON.stringify({ character_id: selectedChar.id }),
       });
       const d = await r.json();
       if (d.ok) {
@@ -727,14 +668,11 @@
         document.getElementById('aiBody').value  = d.body  || '';
         showStatus('aiPostStatus', '✅ 생성 완료! 수정 후 게시하세요', 'success');
       } else {
+        // [Fix] 실제 Gemini 에러 메시지 표시
         showStatus('aiPostStatus', `❌ ${d.error}`, 'error');
       }
-    } catch (e) {
-      showStatus('aiPostStatus', `❌ ${e.message}`, 'error');
-    }
-
-    btn.disabled = false;
-    btn.innerHTML = '✨ 생성';
+    } catch (e) { showStatus('aiPostStatus', `❌ ${e.message}`, 'error'); }
+    btn.disabled = false; btn.innerHTML = '✨ 생성';
   }
 
   async function publishPost() {
@@ -743,36 +681,24 @@
     const body  = document.getElementById('aiBody').value.trim();
     if (!title) { showStatus('aiPostStatus', '제목을 입력하세요', 'error'); return; }
     if (!body)  { showStatus('aiPostStatus', '내용을 입력하세요', 'error'); return; }
-
     const btn = document.getElementById('btnPubPost');
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spin"></span> 게시중';
+    btn.disabled = true; btn.innerHTML = '<span class="spin"></span> 게시중';
     showStatus('aiPostStatus', '게시 중...', 'info');
-
     try {
       const r = await adminFetch('/system/posts', {
-        method: 'POST',
-        body: JSON.stringify({ system_user_id: selectedChar.id, title, body }),
+        method: 'POST', body: JSON.stringify({ system_user_id: selectedChar.id, title, body }),
       });
       const d = await r.json();
       if (d.ok) {
         showStatus('aiPostStatus', '✅ 게시 완료', 'success');
         clearPost();
-        await loadFeed(30);
-        renderPostPicker();
-        loadManagePosts();
-      } else {
-        showStatus('aiPostStatus', `❌ ${d.error}`, 'error');
-      }
-    } catch (e) {
-      showStatus('aiPostStatus', `❌ ${e.message}`, 'error');
-    }
-
-    btn.disabled = false;
-    btn.innerHTML = '📤 게시';
+        await loadFeed(30); renderPostPicker(); loadManagePosts();
+      } else { showStatus('aiPostStatus', `❌ ${d.error}`, 'error'); }
+    } catch (e) { showStatus('aiPostStatus', `❌ ${e.message}`, 'error'); }
+    btn.disabled = false; btn.innerHTML = '📤 게시';
   }
 
-  // ── 게시글 피커 (AI 댓글용) ─────────────────────
+  // ── 게시글 피커 ──────────────────────────────────
   function renderPostPicker() {
     const wrap = document.getElementById('postPicker');
     if (!cachedFeed.length) {
@@ -786,39 +712,29 @@
       </div>`).join('');
   }
 
-  function selectPost(id) {
-    selectedPostId = id;
-    renderPostPicker(); // 선택 표시 업데이트
-  }
+  function selectPost(id) { selectedPostId = id; renderPostPicker(); }
 
-  // ── AI 댓글 생성 ─────────────────────────────────
+  // ── AI 댓글 ──────────────────────────────────────
   async function generateComment() {
     if (!selectedChar)   { showStatus('aiCommentStatus', '캐릭터를 선택해주세요', 'error');  return; }
     if (!selectedPostId) { showStatus('aiCommentStatus', '게시글을 선택해주세요', 'error'); return; }
-
     const btn = document.getElementById('btnGenComment');
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spin"></span> 생성중';
+    btn.disabled = true; btn.innerHTML = '<span class="spin"></span> 생성중';
     showStatus('aiCommentStatus', '댓글 생성 중...', 'info');
-
     try {
       const r = await adminFetch('/admin/generate-comment', {
-        method: 'POST',
-        body: JSON.stringify({ post_id: selectedPostId, character_id: selectedChar.id }),
+        method: 'POST', body: JSON.stringify({ post_id: selectedPostId, character_id: selectedChar.id }),
       });
       const d = await r.json();
       if (d.ok) {
         document.getElementById('aiComment').value = d.comment || '';
         showStatus('aiCommentStatus', '✅ 생성 완료! 수정 후 게시하세요', 'success');
       } else {
+        // [Fix] 실제 Gemini 에러 메시지 표시
         showStatus('aiCommentStatus', `❌ ${d.error}`, 'error');
       }
-    } catch (e) {
-      showStatus('aiCommentStatus', `❌ ${e.message}`, 'error');
-    }
-
-    btn.disabled = false;
-    btn.innerHTML = '✨ 댓글 생성';
+    } catch (e) { showStatus('aiCommentStatus', `❌ ${e.message}`, 'error'); }
+    btn.disabled = false; btn.innerHTML = '✨ 댓글 생성';
   }
 
   async function publishComment() {
@@ -826,62 +742,49 @@
     if (!selectedPostId) { showStatus('aiCommentStatus', '게시글을 선택해주세요', 'error'); return; }
     const body = document.getElementById('aiComment').value.trim();
     if (!body) { showStatus('aiCommentStatus', '댓글 내용을 입력하세요', 'error'); return; }
-
     const btn = document.getElementById('btnPubComment');
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spin"></span> 게시중';
+    btn.disabled = true; btn.innerHTML = '<span class="spin"></span> 게시중';
     showStatus('aiCommentStatus', '게시 중...', 'info');
-
     try {
       const r = await adminFetch('/admin/system-comment', {
-        method: 'POST',
-        body: JSON.stringify({ post_id: selectedPostId, system_user_id: selectedChar.id, body }),
+        method: 'POST', body: JSON.stringify({ post_id: selectedPostId, system_user_id: selectedChar.id, body }),
       });
       const d = await r.json();
       if (d.ok) {
         document.getElementById('aiComment').value = '';
         showStatus('aiCommentStatus', '✅ 댓글 게시 완료', 'success');
-        await loadFeed(30);
-        renderPostPicker();
-        loadManagePosts();
-      } else {
-        showStatus('aiCommentStatus', `❌ ${d.error}`, 'error');
-      }
-    } catch (e) {
-      showStatus('aiCommentStatus', `❌ ${e.message}`, 'error');
-    }
-
-    btn.disabled = false;
-    btn.innerHTML = '📤 댓글 게시';
+        await loadFeed(30); renderPostPicker(); loadManagePosts();
+      } else { showStatus('aiCommentStatus', `❌ ${d.error}`, 'error'); }
+    } catch (e) { showStatus('aiCommentStatus', `❌ ${e.message}`, 'error'); }
+    btn.disabled = false; btn.innerHTML = '📤 댓글 게시';
   }
 
-  // ── 24명 폴백 MOCK 데이터 ────────────────────────
-  // API 실패 시 사용. 실제 DB 데이터를 반영한 기본값
+  // ── MOCK 데이터 (API 실패 시 폴백) ───────────────
   const MOCK_CHARS = [
-    {id:1,  display_name:'임일후',   emoji:'🦆', group_type:'kindergarten', animal_type:'오리',     gender:'고자',   mbti:'ENTP',   likes:'아이돌',   hobby:'눕기',          speech_style:'아이돌 이야기를 자주하는 편안한 말투'},
-    {id:2,  display_name:'쨩구리',   emoji:'🐸', group_type:'kindergarten', animal_type:'개구리',   gender:'female', mbti:'ESTP',   likes:'게임',     hobby:'개굴거리기',    speech_style:'활발하고 게임 이야기 많이 함'},
-    {id:3,  display_name:'쨩규리',   emoji:'🐸', group_type:'kindergarten', animal_type:'개구리',   gender:'female', mbti:'ENFP',   likes:'놀기',     hobby:'장난치기',      speech_style:'장난스럽고 재미있는 말투'},
-    {id:4,  display_name:'루피',     emoji:'🦫', group_type:'kindergarten', animal_type:'비버',     gender:'male',   mbti:'INTP',   likes:'걸그룹',   hobby:'킥복싱',        speech_style:'차분하지만 걸그룹 이야기만 나오면 신남'},
-    {id:5,  display_name:'야코',     emoji:'🐷', group_type:'kindergarten', animal_type:'돼지',     gender:'male',   mbti:'ENFP',   likes:'민초',     hobby:'민초먹기',      speech_style:'밝고 장난기 많은 말투 민초 덕후'},
-    {id:6,  display_name:'우사기',   emoji:'🐰', group_type:'kindergarten', animal_type:'토끼',     gender:'female', mbti:'ISTP',   likes:'공부',     hobby:'공부',          speech_style:'진지하고 공부 이야기만 함'},
-    {id:7,  display_name:'쨩담곰',   emoji:'🐻', group_type:'kindergarten', animal_type:'곰',       gender:'female', mbti:'ISTJ',   likes:'천재',     hobby:'잠자기',        speech_style:'똑똑한 척하는 말투'},
-    {id:8,  display_name:'쨩빤쮸',   emoji:'🐰', group_type:'kindergarten', animal_type:'토끼',     gender:'female', mbti:'ENFP',   likes:'팬티',     hobby:'복싱',          speech_style:'팬티 이야기를 자주하는 귀여운 말투'},
-    {id:9,  display_name:'쨩설',     emoji:'🐯', group_type:'kindergarten', animal_type:'호랑이',   gender:'female', mbti:'ENFP',   likes:'스키',     hobby:'태권도',        speech_style:'운동 이야기를 좋아하는 활발한 말투'},
-    {id:10, display_name:'치이카와', emoji:'🐻', group_type:'kindergarten', animal_type:'곰',       gender:'female', mbti:'ENFP',   likes:'요쿠르트', hobby:'요구르트 먹기', speech_style:'요쿠르트 이야기를 자주하는 귀여운 말투'},
-    {id:11, display_name:'하치와레', emoji:'🐱', group_type:'kindergarten', animal_type:'고양이',   gender:'female', mbti:'ENFP',   likes:'귀여운거', hobby:'노래',          speech_style:'귀엽고 밝은 말투'},
-    {id:12, display_name:'쨩문어',   emoji:'🐙', group_type:'kindergarten', animal_type:'반전문어', gender:'female', mbti:'ENFP',   likes:'착한거',   hobby:'노래부르기',    speech_style:'밝고 긍정적인 말투'},
-    {id:13, display_name:'쨩슝',     emoji:'🦧', group_type:'kindergarten', animal_type:'오랑우탄', gender:'female', mbti:'ENFP',   likes:'리듬체조', hobby:'먹기',          speech_style:'먹는 것과 리듬체조 이야기를 좋아함'},
-    {id:14, display_name:'쨩송',     emoji:'🦧', group_type:'kindergarten', animal_type:'오랑우탄', gender:'female', mbti:'ENFP',   likes:'뮤지컬',   hobby:'트롯트부르기',  speech_style:'노래와 뮤지컬 이야기를 좋아함'},
-    {id:15, display_name:'룹희',     emoji:'🦫', group_type:'daycare',      animal_type:'비버',     gender:'female', mbti:'ENFP',   likes:'치킨',     hobby:'권투',          speech_style:'치킨 이야기와 권투 이야기를 좋아함'},
-    {id:16, display_name:'뤂이',     emoji:'🦫', group_type:'daycare',      animal_type:'비버',     gender:'female', mbti:'ESTJ',   likes:'쌍절곤',   hobby:'쌍절곤',        speech_style:'쌍절곤과 무술 이야기를 좋아함'},
-    {id:17, display_name:'사동',     emoji:'🐷', group_type:'daycare',      animal_type:'돼지',     gender:'male',   mbti:'ENFP',   likes:'백설이',   hobby:'유튜브보기',    speech_style:'백설이와 유튜브 이야기를 자주 함'},
-    {id:18, display_name:'쨩만듀',   emoji:'🐙', group_type:'daycare',      animal_type:'반전문어', gender:'female', mbti:'ISTP',   likes:'깨끗한거', hobby:'그림그리기',    speech_style:'깨끗한 것을 좋아하고 그림 이야기를 함'},
-    {id:19, display_name:'쨩만쥬',   emoji:'🐙', group_type:'daycare',      animal_type:'반전문어', gender:'female', mbti:'ISTP',   likes:'맛있는거', hobby:'먹기',          speech_style:'먹는 이야기를 자주하는 귀여운 말투'},
-    {id:20, display_name:'쨩무너',   emoji:'🐙', group_type:'daycare',      animal_type:'반전문어', gender:'female', mbti:'ISTP',   likes:'놀기',     hobby:'놀기',          speech_style:'늘 놀고 싶어하는 활발한 말투'},
-    {id:21, display_name:'쨩서빈',   emoji:'🦛', group_type:'daycare',      animal_type:'베렝구어', gender:'female', mbti:'ENFP',   likes:'쪽쪽이',   hobby:'쪽쪽이물기',    speech_style:'애기 같은 귀여운 말투'},
-    {id:22, display_name:'쨩크용',   emoji:'🐶', group_type:'daycare',      animal_type:'강아지',   gender:'female', mbti:'ENFP',   likes:'패기',     hobby:'패기',          speech_style:'복싱과 패기 이야기를 좋아하는 활발한 말투'},
-    {id:23, display_name:'쨩세빈',   emoji:'🦛', group_type:'daycare',      animal_type:'베렝구어', gender:'female', mbti:'ENFP',   likes:'쎈놈',     hobby:'은근쎔',        speech_style:'자기가 세다고 생각하는 귀여운 말투'},
-    {id:24, display_name:'쑤갈쌈',   emoji:'👩‍🏫',group_type:'teacher',      animal_type:'선생님',   gender:'female', mbti:'ENFJ-T', likes:'아이들',   hobby:'관찰메모',      speech_style:'따뜻하고 조용히 관찰하는 말투'},
+    {id:1,  display_name:'임일후',   emoji:'🦆', group_type:'kindergarten', animal_type:'오리',     gender:'고자',   mbti:'ENTP',   speech_style:'아이돌 이야기를 자주하는 편안한 말투'},
+    {id:2,  display_name:'쨩구리',   emoji:'🐸', group_type:'kindergarten', animal_type:'개구리',   gender:'female', mbti:'ESTP',   speech_style:'활발하고 게임 이야기 많이 함'},
+    {id:3,  display_name:'쨩규리',   emoji:'🐸', group_type:'kindergarten', animal_type:'개구리',   gender:'female', mbti:'ENFP',   speech_style:'장난스럽고 재미있는 말투'},
+    {id:4,  display_name:'루피',     emoji:'🦫', group_type:'kindergarten', animal_type:'비버',     gender:'male',   mbti:'INTP',   speech_style:'차분하지만 걸그룹 이야기만 나오면 신남'},
+    {id:5,  display_name:'야코',     emoji:'🐷', group_type:'kindergarten', animal_type:'돼지',     gender:'male',   mbti:'ENFP',   speech_style:'밝고 장난기 많은 말투 민초 덕후'},
+    {id:6,  display_name:'우사기',   emoji:'🐰', group_type:'kindergarten', animal_type:'토끼',     gender:'female', mbti:'ISTP',   speech_style:'진지하고 공부 이야기만 함'},
+    {id:7,  display_name:'쨩담곰',   emoji:'🐻', group_type:'kindergarten', animal_type:'곰',       gender:'female', mbti:'ISTJ',   speech_style:'똑똑한 척하는 말투'},
+    {id:8,  display_name:'쨩빤쮸',   emoji:'🐰', group_type:'kindergarten', animal_type:'토끼',     gender:'female', mbti:'ENFP',   speech_style:'팬티 이야기를 자주하는 귀여운 말투'},
+    {id:9,  display_name:'쨩설',     emoji:'🐯', group_type:'kindergarten', animal_type:'호랑이',   gender:'female', mbti:'ENFP',   speech_style:'운동 이야기를 좋아하는 활발한 말투'},
+    {id:10, display_name:'치이카와', emoji:'🐻', group_type:'kindergarten', animal_type:'곰',       gender:'female', mbti:'ENFP',   speech_style:'요쿠르트 이야기를 자주하는 귀여운 말투'},
+    {id:11, display_name:'하치와레', emoji:'🐱', group_type:'kindergarten', animal_type:'고양이',   gender:'female', mbti:'ENFP',   speech_style:'귀엽고 밝은 말투'},
+    {id:12, display_name:'쨩문어',   emoji:'🐙', group_type:'kindergarten', animal_type:'반전문어', gender:'female', mbti:'ENFP',   speech_style:'밝고 긍정적인 말투'},
+    {id:13, display_name:'쨩슝',     emoji:'🦧', group_type:'kindergarten', animal_type:'오랑우탄', gender:'female', mbti:'ENFP',   speech_style:'먹는 것과 리듬체조 이야기를 좋아함'},
+    {id:14, display_name:'쨩송',     emoji:'🦧', group_type:'kindergarten', animal_type:'오랑우탄', gender:'female', mbti:'ENFP',   speech_style:'노래와 뮤지컬 이야기를 좋아함'},
+    {id:15, display_name:'룹희',     emoji:'🦫', group_type:'daycare',      animal_type:'비버',     gender:'female', mbti:'ENFP',   speech_style:'치킨 이야기와 권투 이야기를 좋아함'},
+    {id:16, display_name:'뤂이',     emoji:'🦫', group_type:'daycare',      animal_type:'비버',     gender:'female', mbti:'ESTJ',   speech_style:'쌍절곤과 무술 이야기를 좋아함'},
+    {id:17, display_name:'사동',     emoji:'🐷', group_type:'daycare',      animal_type:'돼지',     gender:'male',   mbti:'ENFP',   speech_style:'백설이와 유튜브 이야기를 자주 함'},
+    {id:18, display_name:'쨩만듀',   emoji:'🐙', group_type:'daycare',      animal_type:'반전문어', gender:'female', mbti:'ISTP',   speech_style:'깨끗한 것을 좋아하고 그림 이야기를 함'},
+    {id:19, display_name:'쨩만쥬',   emoji:'🐙', group_type:'daycare',      animal_type:'반전문어', gender:'female', mbti:'ISTP',   speech_style:'먹는 이야기를 자주하는 귀여운 말투'},
+    {id:20, display_name:'쨩무너',   emoji:'🐙', group_type:'daycare',      animal_type:'반전문어', gender:'female', mbti:'ISTP',   speech_style:'늘 놀고 싶어하는 활발한 말투'},
+    {id:21, display_name:'쨩서빈',   emoji:'🦛', group_type:'daycare',      animal_type:'베렝구어', gender:'female', mbti:'ENFP',   speech_style:'애기 같은 귀여운 말투'},
+    {id:22, display_name:'쨩크용',   emoji:'🐶', group_type:'daycare',      animal_type:'강아지',   gender:'female', mbti:'ENFP',   speech_style:'복싱과 패기 이야기를 좋아하는 활발한 말투'},
+    {id:23, display_name:'쨩세빈',   emoji:'🦛', group_type:'daycare',      animal_type:'베렝구어', gender:'female', mbti:'ENFP',   speech_style:'자기가 세다고 생각하는 귀여운 말투'},
+    {id:24, display_name:'쑤갈쌈',   emoji:'👩‍🏫',group_type:'teacher',      animal_type:'선생님',   gender:'female', mbti:'ENFJ-T', speech_style:'따뜻하고 조용히 관찰하는 말투'},
   ];
 </script>
 </body>
