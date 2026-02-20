@@ -37,10 +37,19 @@
 
     /* 공지사항 */
     .notice-section { padding:14px 16px 0; }
-    .notice-card { background:var(--card); border-radius:var(--radius-card); padding:14px; border-left:4px solid var(--accent); box-shadow:0 1px 4px rgba(0,0,0,.06); margin-bottom:10px; }
-    .notice-label { font-size:11px; font-weight:700; color:var(--accent); margin-bottom:4px; }
+    .notice-card { background:var(--card); border-radius:var(--radius-card); padding:14px; border-left:4px solid var(--accent); box-shadow:0 1px 4px rgba(0,0,0,.06); margin-bottom:10px; cursor:pointer; }
+    .notice-card:active { opacity:.85; }
+    .notice-label { font-size:11px; font-weight:700; color:var(--accent); margin-bottom:4px; display:flex; align-items:center; justify-content:space-between; }
+    .notice-label-hint { font-size:10px; font-weight:400; opacity:.7; }
     .notice-title { font-size:14px; font-weight:700; }
-    .notice-body  { font-size:13px; color:var(--sub); line-height:1.5; margin-top:2px; }
+    .notice-body  { font-size:13px; color:var(--sub); line-height:1.5; margin-top:2px;
+                    display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+    /* 상세 패널 미디어 */
+    .detail-media { padding:0 16px 12px; }
+    .detail-media img { width:100%; border-radius:12px; display:block; margin-bottom:8px; max-height:400px; object-fit:cover; }
+    .detail-media video { width:100%; border-radius:12px; display:block; margin-bottom:8px; max-height:400px; }
+    /* 링크 */
+    .detail-body a { color:var(--blue); text-decoration:underline; word-break:break-all; }
 
     /* 섹션 헤더 */
     .section-header { padding:16px 16px 8px; display:flex; align-items:center; justify-content:space-between; }
@@ -119,8 +128,11 @@
     /* 댓글 */
     .comments-wrap  { padding:0 16px 10px; }
     .comments-title { font-size:13px; font-weight:700; color:var(--sub); padding:12px 0 8px; }
-    .comment-item   { padding:10px 0; border-bottom:1px solid var(--border); }
+    .comment-item   { padding:10px 0; border-bottom:1px solid var(--border); display:flex; gap:8px; align-items:flex-start; }
     .comment-item:last-child { border-bottom:none; }
+    .comment-avatar { width:28px; height:28px; border-radius:8px; background:var(--bg); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; overflow:hidden; }
+    .comment-avatar img { width:100%; height:100%; object-fit:cover; }
+    .comment-right  { flex:1; min-width:0; }
     .comment-nick   { font-size:12px; font-weight:700; }
     .comment-body   { font-size:13px; line-height:1.5; margin-top:3px; }
     .comment-time   { font-size:11px; color:var(--sub); margin-top:2px; }
@@ -241,6 +253,7 @@
     </div>
     <div class="detail-scroll">
       <div class="detail-body" id="dBody"></div>
+      <div class="detail-media" id="dMedia"></div>
       <div class="detail-footer">
         <span class="detail-stat" id="dStats"></span>
         <button class="detail-yar" id="dYarBtn" onclick="toggleDetailYar()">🌟 야르~</button>
@@ -309,6 +322,13 @@
 
   // ── 유틸 ─────────────────────────────────────────
   const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+  /** 텍스트의 URL을 클릭 가능한 링크로 변환 (XSS 안전) */
+  function linkify(text) {
+    const escaped = esc(text);
+    return escaped.replace(/(https?:\/\/[^\s&<>"]+)/g,
+      '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+  }
   const relTime = d => {
     const s = (Date.now() - new Date(d)) / 1000;
     if (s < 60)     return '방금';
@@ -356,11 +376,18 @@
       d.notices.forEach(n => {
         const card = document.createElement('div');
         card.className = 'notice-card';
-        card.style.cursor = 'pointer';
+        // 미디어 썸네일 (이미지만 카드에 표시)
+        const thumbHtml = n.image_url
+          ? `<img src="${esc(n.image_url)}" style="width:100%;border-radius:8px;margin-top:8px;max-height:120px;object-fit:cover;" loading="lazy">`
+          : '';
         card.innerHTML = `
-          <div class="notice-label">📌 공지 <span style="font-size:10px;opacity:.7;">탭하면 댓글 보기</span></div>
+          <div class="notice-label">
+            <span>📌 공지</span>
+            <span class="notice-label-hint">탭하면 자세히 보기 ›</span>
+          </div>
           <div class="notice-title">${esc(n.title||'')}</div>
-          <div class="notice-body">${esc(n.body||'')}</div>`;
+          <div class="notice-body">${esc(n.body||'')}</div>
+          ${thumbHtml}`;
         card.onclick = () => openDetail(n.id);
         sec.appendChild(card);
       });
@@ -525,6 +552,7 @@
     try {
       const r = await fetch(`${API}/posts/${postId}/yar`, {
         method: wasYar ? 'DELETE' : 'POST',
+        credentials: 'include',
         headers: { 'Content-Type':'application/json' },
         body: JSON.stringify({ nickname: myNickname }),
       });
@@ -542,11 +570,12 @@
     currentPost = feedPosts.find(p => p.id == postId) || null;
     // 초기화
     document.getElementById('dTitle').textContent  = '';
-    document.getElementById('dBody').textContent   = '불러오는 중...';
+    document.getElementById('dBody').innerHTML     = '불러오는 중...';
     document.getElementById('dAuthor').textContent = '';
     document.getElementById('dTime').textContent   = '';
     document.getElementById('dStats').textContent  = '';
     document.getElementById('dComments').innerHTML = '';
+    document.getElementById('dMedia').innerHTML    = '';
     document.getElementById('detailOverlay').classList.remove('hidden');
     document.getElementById('commentInput').value  = '';
 
@@ -564,11 +593,21 @@
       const authorName = isSystem ? (p.character_name||'캐릭터') : (p.nickname||'익명');
 
       document.getElementById('dTitle').textContent  = p.title || '';
-      document.getElementById('dBody').textContent   = p.body  || '';
+      document.getElementById('dBody').innerHTML     = linkify(p.body || '');
       document.getElementById('dAuthor').textContent = authorName;
       document.getElementById('dTime').textContent   = relTime(p.created_at);
       document.getElementById('dStats').textContent  =
         `💬 댓글 ${d.comments?.length||0} · 👁 조회 ${p.view_count||0}`;
+
+      // 미디어 (이미지 / 동영상)
+      const mediaWrap = document.getElementById('dMedia');
+      mediaWrap.innerHTML = '';
+      if (p.image_url) {
+        mediaWrap.innerHTML += `<img src="${esc(p.image_url)}" alt="이미지" onclick="this.requestFullscreen?.()" style="cursor:zoom-in;">`;
+      }
+      if (p.video_url) {
+        mediaWrap.innerHTML += `<video src="${esc(p.video_url)}" controls playsinline></video>`;
+      }
 
       const isYar = getYar(postId);
       syncDetailYar(p.yar_count||0, isYar);
@@ -608,13 +647,20 @@
       wrap.innerHTML = '<div style="color:var(--sub);font-size:13px;padding:8px 0 16px;">아직 댓글이 없어요. 첫 댓글을 남겨보세요!</div>';
       return;
     }
-    wrap.innerHTML = comments.map(c => {
-      const nick  = c.system_users?.display_name || c.nickname || '익명';
-      const emoji = c.system_users?.emoji ? esc(c.system_users.emoji)+' ' : '';
+    wrap.innerHTML = comments.map(cm => {
+      const nick     = cm.system_users?.display_name || cm.nickname || '익명';
+      const imgUrl   = cm.system_users?.image_url;
+      const emoji    = cm.system_users?.emoji || '🗣️';
+      const avatarHtml = imgUrl
+        ? `<img src="${esc(imgUrl)}" alt="${esc(nick)}" data-emoji="${esc(emoji)}" onerror="this.outerHTML='<span style=\'font-size:15px;\'>' + this.dataset.emoji + '</span>'">`
+        : `<span style="font-size:15px;">${esc(emoji)}</span>`;
       return `<div class="comment-item">
-        <div class="comment-nick">${emoji}${esc(nick)}</div>
-        <div class="comment-body">${esc(c.body)}</div>
-        <div class="comment-time">${relTime(c.created_at)}</div>
+        <div class="comment-avatar">${avatarHtml}</div>
+        <div class="comment-right">
+          <div class="comment-nick">${esc(nick)}</div>
+          <div class="comment-body">${esc(cm.body)}</div>
+          <div class="comment-time">${relTime(cm.created_at)}</div>
+        </div>
       </div>`;
     }).join('');
   }

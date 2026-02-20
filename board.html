@@ -96,8 +96,11 @@
     /* 댓글 */
     .comments-wrap  { padding:0 16px 10px; }
     .comments-title { font-size:13px; font-weight:700; color:var(--sub); padding:12px 0 8px; }
-    .comment-item   { padding:10px 0; border-bottom:1px solid var(--border); }
+    .comment-item   { padding:10px 0; border-bottom:1px solid var(--border); display:flex; gap:8px; align-items:flex-start; }
     .comment-item:last-child { border-bottom:none; }
+    .comment-avatar { width:28px; height:28px; border-radius:8px; background:var(--bg); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; overflow:hidden; }
+    .comment-avatar img { width:100%; height:100%; object-fit:cover; }
+    .comment-right  { flex:1; min-width:0; }
     .comment-nick   { font-size:12px; font-weight:700; }
     .comment-body   { font-size:13px; line-height:1.5; margin-top:3px; }
     .comment-time   { font-size:11px; color:var(--sub); margin-top:2px; }
@@ -431,12 +434,19 @@
       sorted.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     }
     wrap.innerHTML = sorted.map(cm => {
-      const nick  = cm.system_users?.display_name || cm.nickname || '익명';
-      const emoji = cm.system_users?.emoji ? esc(cm.system_users.emoji) + ' ' : '';
+      const nick     = cm.system_users?.display_name || cm.nickname || '익명';
+      const imgUrl   = cm.system_users?.image_url;
+      const emoji    = cm.system_users?.emoji || '🗣️';
+      const avatarHtml = imgUrl
+        ? `<img src="${esc(imgUrl)}" alt="${esc(nick)}" data-emoji="${esc(emoji)}" onerror="this.outerHTML='<span style=\'font-size:15px;\'>' + this.dataset.emoji + '</span>'">`
+        : `<span style="font-size:15px;">${esc(emoji)}</span>`;
       return `<div class="comment-item">
-        <div class="comment-nick">${emoji}${esc(nick)}</div>
-        <div class="comment-body">${esc(cm.body)}</div>
-        <div class="comment-time">${relTime(cm.created_at)}</div>
+        <div class="comment-avatar">${avatarHtml}</div>
+        <div class="comment-right">
+          <div class="comment-nick">${esc(nick)}</div>
+          <div class="comment-body">${esc(cm.body)}</div>
+          <div class="comment-time">${relTime(cm.created_at)}</div>
+        </div>
       </div>`;
     }).join('');
   }
