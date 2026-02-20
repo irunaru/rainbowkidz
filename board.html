@@ -51,6 +51,13 @@
     /* 더 보기 */
     .load-more { width:100%; padding:13px; background:var(--card); border:1.5px solid var(--border); border-radius:var(--radius-card); font-size:14px; font-weight:700; color:var(--sub); cursor:pointer; font-family:inherit; margin-top:4px; }
     .load-more:disabled { opacity:.5; }
+    /* 통계 + 야르 */
+    .post-footer { display:flex; align-items:center; margin-top:8px; gap:10px; }
+    .post-stats  { font-size:12px; color:var(--sub); display:flex; gap:10px; }
+    .yar-btn { margin-left:auto; display:flex; align-items:center; gap:4px; padding:5px 12px; border-radius:20px; border:1.5px solid var(--border); background:var(--bg); font-size:12px; font-weight:700; cursor:pointer; font-family:inherit; color:var(--sub); white-space:nowrap; }
+    .yar-btn.active { border-color:#ff9f0a; color:#ff9f0a; background:#fff9ee; }
+    @keyframes yarBounce { 0%{transform:scale(1)} 30%{transform:scale(1.35)} 60%{transform:scale(.9)} 80%{transform:scale(1.1)} 100%{transform:scale(1)} }
+    .yar-btn.bounce { animation:yarBounce .35s cubic-bezier(.36,.07,.19,.97) both; }
 
     /* 바텀 네비 */
     .bottom-nav { position:fixed; bottom:0; left:0; right:0; background:var(--card); border-top:1px solid var(--border); display:flex; z-index:100; padding-bottom:env(safe-area-inset-bottom,0); }
@@ -308,15 +315,25 @@
   }
 
   function renderPostCard(p) {
-    return `<div class="post-card" onclick="openDetail(${p.id})">
-      ${p.is_notice ? '<div class="post-badge">📌 공지</div>' : ''}
-      <div class="post-title">${esc(p.title || '')}</div>
-      ${p.body ? `<div class="post-body">${esc(p.body)}</div>` : ''}
-      <div class="post-meta">
-        <span class="post-meta-nick">${esc(p.nickname || p.character_name || '익명')}</span>
-        <span>${relTime(p.created_at)}</span>
-        <span>💬 ${p.comment_count || 0}</span>
-        <span>👁 ${p.view_count || 0}</span>
+    const isYar = getYar(p.id);
+    return `<div class="post-card" id="bpost-${p.id}">
+      <div onclick="openDetail(${p.id})">
+        ${p.is_notice ? '<div class="post-badge">📌 공지</div>' : ''}
+        <div class="post-title">${esc(p.title || '')}</div>
+        ${p.body ? `<div class="post-body">${esc(p.body)}</div>` : ''}
+        <div class="post-meta">
+          <span class="post-meta-nick">${esc(p.nickname || p.character_name || '익명')}</span>
+          <span>${relTime(p.created_at)}</span>
+        </div>
+      </div>
+      <div class="post-footer">
+        <div class="post-stats">
+          <span>💬 댓글 ${p.comment_count || 0}</span>
+          <span>👁 조회 ${p.view_count || 0}</span>
+        </div>
+        <button class="yar-btn${isYar ? ' active' : ''}" id="byar-${p.id}" onclick="toggleYar(event,${p.id})">
+          🌟 야르~ ${p.yar_count || 0}
+        </button>
       </div>
     </div>`;
   }
@@ -412,6 +429,41 @@
     btn.disabled = false; btn.textContent = '전송';
   }
 
+  // ── 야르~ 토글 ──────────────────────────────────
+  async function toggleYar(e, postId) {
+    e.stopPropagation();
+    if (!myNickname) {
+      pendingYarId  = postId;
+      pendingAction = 'yar';
+      openNickModal('야르~를 누르려면 닉네임이 필요해요!');
+      return;
+    }
+    const wasYar = getYar(postId);
+    const post   = posts.find(p => p.id == postId);
+    if (!post) return;
+
+    post.yar_count = (post.yar_count || 0) + (wasYar ? -1 : 1);
+    setYar(postId, !wasYar);
+    const btn = document.getElementById(`byar-${postId}`);
+    if (btn) {
+      btn.className = `yar-btn${!wasYar ? ' active bounce' : ''}`;
+      btn.innerHTML = `🌟 야르~ ${post.yar_count}`;
+      btn.addEventListener('animationend', () => btn.classList.remove('bounce'), { once: true });
+    }
+    try {
+      const r = await fetch(`${API}/posts/${postId}/yar`, {
+        method: wasYar ? 'DELETE' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nickname: myNickname }),
+      });
+      const d = await r.json();
+      if (d.ok && btn) {
+        post.yar_count = d.yar_count;
+        btn.innerHTML = `🌟 야르~ ${d.yar_count}`;
+      }
+    } catch {}
+  }
+
   document.getElementById('commentInput').addEventListener('keypress', e => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitComment(); }
   });
@@ -494,6 +546,10 @@
         // 대기 중인 작업 실행
         if (pendingAction === 'write')   { pendingAction = null; openWriteModal(); }
         if (pendingAction === 'comment') { pendingAction = null; document.getElementById('commentInput').focus(); }
+        if (pendingAction === 'yar' && pendingYarId) {
+          const id = pendingYarId; pendingYarId = null; pendingAction = null;
+          toggleYar({ stopPropagation: () => {} }, id);
+        }
       } else {
         errEl.textContent = d.error === 'nickname_taken' ? '이미 사용 중인 닉네임이에요' : (d.error || '오류가 발생했어요');
       }
