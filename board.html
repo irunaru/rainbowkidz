@@ -109,6 +109,11 @@
     .comment-send  { padding:10px 16px; background:var(--text); color:#fff; border:none; border-radius:22px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; white-space:nowrap; }
     .comment-send:disabled { opacity:.5; }
 
+    /* 상세패널 야르 버튼 */
+    .detail-footer { padding:10px 16px; display:flex; align-items:center; gap:8px; border-bottom:1px solid var(--border); flex-wrap:wrap; }
+    .detail-stat   { font-size:12px; color:var(--sub); }
+    .detail-yar    { margin-left:auto; display:flex; align-items:center; gap:4px; padding:6px 14px; border-radius:20px; border:1.5px solid var(--border); background:var(--bg); font-size:12px; font-weight:700; cursor:pointer; font-family:inherit; color:var(--sub); white-space:nowrap; }
+    .detail-yar.active { border-color:#ff9f0a; color:#ff9f0a; background:#fff9ee; }
     /* 닉네임 모달 */
     .nick-modal { position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; z-index:3000; padding:20px; }
     .nick-modal.hidden { display:none; }
@@ -178,22 +183,30 @@
       <div class="detail-meta">
         <span style="font-weight:700;color:var(--text);" id="dNick"></span>
         <span id="dTime"></span>
-        <span id="dViewCount"></span>
       </div>
     </div>
-    <!-- 스크롤 영역 -->
     <div class="detail-scroll">
       <div class="detail-body" id="dBody"></div>
       <div class="detail-footer">
-        <span class="detail-stat" id="dCommentCount"></span>
+        <div style="display:flex;flex-direction:column;gap:4px;">
+          <span class="detail-stat" id="dViewCount"></span>
+          <span class="detail-stat" id="dCommentCount"></span>
+        </div>
+        <button class="detail-yar" id="dYarBtn" onclick="toggleDetailYar()">🌟 야르~</button>
         <button class="detail-close" onclick="closeDetail()">✕ 닫기</button>
       </div>
       <div class="comments-wrap">
-        <div class="comments-title">댓글</div>
+        <!-- 댓글 정렬 탭 -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0 6px;">
+          <span style="font-size:13px;font-weight:700;color:var(--sub);">댓글</span>
+          <div style="display:flex;gap:6px;">
+            <button id="cTabLatest"  onclick="switchCommentTab('latest')"  style="padding:4px 10px;border-radius:20px;border:1.5px solid var(--text);background:var(--text);color:#fff;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">최신순</button>
+            <button id="cTabPopular" onclick="switchCommentTab('popular')" style="padding:4px 10px;border-radius:20px;border:1.5px solid var(--border);background:var(--bg);color:var(--sub);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">인기순</button>
+          </div>
+        </div>
         <div id="dComments"></div>
       </div>
     </div>
-    <!-- 댓글 입력 (패널 하단 고정) -->
     <div class="comment-form">
       <input class="comment-input" id="commentInput" placeholder="댓글을 입력하세요..." maxlength="500">
       <button class="comment-send" id="commentSendBtn" onclick="submitComment()">전송</button>
@@ -225,7 +238,11 @@
   let guestId       = null;
   let myNickname    = null;
   let currentPostId = null;
-  let pendingAction = null; // 'write' | 'comment'
+  let pendingAction = null; // 'write' | 'comment' | 'yar'
+  let pendingYarId  = null;
+
+  const getYar = id => localStorage.getItem(`rkYar_${id}`) === '1';
+  const setYar = (id, v) => localStorage.setItem(`rkYar_${id}`, v ? '1' : '0');
 
   const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   const relTime = d => {
@@ -339,15 +356,19 @@
   }
 
   // ── 게시글 상세 ──────────────────────────────────
+  let currentComments  = [];  // 현재 패널 댓글 원본
+  let commentSort      = 'latest';
+
   async function openDetail(postId) {
     currentPostId = postId;
-    // 초기화
+    commentSort   = 'latest';
+    switchCommentTab('latest', false); // 탭 UI 초기화만
     ['dTitle','dBody','dNick','dTime','dViewCount','dCommentCount'].forEach(id =>
       document.getElementById(id).textContent = id === 'dBody' ? '불러오는 중...' : '');
     document.getElementById('dComments').innerHTML = '';
     document.getElementById('detailOverlay').classList.remove('hidden');
+    document.getElementById('commentInput').value = '';
 
-    // 조회수 +1 (fire-and-forget)
     fetch(`${API}/posts/${postId}/view`, { method:'POST' }).catch(() => {});
 
     try {
@@ -355,16 +376,39 @@
       const d = await r.json();
       if (!d.ok) { document.getElementById('dBody').textContent = '게시글을 불러올 수 없어요'; return; }
       const p = d.post;
-      document.getElementById('dTitle').textContent        = p.title || '';
-      document.getElementById('dBody').textContent         = p.body  || '';
-      document.getElementById('dNick').textContent         = p.nickname || p.character_name || '익명';
-      document.getElementById('dTime').textContent         = relTime(p.created_at);
-      document.getElementById('dViewCount').textContent    = `👁 ${p.view_count || 0}`;
+
+      document.getElementById('dTitle').textContent     = p.title || '';
+      document.getElementById('dBody').textContent      = p.body  || '';
+      document.getElementById('dNick').textContent      = p.nickname || p.character_name || '익명';
+      document.getElementById('dTime').textContent      = relTime(p.created_at);
+      document.getElementById('dViewCount').textContent    = `👁 조회 ${p.view_count || 0}`;
       document.getElementById('dCommentCount').textContent = `💬 댓글 ${d.comments?.length || 0}개`;
-      renderComments(d.comments || []);
+
+      // 야르 버튼
+      const isYar = getYar(postId);
+      const yc    = p.yar_count || 0;
+      const dYar  = document.getElementById('dYarBtn');
+      dYar.className = `detail-yar${isYar ? ' active' : ''}`;
+      dYar.innerHTML = `🌟 야르~ ${yc}`;
+
+      currentComments = d.comments || [];
+      renderComments(currentComments);
     } catch (e) {
       document.getElementById('dBody').textContent = `오류: ${e.message}`;
     }
+  }
+
+  // ── 댓글 정렬 탭 ─────────────────────────────────
+  function switchCommentTab(sort, rerender = true) {
+    commentSort = sort;
+    const btnL = document.getElementById('cTabLatest');
+    const btnP = document.getElementById('cTabPopular');
+    if (!btnL || !btnP) return;
+    const activeStyle  = 'padding:4px 10px;border-radius:20px;border:1.5px solid var(--text);background:var(--text);color:#fff;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;';
+    const normalStyle  = 'padding:4px 10px;border-radius:20px;border:1.5px solid var(--border);background:var(--bg);color:var(--sub);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;';
+    btnL.style.cssText = sort === 'latest'  ? activeStyle : normalStyle;
+    btnP.style.cssText = sort === 'popular' ? activeStyle : normalStyle;
+    if (rerender) renderComments(currentComments);
   }
 
   function renderComments(comments) {
@@ -373,20 +417,66 @@
       wrap.innerHTML = '<div style="color:var(--sub);font-size:13px;padding:8px 0 16px;">아직 댓글이 없어요. 첫 댓글을 남겨보세요!</div>';
       return;
     }
-    wrap.innerHTML = comments.map(c => {
-      const nick  = c.system_users?.display_name || c.nickname || '익명';
-      const emoji = c.system_users?.emoji ? esc(c.system_users.emoji) + ' ' : '';
+    // 정렬: 최신순 = created_at desc, 인기순 = 캐릭터 댓글 우선 + 시간순
+    let sorted = [...comments];
+    if (commentSort === 'popular') {
+      // 캐릭터(system) 댓글 먼저, 그 안에서 최신순
+      sorted.sort((a, b) => {
+        const aS = a.author_type === 'system' ? 1 : 0;
+        const bS = b.author_type === 'system' ? 1 : 0;
+        if (bS !== aS) return bS - aS;
+        return new Date(b.created_at) - new Date(a.created_at);
+      });
+    } else {
+      sorted.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    }
+    wrap.innerHTML = sorted.map(cm => {
+      const nick  = cm.system_users?.display_name || cm.nickname || '익명';
+      const emoji = cm.system_users?.emoji ? esc(cm.system_users.emoji) + ' ' : '';
       return `<div class="comment-item">
         <div class="comment-nick">${emoji}${esc(nick)}</div>
-        <div class="comment-body">${esc(c.body)}</div>
-        <div class="comment-time">${relTime(c.created_at)}</div>
+        <div class="comment-body">${esc(cm.body)}</div>
+        <div class="comment-time">${relTime(cm.created_at)}</div>
       </div>`;
     }).join('');
   }
 
+  // ── 야르~ (상세패널) ─────────────────────────────
+  async function toggleDetailYar() {
+    if (!currentPostId) return;
+    if (!myNickname) {
+      pendingYarId  = currentPostId;
+      pendingAction = 'yar';
+      openNickModal('야르~를 누르려면 닉네임이 필요해요!');
+      return;
+    }
+    const wasYar = getYar(currentPostId);
+    setYar(currentPostId, !wasYar);
+    const dYar = document.getElementById('dYarBtn');
+    try {
+      const r = await fetch(`${API}/posts/${currentPostId}/yar`, {
+        method: wasYar ? 'DELETE' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nickname: myNickname }),
+      });
+      const d = await r.json();
+      if (d.ok) {
+        dYar.className = `detail-yar${!wasYar ? ' active' : ''}`;
+        dYar.innerHTML = `🌟 야르~ ${d.yar_count}`;
+        // 목록 카드도 동기화
+        const post = posts.find(p => p.id == currentPostId);
+        if (post) {
+          post.yar_count = d.yar_count;
+          const btn = document.getElementById(`byar-${currentPostId}`);
+          if (btn) { btn.className = `yar-btn${!wasYar ? ' active' : ''}`; btn.innerHTML = `🌟 야르~ ${d.yar_count}`; }
+        }
+      }
+    } catch {}
+  }
+
   function closeDetail() {
     document.getElementById('detailOverlay').classList.add('hidden');
-    currentPostId = null;
+    currentPostId = null; currentComments = [];
   }
   function handleDetailOverlay(e) { if (e.target.id === 'detailOverlay') closeDetail(); }
 
@@ -416,8 +506,9 @@
         // 댓글 새로고침
         const r2 = await fetch(`${API}/posts/${currentPostId}`);
         const d2 = await r2.json();
-        renderComments(d2.comments || []);
-        document.getElementById('dCommentCount').textContent = `💬 댓글 ${d2.comments?.length || 0}개`;
+        currentComments = d2.comments || [];
+        renderComments(currentComments);
+        document.getElementById('dCommentCount').textContent = `💬 댓글 ${currentComments.length}개`;
         // 목록 댓글 수 업데이트
         const post = posts.find(p => p.id == currentPostId);
         if (post) { post.comment_count = (post.comment_count || 0) + 1; renderPosts(); }

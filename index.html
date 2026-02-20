@@ -356,9 +356,12 @@
       d.notices.forEach(n => {
         const card = document.createElement('div');
         card.className = 'notice-card';
-        card.innerHTML = `<div class="notice-label">📌 공지</div>
+        card.style.cursor = 'pointer';
+        card.innerHTML = `
+          <div class="notice-label">📌 공지 <span style="font-size:10px;opacity:.7;">탭하면 댓글 보기</span></div>
           <div class="notice-title">${esc(n.title||'')}</div>
           <div class="notice-body">${esc(n.body||'')}</div>`;
+        card.onclick = () => openDetail(n.id);
         sec.appendChild(card);
       });
     } catch { sec.innerHTML = ''; }
