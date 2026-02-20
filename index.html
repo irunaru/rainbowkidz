@@ -127,6 +127,8 @@
     .detail-close  { padding:6px 14px; border:1px solid var(--border); border-radius:20px; background:var(--bg); font-size:12px; cursor:pointer; font-family:inherit; flex-shrink:0; }
     /* 댓글 */
     .comments-wrap  { padding:0 16px 10px; }
+    .ctab { padding:4px 10px; border-radius:20px; border:1.5px solid var(--border); background:var(--bg); color:var(--sub); font-size:11px; font-weight:700; cursor:pointer; font-family:inherit; }
+    .ctab-active { border-color:var(--text); background:var(--text); color:#fff; }
     .comments-title { font-size:13px; font-weight:700; color:var(--sub); padding:12px 0 8px; }
     .comment-item   { padding:10px 0; border-bottom:1px solid var(--border); display:flex; gap:8px; align-items:flex-start; }
     .comment-item:last-child { border-bottom:none; }
@@ -260,7 +262,13 @@
         <button class="detail-close" onclick="closeDetail()">✕ 닫기</button>
       </div>
       <div class="comments-wrap">
-        <div class="comments-title">댓글</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0 6px;">
+          <span style="font-size:13px;font-weight:700;color:var(--sub);">댓글</span>
+          <div style="display:flex;gap:6px;">
+            <button id="cTabLatest"  onclick="switchCommentTab('latest')"  class="ctab ctab-active">최신순</button>
+            <button id="cTabPopular" onclick="switchCommentTab('popular')" class="ctab">인기순</button>
+          </div>
+        </div>
         <div id="dComments"></div>
       </div>
     </div>
@@ -318,7 +326,9 @@
   let pendingAction = null;  // 'yar' | 'comment'
 
   // 상세 패널 상태
-  let currentPost = null;    // 현재 열린 게시글 전체 데이터
+  let currentPost     = null;  // 현재 열린 게시글 전체 데이터
+  let currentComments = [];    // 현재 댓글 원본 (정렬용)
+  let commentSort     = 'latest';
 
   // ── 유틸 ─────────────────────────────────────────
   const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -569,6 +579,8 @@
   async function openDetail(postId) {
     currentPost = feedPosts.find(p => p.id == postId) || null;
     // 초기화
+    commentSort = 'latest';
+    switchCommentTab('latest', false);
     document.getElementById('dTitle').textContent  = '';
     document.getElementById('dBody').innerHTML     = '불러오는 중...';
     document.getElementById('dAuthor').textContent = '';
@@ -587,7 +599,8 @@
       const d = await r.json();
       if (!d.ok) { document.getElementById('dBody').textContent = '불러올 수 없어요'; return; }
       const p = d.post;
-      currentPost = { ...p, yar_count: d.post.yar_count || currentPost?.yar_count || 0 };
+      currentPost     = { ...p, yar_count: d.post.yar_count || currentPost?.yar_count || 0 };
+      currentComments = d.comments || [];
 
       const isSystem   = p.author_type === 'system';
       const authorName = isSystem ? (p.character_name||'캐릭터') : (p.nickname||'익명');
@@ -611,7 +624,7 @@
 
       const isYar = getYar(postId);
       syncDetailYar(p.yar_count||0, isYar);
-      renderComments(d.comments||[]);
+      renderComments(currentComments);
     } catch (e) {
       document.getElementById('dBody').textContent = `오류: ${e.message}`;
     }
@@ -637,9 +650,19 @@
 
   function closeDetail() {
     document.getElementById('detailOverlay').classList.add('hidden');
-    currentPost = null;
+    currentPost = null; currentComments = [];
   }
   function handleDetailOverlay(e) { if (e.target.id === 'detailOverlay') closeDetail(); }
+
+  function switchCommentTab(sort, rerender = true) {
+    commentSort = sort;
+    const btnL = document.getElementById('cTabLatest');
+    const btnP = document.getElementById('cTabPopular');
+    if (!btnL || !btnP) return;
+    btnL.className = 'ctab' + (sort === 'latest'  ? ' ctab-active' : '');
+    btnP.className = 'ctab' + (sort === 'popular' ? ' ctab-active' : '');
+    if (rerender) renderComments(currentComments);
+  }
 
   function renderComments(comments) {
     const wrap = document.getElementById('dComments');
@@ -647,7 +670,19 @@
       wrap.innerHTML = '<div style="color:var(--sub);font-size:13px;padding:8px 0 16px;">아직 댓글이 없어요. 첫 댓글을 남겨보세요!</div>';
       return;
     }
-    wrap.innerHTML = comments.map(cm => {
+    // 정렬: 최신순 = created_at desc, 인기순 = 캐릭터 댓글 우선 후 최신순
+    let sorted = [...comments];
+    if (commentSort === 'popular') {
+      sorted.sort((a, b) => {
+        const aS = a.author_type === 'system' ? 1 : 0;
+        const bS = b.author_type === 'system' ? 1 : 0;
+        if (bS !== aS) return bS - aS;
+        return new Date(b.created_at) - new Date(a.created_at);
+      });
+    } else {
+      sorted.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    }
+    wrap.innerHTML = sorted.map(cm => {
       const nick     = cm.system_users?.display_name || cm.nickname || '익명';
       const imgUrl   = cm.system_users?.image_url;
       const emoji    = cm.system_users?.emoji || '🗣️';
@@ -695,7 +730,8 @@
         // 댓글 새로고침
         const r2 = await fetch(`${API}/posts/${currentPost.id}`);
         const d2 = await r2.json();
-        renderComments(d2.comments||[]);
+        currentComments = d2.comments || [];
+        renderComments(currentComments);
         document.getElementById('dStats').textContent =
           `💬 댓글 ${d2.comments?.length||0} · 👁 조회 ${d2.post?.view_count||0}`;
         // 피드 카드 댓글 수 업데이트
