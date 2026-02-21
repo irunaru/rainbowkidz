@@ -48,6 +48,8 @@
     .detail-media { padding:0 16px 12px; }
     .detail-media img { width:100%; border-radius:12px; display:block; margin-bottom:8px; max-height:400px; object-fit:cover; }
     .detail-media video { width:100%; border-radius:12px; display:block; margin-bottom:8px; max-height:400px; }
+    .detail-media audio { width:100%; border-radius:12px; display:block; margin-bottom:8px; }
+    .detail-media-icon { font-size:13px; color:var(--sub); margin-bottom:4px; }
     /* 링크 */
     .detail-body a { color:var(--blue); text-decoration:underline; word-break:break-all; }
 
@@ -334,6 +336,17 @@
   const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
   /** 텍스트의 URL을 클릭 가능한 링크로 변환 (XSS 안전) */
+  // 미디어 URL 타입 감지
+  function detectMediaType(url) {
+    if (!url) return null;
+    const u = url.toLowerCase().split('?')[0];
+    if (/\.(jpg|jpeg|png|gif|webp|avif|svg)$/.test(u)) return 'image';
+    if (/\.(mp4|webm|mov|avi|mkv)$/.test(u)) return 'video';
+    if (/\.(mp3|wav|ogg|m4a|aac|flac)$/.test(u)) return 'audio';
+    if (/youtube\.com|youtu\.be/.test(url)) return 'youtube';
+    return 'link';
+  }
+
   function linkify(text) {
     const escaped = esc(text);
     return escaped.replace(/(https?:\/\/[^\s&<>"]+)/g,
@@ -387,8 +400,14 @@
         const card = document.createElement('div');
         card.className = 'notice-card';
         // 미디어 썸네일 (이미지만 카드에 표시)
-        const thumbHtml = n.image_url
-          ? `<img src="${esc(n.image_url)}" style="width:100%;border-radius:8px;margin-top:8px;max-height:120px;object-fit:cover;" loading="lazy">`
+        // 공지 카드: 미디어 썸네일 (이미지만 표시)
+        const mtype = detectMediaType(n.media_url);
+        const thumbHtml = (n.media_url && mtype === 'image')
+          ? `<img src="${esc(n.media_url)}" style="width:100%;border-radius:8px;margin-top:8px;max-height:120px;object-fit:cover;" loading="lazy">`
+          : (n.media_url && mtype === 'video')
+          ? `<div style="margin-top:6px;font-size:12px;color:var(--sub);">🎬 동영상 첨부</div>`
+          : (n.media_url && mtype === 'audio')
+          ? `<div style="margin-top:6px;font-size:12px;color:var(--sub);">🎵 음악 첨부</div>`
           : '';
         card.innerHTML = `
           <div class="notice-label">
@@ -615,14 +634,23 @@
       // 미디어 (이미지 / 동영상)
       const mediaWrap = document.getElementById('dMedia');
       mediaWrap.innerHTML = '';
-      if (p.image_url) {
-        mediaWrap.innerHTML += `<img src="${esc(p.image_url)}" alt="이미지" onclick="this.requestFullscreen?.()" style="cursor:zoom-in;">`;
-      }
-      if (p.video_url) {
-        mediaWrap.innerHTML += `<video src="${esc(p.video_url)}" controls playsinline></video>`;
-      }
-      if (p.audio_url) {
-        mediaWrap.innerHTML += `<audio src="${esc(p.audio_url)}" controls style="width:100%;margin-top:4px;border-radius:8px;"></audio>`;
+      if (p.media_url) {
+        const mtype = detectMediaType(p.media_url);
+        if (mtype === 'image') {
+          mediaWrap.innerHTML = `<img src="${esc(p.media_url)}" alt="이미지" onclick="this.requestFullscreen?.()" style="cursor:zoom-in;">`;
+        } else if (mtype === 'video') {
+          mediaWrap.innerHTML = `<video src="${esc(p.media_url)}" controls playsinline></video>`;
+        } else if (mtype === 'audio') {
+          mediaWrap.innerHTML = `<div class="detail-media-icon">🎵 음악</div><audio src="${esc(p.media_url)}" controls></audio>`;
+        } else if (p.media_url) {
+          // YouTube 등 외부 링크 임베드
+          const ytMatch = p.media_url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+          if (ytMatch) {
+            mediaWrap.innerHTML = `<div style="position:relative;padding-top:56.25%;border-radius:12px;overflow:hidden;"><iframe src="https://www.youtube.com/embed/${ytMatch[1]}" style="position:absolute;inset:0;width:100%;height:100%;border:none;" allowfullscreen></iframe></div>`;
+          } else {
+            mediaWrap.innerHTML = `<a href="${esc(p.media_url)}" target="_blank" rel="noopener" style="color:var(--blue);font-size:13px;">🔗 첨부 링크 열기</a>`;
+          }
+        }
       }
 
       const isYar = getYar(postId);

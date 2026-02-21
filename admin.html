@@ -16,16 +16,18 @@
     body { font-family:'Noto Sans KR',-apple-system,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
     .hidden { display:none !important; }
 
-    /* 비밀번호 게이트 */
-    #pwGate { position:fixed; inset:0; background:#fff; display:flex; align-items:center; justify-content:center; z-index:9999; }
-    .pw-box   { text-align:center; padding:40px 32px; max-width:360px; width:90%; }
-    .pw-logo  { font-size:52px; margin-bottom:16px; }
-    .pw-title { font-size:22px; font-weight:900; margin-bottom:6px; }
-    .pw-sub   { font-size:14px; color:var(--sub); margin-bottom:28px; }
-    .pw-input { width:100%; padding:14px 18px; border:2px solid var(--border); border-radius:14px; font-size:18px; text-align:center; letter-spacing:4px; margin-bottom:14px; font-family:inherit; }
+    /* 비밀번호 게이트 - 상단 배치 (모바일 키보드에 안 가림) */
+    #pwGate { position:fixed; inset:0; background:#fff; display:flex; align-items:flex-start; justify-content:center; z-index:9999; padding-top:60px; overflow-y:auto; }
+    .pw-box   { text-align:center; padding:32px 28px; max-width:360px; width:90%; }
+    .pw-logo  { font-size:48px; margin-bottom:12px; }
+    .pw-title { font-size:20px; font-weight:900; margin-bottom:4px; }
+    .pw-sub   { font-size:13px; color:var(--sub); margin-bottom:24px; }
+    .pw-input { width:100%; padding:14px 18px; border:2px solid var(--border); border-radius:14px; font-size:20px; text-align:center; letter-spacing:6px; margin-bottom:10px; font-family:inherit; }
     .pw-input:focus { outline:none; border-color:var(--text); }
-    .pw-btn   { width:100%; padding:14px; background:var(--text); color:#fff; border:none; border-radius:14px; font-size:16px; font-weight:800; cursor:pointer; font-family:inherit; }
-    .pw-error { margin-top:10px; font-size:13px; color:var(--red); min-height:18px; }
+    .pw-btn   { width:100%; padding:14px; background:var(--text); color:#fff; border:none; border-radius:14px; font-size:16px; font-weight:800; cursor:pointer; font-family:inherit; margin-bottom:10px; }
+    .pw-save  { display:flex; align-items:center; justify-content:center; gap:6px; font-size:13px; color:var(--sub); cursor:pointer; }
+    .pw-save input { cursor:pointer; }
+    .pw-error { margin-top:6px; font-size:13px; color:var(--red); min-height:18px; }
 
     /* 헤더 */
     .header { background:var(--card); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:100; }
@@ -139,6 +141,7 @@
     <div class="pw-sub">RainbowKidz 관리자 전용 페이지</div>
     <input type="password" class="pw-input" id="pwInput" placeholder="비밀번호 입력" autocomplete="current-password">
     <button class="pw-btn" onclick="checkPw()">입장하기</button>
+    <label class="pw-save"><input type="checkbox" id="pwSave"> 비밀번호 기억하기</label>
     <div class="pw-error" id="pwError"></div>
   </div>
 </div>
@@ -166,40 +169,18 @@
       <input class="input" id="noticeTitle" placeholder="공지 제목">
       <textarea class="textarea" id="noticeBody" placeholder="공지 내용..."></textarea>
 
-      <!-- 미디어 첨부 -->
+      <!-- 미디어 첨부 (이미지/동영상/음악 통합) -->
       <div style="margin:10px 0 6px;font-size:13px;font-weight:700;color:var(--sub);">📎 미디어 첨부 (선택)</div>
-
-      <!-- 이미지 -->
-      <div style="margin-bottom:8px;">
-        <label style="font-size:12px;font-weight:600;color:var(--sub);display:block;margin-bottom:4px;">🖼️ 이미지</label>
-        <input type="file" id="noticeImageFile" accept="image/*" style="display:none;" onchange="previewNoticeMedia('image')">
-        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
-          <button class="btn btn-ghost btn-sm" onclick="document.getElementById('noticeImageFile').click()">파일 선택</button>
-          <input class="input" id="noticeImageUrl" placeholder="또는 이미지 URL 직접 입력" style="flex:1;min-width:180px;margin:0;">
-        </div>
-        <div id="noticeImagePreview" style="margin-top:6px;"></div>
-      </div>
-
-      <!-- 동영상 -->
-      <div style="margin-bottom:8px;">
-        <label style="font-size:12px;font-weight:600;color:var(--sub);display:block;margin-bottom:4px;">🎬 동영상</label>
-        <input type="file" id="noticeVideoFile" accept="video/*" style="display:none;" onchange="previewNoticeMedia('video')">
-        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
-          <button class="btn btn-ghost btn-sm" onclick="document.getElementById('noticeVideoFile').click()">파일 선택</button>
-          <input class="input" id="noticeVideoUrl" placeholder="또는 동영상 URL (YouTube 등)" style="flex:1;min-width:180px;margin:0;">
-        </div>
-        <div id="noticeVideoPreview" style="margin-top:6px;"></div>
-      </div>
-
-      <!-- 음악 -->
       <div style="margin-bottom:12px;">
-        <label style="font-size:12px;font-weight:600;color:var(--sub);display:block;margin-bottom:4px;">🎵 음악</label>
-        <input type="file" id="noticeAudioFile" accept="audio/*" style="display:none;" onchange="previewNoticeMedia('audio')">
-        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
-          <button class="btn btn-ghost btn-sm" onclick="document.getElementById('noticeAudioFile').click()">파일 선택</button>
-          <input class="input" id="noticeAudioUrl" placeholder="또는 음악 URL 직접 입력" style="flex:1;min-width:180px;margin:0;">
+        <div style="font-size:12px;color:var(--sub);margin-bottom:6px;">이미지·동영상·음악 파일 또는 URL (YouTube 포함)</div>
+        <input type="file" id="noticeMediaFile" accept="image/*,video/*,audio/*" style="display:none;" onchange="uploadNoticeMedia()">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+          <button class="btn btn-ghost btn-sm" onclick="document.getElementById('noticeMediaFile').click()">📁 파일 선택</button>
+          <input class="input" id="noticeMediaUrl" placeholder="또는 URL 직접 입력 (YouTube, 이미지 등)" style="flex:1;min-width:180px;margin:0;" oninput="onNoticeUrlInput()">
+          <button class="btn btn-ghost btn-sm" onclick="clearNoticeMedia()">✕ 제거</button>
         </div>
-        <div id="noticeAudioPreview" style="margin-top:6px;"></div>
+        <div id="noticeMediaStatus" style="font-size:12px;color:var(--sub);margin-top:4px;min-height:16px;"></div>
+        <div id="noticeMediaPreview" style="margin-top:8px;"></div>
       </div>
 
       <button class="btn btn-blue" onclick="publishNotice()">📌 공지 등록</button>
@@ -272,13 +253,13 @@
       <!-- ② AI 게시글 생성 -->
       <!-- [Fix] 섹션 순서 변경: 이미지 → AI게시글 → AI댓글 → 캐릭터편집 -->
       <div class="section">
-        <div class="section-title">🤖 AI 게시글 생성</div>
-        <div style="font-size:12px;color:var(--sub);margin-bottom:10px;">Gemini 2.0 Flash가 이 캐릭터 말투로 게시글을 생성합니다. 수정 후 게시하세요.</div>
-        <input class="input" id="aiTitle" placeholder="제목 (생성 후 나타남)">
-        <textarea class="textarea" id="aiBody" placeholder="본문 (생성 후 나타남)"></textarea>
+        <div class="section-title">✨ AI 게시글 제안</div>
+        <div style="font-size:12px;color:var(--sub);margin-bottom:10px;">AI가 이 캐릭터 말투로 초안을 제안해요. 직접 수정 후 게시하세요!</div>
+        <input class="input" id="aiTitle" placeholder="제목 (AI 제안 후 여기에 나타나요)">
+        <textarea class="textarea" id="aiBody" placeholder="본문 (AI 제안 후 여기에 나타나요 — 자유롭게 수정하세요)"></textarea>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button class="btn btn-purple" id="btnGenPost"  onclick="generatePost()">✨ 생성</button>
-          <button class="btn btn-green"  id="btnPubPost"  onclick="publishPost()">📤 게시</button>
+          <button class="btn btn-purple" id="btnGenPost"  onclick="generatePost()">🤖 AI 제안 받기</button>
+          <button class="btn btn-green"  id="btnPubPost"  onclick="publishPost()">📤 게시하기</button>
           <button class="btn btn-ghost btn-sm" onclick="clearPost()">초기화</button>
         </div>
         <div class="status" id="aiPostStatus"></div>
@@ -286,14 +267,14 @@
 
       <!-- ③ AI 댓글 생성 -->
       <div class="section">
-        <div class="section-title">💬 AI 댓글 생성</div>
-        <div style="font-size:12px;color:var(--sub);margin-bottom:8px;">게시글을 선택 후 이 캐릭터 말투로 댓글을 생성합니다.</div>
+        <div class="section-title">💬 AI 댓글 제안</div>
+        <div style="font-size:12px;color:var(--sub);margin-bottom:8px;">게시글을 선택하면 AI가 이 캐릭터 말투로 댓글 초안을 제안해요. 수정 후 게시하세요!</div>
         <div class="postpick" id="postPicker">
           <div style="color:var(--sub);font-size:13px;">게시글이 없습니다</div>
         </div>
         <textarea class="textarea" id="aiComment" placeholder="댓글 내용..." style="min-height:60px;"></textarea>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button class="btn btn-purple" id="btnGenComment" onclick="generateComment()">✨ 댓글 생성</button>
+          <button class="btn btn-purple" id="btnGenComment" onclick="generateComment()">🤖 AI 제안 받기</button>
           <button class="btn btn-green"  id="btnPubComment" onclick="publishComment()">📤 댓글 게시</button>
           <button class="btn btn-ghost btn-sm" onclick="document.getElementById('aiComment').value=''">초기화</button>
         </div>
@@ -391,8 +372,24 @@
   }
 
   // ── 비밀번호 인증 ────────────────────────────────
+  // localStorage에 저장된 비밀번호 자동 채우기
+  (function() {
+    const saved = localStorage.getItem('rk_admin_pw');
+    if (saved) {
+      document.getElementById('pwInput').value = saved;
+      document.getElementById('pwSave').checked = true;
+    }
+  })();
+
   function checkPw() {
-    if (document.getElementById('pwInput').value === PW) {
+    const val = document.getElementById('pwInput').value;
+    if (val === PW) {
+      // 저장 여부에 따라 localStorage 처리
+      if (document.getElementById('pwSave').checked) {
+        localStorage.setItem('rk_admin_pw', val);
+      } else {
+        localStorage.removeItem('rk_admin_pw');
+      }
       document.getElementById('pwGate').classList.add('hidden');
       sessionStorage.setItem('rk_admin', '1');
       init();
@@ -404,9 +401,13 @@
       setTimeout(() => { errEl.textContent = ''; }, 2000);
     }
   }
-  function logout() { sessionStorage.removeItem('rk_admin'); location.reload(); }
+  function logout() {
+    sessionStorage.removeItem('rk_admin');
+    location.reload();
+  }
   document.getElementById('pwInput').addEventListener('keypress', e => { if (e.key === 'Enter') checkPw(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel(); });
+  // 세션 유지 (탭 닫기 전까지)
   if (sessionStorage.getItem('rk_admin') === '1') {
     document.getElementById('pwGate').classList.add('hidden');
     window.addEventListener('DOMContentLoaded', init);
@@ -594,49 +595,96 @@
     input.value = '';
   }
 
-  // ── 공지 미디어 미리보기 + 업로드 ──────────────────
-  const noticeMedia = { image: null, video: null, audio: null };
+  // ── 공지 미디어 (통합) ────────────────────────────
+  let noticeMediaUrl = null; // 최종 저장될 URL
 
-  async function previewNoticeMedia(type) {
-    const file = document.getElementById(`notice${cap(type)}File`).files[0];
+  // 파일 타입 감지 (MIME 타입 기반)
+  function detectFileType(file) {
+    const t = file.type || '';
+    if (t.startsWith('image/')) return 'image';
+    if (t.startsWith('video/')) return 'video';
+    if (t.startsWith('audio/')) return 'audio';
+    return 'file';
+  }
+
+  // URL 타입 감지 (확장자 기반)
+  function detectUrlType(url) {
+    if (!url) return null;
+    const u = url.toLowerCase().split('?')[0];
+    if (/\.(jpg|jpeg|png|gif|webp|avif|svg)$/.test(u)) return 'image';
+    if (/\.(mp4|webm|mov|avi|mkv)$/.test(u)) return 'video';
+    if (/\.(mp3|wav|ogg|m4a|aac|flac)$/.test(u)) return 'audio';
+    if (/youtube\.com|youtu\.be/.test(url)) return 'youtube';
+    return 'link';
+  }
+
+  function renderAdminPreview(type, url) {
+    if (type === 'image')   return `<img src="${esc(url)}" style="max-width:100%;max-height:200px;border-radius:10px;display:block;">`;
+    if (type === 'video')   return `<video src="${esc(url)}" controls style="max-width:100%;max-height:200px;border-radius:10px;display:block;"></video>`;
+    if (type === 'audio')   return `<audio src="${esc(url)}" controls style="width:100%;border-radius:8px;"></audio>`;
+    if (type === 'youtube') {
+      const m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+      if (m) return `<div style="position:relative;padding-top:56.25%;border-radius:10px;overflow:hidden;"><iframe src="https://www.youtube.com/embed/${m[1]}" style="position:absolute;inset:0;width:100%;height:100%;border:none;" allowfullscreen></iframe></div>`;
+    }
+    return `<a href="${esc(url)}" target="_blank" rel="noopener" style="font-size:13px;color:#007aff;">🔗 ${esc(url)}</a>`;
+  }
+
+  // 파일 업로드
+  async function uploadNoticeMedia() {
+    const file = document.getElementById('noticeMediaFile').files[0];
     if (!file) return;
-    const previewEl = document.getElementById(`notice${cap(type)}Preview`);
-    const urlInput  = document.getElementById(`notice${cap(type)}Url`);
-
-    // 로컬 미리보기
+    if (file.size > 50 * 1024 * 1024) {
+      document.getElementById('noticeMediaStatus').textContent = '❌ 50MB 이하 파일만 가능합니다';
+      document.getElementById('noticeMediaFile').value = '';
+      return;
+    }
+    const ftype = detectFileType(file);
+    // 로컬 미리보기 즉시 표시
     const localUrl = URL.createObjectURL(file);
-    previewEl.innerHTML = renderMediaPreview(type, localUrl);
-    previewEl.style.opacity = '0.6';
-    urlInput.value = '업로드 중...';
+    document.getElementById('noticeMediaPreview').innerHTML = renderAdminPreview(ftype, localUrl);
+    document.getElementById('noticeMediaStatus').textContent = '⏳ 업로드 중...';
+    document.getElementById('noticeMediaUrl').value = '';
+    noticeMediaUrl = null;
 
     try {
       const form = new FormData();
       form.append('file', file);
-      form.append('type', type);
+      form.append('type', ftype);
       const r = await adminFetch('/admin/upload-media', { method: 'POST', body: form });
       const d = await r.json();
       if (d.ok) {
-        noticeMedia[type] = d.url;
-        urlInput.value = d.url;
-        previewEl.innerHTML = renderMediaPreview(type, d.url);
-        previewEl.style.opacity = '1';
+        noticeMediaUrl = d.url;
+        document.getElementById('noticeMediaUrl').value = d.url;
+        document.getElementById('noticeMediaStatus').textContent = '✅ 업로드 완료';
+        document.getElementById('noticeMediaPreview').innerHTML = renderAdminPreview(ftype, d.url);
       } else {
-        urlInput.value = '';
-        previewEl.innerHTML = `<span style="color:red;font-size:12px;">❌ 업로드 실패: ${d.error}</span>`;
+        document.getElementById('noticeMediaStatus').textContent = `❌ 업로드 실패: ${d.error}`;
+        noticeMediaUrl = null;
       }
     } catch (e) {
-      urlInput.value = '';
-      previewEl.innerHTML = `<span style="color:red;font-size:12px;">❌ ${e.message}</span>`;
+      document.getElementById('noticeMediaStatus').textContent = `❌ ${e.message}`;
+      noticeMediaUrl = null;
     }
+    document.getElementById('noticeMediaFile').value = '';
   }
 
-  function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+  // URL 직접 입력 시 미리보기
+  function onNoticeUrlInput() {
+    const url = document.getElementById('noticeMediaUrl').value.trim();
+    if (!url) { clearNoticeMedia(); return; }
+    const utype = detectUrlType(url);
+    noticeMediaUrl = url;
+    document.getElementById('noticeMediaStatus').textContent = `📎 ${utype === 'youtube' ? 'YouTube' : utype} 링크`;
+    document.getElementById('noticeMediaPreview').innerHTML = renderAdminPreview(utype, url);
+  }
 
-  function renderMediaPreview(type, url) {
-    if (type === 'image') return `<img src="${url}" style="max-width:100%;max-height:200px;border-radius:10px;display:block;">`;
-    if (type === 'video') return `<video src="${url}" controls style="max-width:100%;max-height:200px;border-radius:10px;display:block;"></video>`;
-    if (type === 'audio') return `<audio src="${url}" controls style="width:100%;margin-top:4px;"></audio>`;
-    return '';
+  // 미디어 제거
+  function clearNoticeMedia() {
+    noticeMediaUrl = null;
+    document.getElementById('noticeMediaUrl').value = '';
+    document.getElementById('noticeMediaFile').value = '';
+    document.getElementById('noticeMediaPreview').innerHTML = '';
+    document.getElementById('noticeMediaStatus').textContent = '';
   }
 
   // ── 공지사항 작성 ────────────────────────────────
@@ -648,10 +696,8 @@
     const teacher = characters.find(c => c.group_type === 'teacher');
     if (!teacher) { showStatus('noticeStatus', '❌ 선생님 캐릭터를 찾을 수 없어요', 'error'); return; }
 
-    // URL 입력란 값도 확인 (직접 입력 or 업로드 완료)
-    const imageUrl = document.getElementById('noticeImageUrl').value.trim() || null;
-    const videoUrl = document.getElementById('noticeVideoUrl').value.trim() || null;
-    const audioUrl = document.getElementById('noticeAudioUrl').value.trim() || null;
+    // URL 입력란과 업로드 결과 모두 확인
+    const mediaUrl = noticeMediaUrl || document.getElementById('noticeMediaUrl').value.trim() || null;
 
     showStatus('noticeStatus', '등록 중...', 'info');
     try {
@@ -659,19 +705,15 @@
         method: 'POST',
         body: JSON.stringify({
           system_user_id: teacher.id, title, body, is_notice: true,
-          image_url: imageUrl,
-          video_url: videoUrl,
-          audio_url: audioUrl,
+          media_url: mediaUrl,
         }),
       });
       const d = await r.json();
       if (d.ok) {
-        // 입력 초기화
-        ['noticeTitle','noticeBody','noticeImageUrl','noticeVideoUrl','noticeAudioUrl'].forEach(id => document.getElementById(id).value = '');
-        ['noticeImagePreview','noticeVideoPreview','noticeAudioPreview'].forEach(id => document.getElementById(id).innerHTML = '');
-        ['noticeImageFile','noticeVideoFile','noticeAudioFile'].forEach(id => document.getElementById(id).value = '');
-        noticeMedia.image = noticeMedia.video = noticeMedia.audio = null;
-        showStatus('noticeStatus', '✅ 공지 등록 완료', 'success');
+        document.getElementById('noticeTitle').value = '';
+        document.getElementById('noticeBody').value  = '';
+        clearNoticeMedia();
+        showStatus('noticeStatus', '✅ 공지 등록 완료!', 'success');
         loadManageNotices();
       } else { showStatus('noticeStatus', `❌ ${d.error}`, 'error'); }
     } catch (e) { showStatus('noticeStatus', `❌ ${e.message}`, 'error'); }
@@ -767,7 +809,7 @@
       if (d.ok) {
         document.getElementById('aiTitle').value = d.title || '';
         document.getElementById('aiBody').value  = d.body  || '';
-        showStatus('aiPostStatus', '✅ 생성 완료! 수정 후 게시하세요', 'success');
+        showStatus('aiPostStatus', '✅ AI 제안 완료! 자유롭게 수정 후 게시하세요 ✏️', 'success');
       } else {
         // [Fix] 실제 Gemini 에러 메시지 표시
         showStatus('aiPostStatus', `❌ ${d.error}`, 'error');
@@ -829,7 +871,7 @@
       const d = await r.json();
       if (d.ok) {
         document.getElementById('aiComment').value = d.comment || '';
-        showStatus('aiCommentStatus', '✅ 생성 완료! 수정 후 게시하세요', 'success');
+        showStatus('aiCommentStatus', '✅ AI 제안 완료! 수정 후 게시하세요 ✏️', 'success');
       } else {
         // [Fix] 실제 Gemini 에러 메시지 표시
         showStatus('aiCommentStatus', `❌ ${d.error}`, 'error');
