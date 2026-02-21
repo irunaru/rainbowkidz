@@ -58,15 +58,15 @@
     .section-title  { font-size:15px; font-weight:700; }
     .section-sub    { font-size:12px; color:var(--sub); }
 
-    /* 캐릭터 그리드 */
-    .char-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; padding:0 16px; }
-    @media (min-width:420px) { .char-grid { grid-template-columns:repeat(5,1fr); } }
-    @media (min-width:520px) { .char-grid { grid-template-columns:repeat(6,1fr); } }
-    .char-item { display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer; }
-    .char-icon { width:100%; aspect-ratio:1; border-radius:var(--radius-icon); background:var(--card); border:1.5px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:28px; overflow:hidden; position:relative; box-shadow:0 1px 4px rgba(0,0,0,.08); transition:transform .15s; }
-    .char-item:active .char-icon { transform:scale(.95); }
+    /* 캐릭터 가로 스크롤 */
+    .char-scroll-wrap { overflow-x:auto; padding:0 16px 8px; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+    .char-scroll-wrap::-webkit-scrollbar { display:none; }
+    .char-grid { display:flex; gap:10px; width:max-content; }
+    .char-item { display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer; width:64px; flex-shrink:0; }
+    .char-icon { width:64px; height:64px; border-radius:var(--radius-icon); background:var(--card); border:1.5px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:28px; overflow:hidden; position:relative; box-shadow:0 1px 4px rgba(0,0,0,.08); transition:transform .15s; }
+    .char-item:active .char-icon { transform:scale(.93); }
     .char-icon img { width:100%; height:100%; object-fit:cover; }
-    .char-name { font-size:11px; font-weight:700; color:var(--sub); max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:center; }
+    .char-name { font-size:11px; font-weight:700; color:var(--sub); width:64px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:center; }
     .unread-badge { position:absolute; top:-3px; right:-3px; width:10px; height:10px; background:var(--accent); border-radius:50%; border:2px solid var(--bg); }
 
     /* 탭 */
@@ -99,6 +99,11 @@
     @keyframes yarBounce { 0%{transform:scale(1)} 30%{transform:scale(1.35)} 60%{transform:scale(.9)} 80%{transform:scale(1.1)} 100%{transform:scale(1)} }
     .yar-btn.bounce { animation:yarBounce .35s cubic-bezier(.36,.07,.19,.97) both; }
 
+    /* 내 글 배지 */
+    .mine-badge { font-size:10px; font-weight:700; color:var(--blue); background:#e8f0fe; border-radius:10px; padding:2px 7px; margin-left:6px; vertical-align:middle; }
+    /* 새 기기 토스트 */
+    .device-toast { position:fixed; top:70px; left:50%; transform:translateX(-50%); background:#1c1c1e; color:#fff; padding:10px 18px; border-radius:20px; font-size:13px; font-weight:600; z-index:500; opacity:0; transition:opacity .3s; pointer-events:none; white-space:nowrap; max-width:90vw; text-align:center; }
+    .device-toast.show { opacity:1; }
     /* 더 보기 */
     .load-more { width:calc(100% - 32px); margin:0 16px 10px; padding:13px; background:var(--card); border:1.5px solid var(--border); border-radius:var(--radius-card); font-size:14px; font-weight:700; color:var(--sub); cursor:pointer; font-family:inherit; }
     .load-more:disabled { opacity:.5; }
@@ -180,6 +185,9 @@
 </head>
 <body>
 
+<!-- 새 기기 토스트 -->
+<div class="device-toast" id="deviceToast">🌈 새로운 교실로 들어왔어요! 여기서 닉네임을 새로 설정할 수 있어요.</div>
+
 <!-- 로딩 -->
 <div id="globalLoader">
   <div style="font-size:52px;">🌈</div>
@@ -197,7 +205,10 @@
         <span class="logo-sub">유치원 & 어린이집</span>
       </span>
     </a>
-    <a class="board-link" href="board.html">✏️ 이야기판</a>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button onclick="softRefresh()" style="width:34px;height:34px;border-radius:50%;background:var(--bg);border:1px solid var(--border);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="새로고침">🔄</button>
+      <a href="mypage.html" style="padding:7px 14px;background:var(--bg);color:var(--text);border-radius:20px;font-size:12px;font-weight:700;text-decoration:none;border:1px solid var(--border);">👤 내 페이지</a>
+    </div>
   </div>
 </div>
 
@@ -213,11 +224,15 @@
     <span class="section-title">🌈 우리 친구들</span>
     <span class="section-sub" id="charCount"></span>
   </div>
-  <div class="char-grid" id="charGrid">
-    <div class="char-item"><div class="char-icon skel" style="width:100%;aspect-ratio:1;"></div></div>
-    <div class="char-item"><div class="char-icon skel" style="width:100%;aspect-ratio:1;"></div></div>
-    <div class="char-item"><div class="char-icon skel" style="width:100%;aspect-ratio:1;"></div></div>
-    <div class="char-item"><div class="char-icon skel" style="width:100%;aspect-ratio:1;"></div></div>
+  <div class="char-scroll-wrap">
+    <div class="char-grid" id="charGrid">
+      <div class="char-item"><div class="char-icon skel"></div></div>
+      <div class="char-item"><div class="char-icon skel"></div></div>
+      <div class="char-item"><div class="char-icon skel"></div></div>
+      <div class="char-item"><div class="char-icon skel"></div></div>
+      <div class="char-item"><div class="char-icon skel"></div></div>
+      <div class="char-item"><div class="char-icon skel"></div></div>
+    </div>
   </div>
 
   <!-- 이야기 탭 + 피드 -->
@@ -241,7 +256,7 @@
 <!-- 바텀 네비 -->
 <div class="bottom-nav">
   <a href="index.html" class="active"><span class="nav-icon">🏠</span>홈</a>
-  <a href="board.html"><span class="nav-icon">🗣️</span>이야기판</a>
+  <a href="mypage.html"><span class="nav-icon">👤</span>내 페이지</a>
 </div>
 
 <!-- 게시글 상세 패널 -->
@@ -335,6 +350,13 @@
   // ── 유틸 ─────────────────────────────────────────
   const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
+  // 새로고침 (소프트: 피드+공지만 다시 로드)
+  async function softRefresh() {
+    const btn = document.querySelector('[onclick="softRefresh()"]');
+    if (btn) { btn.style.animation = 'spin .6s linear'; setTimeout(() => btn.style.animation = '', 700); }
+    await Promise.all([loadNotices(), loadCharacters(), loadFeed(true)]);
+  }
+
   /** 텍스트의 URL을 클릭 가능한 링크로 변환 (XSS 안전) */
   // 미디어 URL 타입 감지
   function detectMediaType(url) {
@@ -380,6 +402,16 @@
       if (!r.ok) return;
       const d = await r.json();
       guestId = d.guest_id;
+
+      // 새 기기 감지: is_new=true이고 이전에 본 적 없으면 토스트
+      if (d.is_new && !localStorage.getItem('rkSeen')) {
+        setTimeout(() => {
+          const t = document.getElementById('deviceToast');
+          if (t) { t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 4000); }
+        }, 1200);
+      }
+      localStorage.setItem('rkSeen', '1');
+
       if (d.has_nickname) {
         const m = await fetch(`${API}/me`, { credentials:'include' });
         if (m.ok) { const md = await m.json(); myNickname = md.guest?.nickname || null; }
@@ -518,6 +550,7 @@
     const isSystem  = p.author_type === 'system';
     const authorName = isSystem ? (p.character_name||'캐릭터') : (p.nickname||'익명');
     const authorType = isSystem ? '' : '이야기판';
+    const isMine = !isSystem && !!p.is_mine;
 
     // 아바타: 프로필 이미지 → 이모지 폴백
     let avatarHtml;
@@ -540,7 +573,7 @@
         <span class="feed-time">${relTime(p.created_at)}</span>
       </div>
       <div class="feed-content" onclick="openDetail(${p.id})">
-        ${p.title ? `<div class="feed-title">${esc(p.title)}</div>` : ''}
+        ${p.title ? `<div class="feed-title">${esc(p.title)}${isMine ? '<span class="mine-badge">내 글</span>' : ''}</div>` : ''}
         <div class="feed-body">${esc(p.body||'')}</div>
       </div>
       <div class="feed-footer">
@@ -583,7 +616,7 @@
         method: wasYar ? 'DELETE' : 'POST',
         credentials: 'include',
         headers: { 'Content-Type':'application/json' },
-        body: JSON.stringify({ nickname: myNickname }),
+        body: JSON.stringify({}),
       });
       const d = await r.json();
       if (d.ok) {
@@ -850,7 +883,7 @@
           document.getElementById('commentInput').focus();
         }
       } else {
-        errEl.textContent = d.error==='nickname_taken' ? '이미 사용 중인 닉네임이에요' : (d.error||'오류가 발생했어요');
+        errEl.textContent = d.error || '오류가 발생했어요';
       }
     } catch { errEl.textContent = '오류가 발생했어요'; }
   }

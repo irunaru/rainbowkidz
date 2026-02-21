@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>👤 내 페이지 - 무지개 유치원</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    :root {
+      --bg:#f2f2f7; --card:#fff; --text:#1c1c1e; --sub:#8e8e93; --border:#e5e5ea;
+      --accent:#ff6b6b; --blue:#007aff; --green:#34c759; --yar:#ff9f0a;
+      --radius-card:16px;
+    }
+    body { font-family:'Noto Sans KR',-apple-system,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+    .hidden { display:none !important; }
+
+    /* 로딩 */
+    #globalLoader { position:fixed; inset:0; background:rgba(255,255,255,.96); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:9000; gap:14px; }
+    #globalLoader.hidden { display:none; }
+    .spinner { width:28px; height:28px; border:3px solid var(--border); border-top-color:var(--text); border-radius:50%; animation:spin .8s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+    .skel { border-radius:12px; background:linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%); background-size:200% 100%; animation:shimmer 1.3s ease-in-out infinite; }
+
+    /* 헤더 */
+    .header { background:var(--card); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:100; }
+    .header-inner { max-width:640px; margin:0 auto; padding:10px 16px; display:flex; align-items:center; gap:10px; }
+    .back-btn { width:34px; height:34px; border-radius:50%; background:var(--bg); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:16px; cursor:pointer; text-decoration:none; flex-shrink:0; color:var(--text); }
+    .header-title { font-size:17px; font-weight:900; }
+
+    /* 컨테이너 */
+    .container { max-width:640px; margin:0 auto; padding:16px 16px 100px; }
+
+    /* 프로필 카드 */
+    .profile-card { background:var(--card); border-radius:var(--radius-card); padding:20px; margin-bottom:16px; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+    .profile-top { display:flex; align-items:center; gap:14px; margin-bottom:16px; }
+    .profile-avatar { width:64px; height:64px; border-radius:16px; background:var(--bg); border:1.5px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:32px; flex-shrink:0; }
+    .profile-info { flex:1; }
+    .profile-nick { font-size:20px; font-weight:900; margin-bottom:2px; }
+    .profile-sub { font-size:12px; color:var(--sub); line-height:1.4; }
+    .nick-btn { padding:8px 16px; border-radius:20px; border:1.5px solid var(--border); background:var(--bg); font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; color:var(--text); white-space:nowrap; }
+    .nick-btn:active { opacity:.75; }
+
+    /* 닉네임 편집 인라인 */
+    .nick-edit-wrap { background:var(--bg); border-radius:12px; padding:14px; }
+    .nick-edit-label { font-size:12px; color:var(--sub); margin-bottom:8px; line-height:1.5; }
+    .nick-edit-row { display:flex; gap:8px; }
+    .nick-edit-input { flex:1; padding:10px 14px; border:1.5px solid var(--border); border-radius:10px; font-size:15px; font-family:inherit; text-align:center; }
+    .nick-edit-input:focus { outline:none; border-color:var(--text); }
+    .nick-save-btn { padding:10px 18px; background:var(--text); color:#fff; border:none; border-radius:10px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; white-space:nowrap; }
+    .nick-save-btn:disabled { opacity:.5; }
+    .nick-edit-error { font-size:12px; color:var(--accent); margin-top:6px; min-height:16px; }
+    .nick-edit-cooldown { font-size:12px; color:var(--sub); margin-top:6px; }
+
+    /* 기기 안내 */
+    .device-notice { background:#fff9ee; border:1px solid #ffe5b4; border-radius:12px; padding:12px 14px; font-size:13px; color:#7c5c00; line-height:1.5; margin-bottom:16px; }
+
+    /* 통계 */
+    .stats-row { display:flex; gap:8px; margin-top:12px; }
+    .stat-chip { flex:1; text-align:center; background:var(--bg); border-radius:12px; padding:10px 8px; }
+    .stat-num { font-size:18px; font-weight:900; }
+    .stat-label { font-size:11px; color:var(--sub); margin-top:2px; }
+
+    /* 탭 */
+    .tab-bar { display:flex; border-bottom:1.5px solid var(--border); margin-bottom:12px; }
+    .tab-btn { flex:1; padding:10px 0; font-size:14px; font-weight:700; color:var(--sub); background:none; border:none; cursor:pointer; font-family:inherit; border-bottom:2.5px solid transparent; margin-bottom:-1.5px; }
+    .tab-btn.active { color:var(--text); border-bottom-color:var(--text); }
+
+    /* 게시글 카드 */
+    .post-card { background:var(--card); border-radius:var(--radius-card); padding:14px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,.06); cursor:pointer; }
+    .post-card:active { opacity:.85; }
+    .post-title { font-size:15px; font-weight:700; margin-bottom:4px; }
+    .post-body { font-size:13px; color:var(--sub); line-height:1.5; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; margin-bottom:8px; }
+    .post-meta { display:flex; align-items:center; gap:10px; font-size:12px; color:var(--sub); }
+    .post-del { margin-left:auto; padding:5px 12px; background:var(--accent); color:#fff; border:none; border-radius:20px; font-size:11px; font-weight:700; cursor:pointer; font-family:inherit; flex-shrink:0; }
+    .post-del:active { opacity:.75; }
+
+    /* 댓글 카드 */
+    .cmt-card { background:var(--card); border-radius:var(--radius-card); padding:14px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+    .cmt-origin { font-size:12px; color:var(--blue); font-weight:700; margin-bottom:6px; cursor:pointer; }
+    .cmt-origin:active { opacity:.75; }
+    .cmt-body { font-size:14px; line-height:1.5; margin-bottom:8px; }
+    .cmt-meta { display:flex; align-items:center; gap:10px; font-size:12px; color:var(--sub); }
+    .cmt-del { margin-left:auto; padding:5px 12px; background:var(--accent); color:#fff; border:none; border-radius:20px; font-size:11px; font-weight:700; cursor:pointer; font-family:inherit; flex-shrink:0; }
+
+    /* 빈 상태 */
+    .empty { text-align:center; padding:48px 20px; }
+    .empty-icon { font-size:42px; margin-bottom:10px; }
+    .empty-text { font-size:15px; font-weight:700; margin-bottom:4px; }
+    .empty-sub { font-size:13px; color:var(--sub); }
+
+    /* 더 보기 */
+    .load-more { width:100%; padding:13px; background:var(--card); border:1.5px solid var(--border); border-radius:var(--radius-card); font-size:14px; font-weight:700; color:var(--sub); cursor:pointer; font-family:inherit; }
+    .load-more:disabled { opacity:.5; }
+
+    /* 바텀 네비 */
+    .bottom-nav { position:fixed; bottom:0; left:0; right:0; background:var(--card); border-top:1px solid var(--border); display:flex; z-index:100; padding-bottom:env(safe-area-inset-bottom,0); }
+    .bottom-nav a { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:8px 0 6px; text-decoration:none; color:var(--sub); font-size:10px; font-weight:600; gap:2px; }
+    .bottom-nav a.active { color:var(--text); }
+    .nav-icon { font-size:22px; }
+
+    /* 게시글 상세 오버레이 (index.html에서 복사) */
+    .overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:flex-end; justify-content:center; z-index:2000; }
+    .overlay.hidden { display:none; }
+    .detail-panel { width:100%; max-width:640px; background:var(--card); border-radius:20px 20px 0 0; max-height:90vh; display:flex; flex-direction:column; }
+    .detail-handle { width:36px; height:4px; background:var(--border); border-radius:2px; margin:10px auto 0; flex-shrink:0; }
+    .detail-head { padding:12px 16px 10px; border-bottom:1px solid var(--border); flex-shrink:0; }
+    .detail-title { font-size:17px; font-weight:900; margin-bottom:6px; }
+    .detail-meta { font-size:12px; color:var(--sub); display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .detail-meta-author { font-weight:700; color:var(--text); }
+    .detail-scroll { flex:1; overflow-y:auto; }
+    .detail-body { padding:14px 16px; font-size:14px; line-height:1.7; border-bottom:1px solid var(--border); white-space:pre-wrap; }
+    .detail-body a { color:var(--blue); text-decoration:underline; word-break:break-all; }
+    .detail-media { padding:0 16px 12px; }
+    .detail-media img { width:100%; border-radius:12px; display:block; margin-bottom:8px; max-height:400px; object-fit:cover; }
+    .detail-media video { width:100%; border-radius:12px; display:block; margin-bottom:8px; max-height:400px; }
+    .detail-media audio { width:100%; border-radius:12px; display:block; margin-bottom:8px; }
+    .detail-footer { padding:10px 16px; display:flex; align-items:center; gap:10px; border-bottom:1px solid var(--border); flex-shrink:0; }
+    .detail-stat { font-size:13px; color:var(--sub); }
+    .detail-yar { margin-left:auto; display:flex; align-items:center; gap:4px; padding:6px 14px; border-radius:20px; border:1.5px solid var(--border); background:var(--bg); font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; color:var(--sub); }
+    .detail-yar.active { border-color:var(--yar); color:var(--yar); background:#fff9ee; }
+    .detail-close { padding:6px 14px; border:1px solid var(--border); border-radius:20px; background:var(--bg); font-size:12px; cursor:pointer; font-family:inherit; flex-shrink:0; }
+    .comments-wrap { padding:0 16px 10px; }
+    .ctab { padding:4px 10px; border-radius:20px; border:1.5px solid var(--border); background:var(--bg); color:var(--sub); font-size:11px; font-weight:700; cursor:pointer; font-family:inherit; }
+    .ctab-active { border-color:var(--text); background:var(--text); color:#fff; }
+    .comment-item { padding:10px 0; border-bottom:1px solid var(--border); display:flex; gap:8px; align-items:flex-start; }
+    .comment-item:last-child { border-bottom:none; }
+    .comment-avatar { width:28px; height:28px; border-radius:8px; background:var(--bg); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; overflow:hidden; }
+    .comment-avatar img { width:100%; height:100%; object-fit:cover; }
+    .comment-right { flex:1; min-width:0; }
+    .comment-nick { font-size:12px; font-weight:700; }
+    .comment-body { font-size:13px; line-height:1.5; margin-top:3px; }
+    .comment-time { font-size:11px; color:var(--sub); margin-top:2px; }
+    .comment-form { flex-shrink:0; background:var(--card); border-top:1px solid var(--border); padding:10px 16px; display:flex; gap:8px; padding-bottom:calc(10px + env(safe-area-inset-bottom,0)); }
+    .comment-input { flex:1; padding:10px 12px; border:1.5px solid var(--border); border-radius:22px; font-size:14px; font-family:inherit; }
+    .comment-input:focus { outline:none; border-color:var(--text); }
+    .comment-send { padding:10px 16px; background:var(--text); color:#fff; border:none; border-radius:22px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; }
+    .comment-send:disabled { opacity:.5; }
+  </style>
+</head>
+<body>
+
+<!-- 로딩 -->
+<div id="globalLoader">
+  <div style="font-size:48px;">👤</div>
+  <div class="spinner"></div>
+  <div style="font-size:14px;color:var(--sub);">내 페이지 로딩 중...</div>
+</div>
+
+<!-- 헤더 -->
+<div class="header">
+  <div class="header-inner">
+    <a class="back-btn" href="index.html">←</a>
+    <div class="header-title">내 페이지</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- 프로필 카드 -->
+  <div class="profile-card" id="profileCard">
+    <div class="profile-top">
+      <div class="profile-avatar">👤</div>
+      <div class="profile-info">
+        <div class="profile-nick" id="nickDisplay">닉네임 없음</div>
+        <div class="profile-sub" id="profileSub">이 기기에서 작성한 글과 댓글을 볼 수 있어요</div>
+      </div>
+      <button class="nick-btn" id="nickEditBtn" onclick="toggleNickEdit()">✏️ 닉네임</button>
+    </div>
+
+    <!-- 닉네임 편집 (인라인) -->
+    <div class="nick-edit-wrap hidden" id="nickEditWrap">
+      <div class="nick-edit-label">
+        닉네임은 언제든 바꿀 수 있어요. 중복도 허용돼요.<br>
+        단, 변경 후 7일간 재변경이 제한됩니다.
+      </div>
+      <div class="nick-edit-row">
+        <input class="nick-edit-input" id="nickEditInput" placeholder="닉네임 (1~10자)" maxlength="10" autocomplete="off">
+        <button class="nick-save-btn" id="nickSaveBtn" onclick="saveNickname()">저장</button>
+      </div>
+      <div class="nick-edit-error hidden" id="nickEditError"></div>
+      <div class="nick-edit-cooldown hidden" id="nickEditCooldown"></div>
+    </div>
+
+    <!-- 통계 -->
+    <div class="stats-row">
+      <div class="stat-chip">
+        <div class="stat-num" id="statPosts">-</div>
+        <div class="stat-label">작성한 글</div>
+      </div>
+      <div class="stat-chip">
+        <div class="stat-num" id="statComments">-</div>
+        <div class="stat-label">작성한 댓글</div>
+      </div>
+      <div class="stat-chip">
+        <div class="stat-num" id="statYars">-</div>
+        <div class="stat-label">받은 야르~</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 기기 안내 (새 기기이거나 닉네임 없을 때) -->
+  <div class="device-notice hidden" id="deviceNotice">
+    📱 이 기기에서 작성한 글과 댓글만 보여요. 기기가 바뀌면 새 교실로 들어온 거예요.
+  </div>
+
+  <!-- 탭 -->
+  <div class="tab-bar">
+    <button class="tab-btn active" id="tabPosts"    onclick="switchTab('posts')">📝 내 글</button>
+    <button class="tab-btn"        id="tabComments" onclick="switchTab('comments')">💬 내 댓글</button>
+  </div>
+
+  <!-- 내 글 목록 -->
+  <div id="postsSection">
+    <div class="skel" style="height:100px;margin-bottom:10px;"></div>
+    <div class="skel" style="height:100px;margin-bottom:10px;"></div>
+  </div>
+
+  <!-- 내 댓글 목록 -->
+  <div id="commentsSection" class="hidden">
+    <div class="skel" style="height:80px;margin-bottom:10px;"></div>
+    <div class="skel" style="height:80px;margin-bottom:10px;"></div>
+  </div>
+
+  <!-- 더 보기 -->
+  <button class="load-more hidden" id="loadMoreBtn" onclick="loadMore()">더 보기</button>
+
+</div>
+
+<!-- 바텀 네비 -->
+<div class="bottom-nav">
+  <a href="index.html"><span class="nav-icon">🏠</span>홈</a>
+  <a href="mypage.html" class="active"><span class="nav-icon">👤</span>내 페이지</a>
+</div>
+
+<!-- 게시글 상세 패널 -->
+<div class="overlay hidden" id="detailOverlay" onclick="handleDetailOverlay(event)">
+  <div class="detail-panel" onclick="event.stopPropagation()">
+    <div class="detail-handle"></div>
+    <div class="detail-head">
+      <div class="detail-title" id="dTitle"></div>
+      <div class="detail-meta">
+        <span class="detail-meta-author" id="dAuthor"></span>
+        <span id="dTime"></span>
+      </div>
+    </div>
+    <div class="detail-scroll">
+      <div class="detail-body" id="dBody"></div>
+      <div class="detail-media" id="dMedia"></div>
+      <div class="detail-footer">
+        <span class="detail-stat" id="dStats"></span>
+        <button class="detail-yar" id="dYarBtn" onclick="toggleDetailYar()">🌟 야르~</button>
+        <button class="detail-close" onclick="closeDetail()">✕ 닫기</button>
+      </div>
+      <div class="comments-wrap">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0 6px;">
+          <span style="font-size:13px;font-weight:700;color:var(--sub);">댓글</span>
+          <div style="display:flex;gap:6px;">
+            <button id="cTabLatest"  onclick="switchCommentTab('latest')"  class="ctab ctab-active">최신순</button>
+            <button id="cTabPopular" onclick="switchCommentTab('popular')" class="ctab">인기순</button>
+          </div>
+        </div>
+        <div id="dComments"></div>
+      </div>
+    </div>
+    <div class="comment-form">
+      <input class="comment-input" id="commentInput" placeholder="댓글을 입력하세요..." maxlength="500">
+      <button class="comment-send" id="commentSendBtn" onclick="submitComment()">전송</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
+
+  // ── 상태 ─────────────────────────────────────────
+  let guestId     = null;
+  let myNickname  = null;
+  let currentTab  = 'posts';
+  let myPosts     = [];
+  let myComments  = [];
+  let postsOffset   = 0;
+  let commentsOffset = 0;
+  const LIMIT     = 20;
+  let hasMore     = false;
+
+  // 상세 패널 상태
+  let currentPost     = null;
+  let currentComments = [];
+  let commentSort     = 'latest';
+
+  // ── 유틸 ─────────────────────────────────────────
+  const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const relTime = d => {
+    const s = (Date.now() - new Date(d)) / 1000;
+    if (s < 60)     return '방금';
+    if (s < 3600)   return `${Math.floor(s/60)}분 전`;
+    if (s < 86400)  return `${Math.floor(s/3600)}시간 전`;
+    if (s < 604800) return `${Math.floor(s/86400)}일 전`;
+    return new Date(d).toLocaleDateString('ko-KR',{month:'long',day:'numeric'});
+  };
+  const getYar = id => localStorage.getItem(`rkYar_${id}`) === '1';
+  const setYar = (id, v) => localStorage.setItem(`rkYar_${id}`, v ? '1' : '0');
+
+  function detectMediaType(url) {
+    if (!url) return null;
+    const u = url.toLowerCase().split('?')[0];
+    if (/\.(jpg|jpeg|png|gif|webp|avif|svg)$/.test(u)) return 'image';
+    if (/\.(mp4|webm|mov|avi|mkv)$/.test(u)) return 'video';
+    if (/\.(mp3|wav|ogg|m4a|aac|flac)$/.test(u)) return 'audio';
+    if (/youtube\.com|youtu\.be/.test(url)) return 'youtube';
+    return 'link';
+  }
+  function linkify(text) {
+    return esc(text).replace(/(https?:\/\/[^\s&<>"]+)/g,
+      '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+  }
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
+
+  // ── 게스트 초기화 ────────────────────────────────
+  async function initGuest() {
+    try {
+      const r = await fetch(`${API}/guest/init`, { method:'POST', credentials:'include' });
+      if (!r.ok) return;
+      const d = await r.json();
+      guestId = d.guest_id;
+
+      if (d.has_nickname) {
+        const m = await fetch(`${API}/me`, { credentials:'include' });
+        if (m.ok) {
+          const md = await m.json();
+          myNickname = md.guest?.nickname || null;
+        }
+      }
+      if (!myNickname) myNickname = localStorage.getItem('rkNickname');
+    } catch {}
+  }
+
+  // ── 닉네임 편집 ──────────────────────────────────
+  function toggleNickEdit() {
+    const wrap = document.getElementById('nickEditWrap');
+    const isHidden = wrap.classList.contains('hidden');
+    wrap.classList.toggle('hidden', !isHidden);
+    if (isHidden) {
+      const inp = document.getElementById('nickEditInput');
+      inp.value = myNickname || '';
+      inp.focus();
+    }
+  }
+
+  document.getElementById('nickEditInput').addEventListener('keypress', e => {
+    if (e.key === 'Enter') saveNickname();
+  });
+
+  async function saveNickname() {
+    const val    = document.getElementById('nickEditInput').value.trim();
+    const errEl  = document.getElementById('nickEditError');
+    const coolEl = document.getElementById('nickEditCooldown');
+    const btn    = document.getElementById('nickSaveBtn');
+
+    errEl.classList.add('hidden');
+    coolEl.classList.add('hidden');
+
+    if (!val || val.length > 10) { errEl.textContent = '1~10자로 입력해주세요'; errEl.classList.remove('hidden'); return; }
+    if (!/^[가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z0-9]+$/.test(val)) { errEl.textContent = '한글, 영문, 숫자만 가능해요'; errEl.classList.remove('hidden'); return; }
+
+    btn.disabled = true; btn.textContent = '저장중...';
+
+    try {
+      const r = await fetch(`${API}/guest/nickname`, {
+        method:'POST', credentials:'include',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ nickname: val, guest_id: guestId }),
+      });
+      const d = await r.json();
+      if (d.ok) {
+        myNickname = d.nickname;
+        localStorage.setItem('rkNickname', d.nickname);
+        document.getElementById('nickDisplay').textContent = d.nickname;
+        document.getElementById('nickEditWrap').classList.add('hidden');
+        updateProfileSub();
+      } else if (d.error === 'nickname_cooldown_7days') {
+        coolEl.textContent = '닉네임은 7일마다 변경할 수 있어요';
+        coolEl.classList.remove('hidden');
+      } else {
+        errEl.textContent = d.error || '오류가 발생했어요';
+        errEl.classList.remove('hidden');
+      }
+    } catch {
+      errEl.textContent = '오류가 발생했어요';
+      errEl.classList.remove('hidden');
+    }
+    btn.disabled = false; btn.textContent = '저장';
+  }
+
+  function updateProfileSub() {
+    const sub = document.getElementById('profileSub');
+    if (myNickname) {
+      sub.textContent = '이 기기에서 작성한 글과 댓글을 볼 수 있어요';
+    } else {
+      sub.textContent = '닉네임을 설정하면 글과 댓글을 작성할 수 있어요';
+      document.getElementById('deviceNotice').classList.remove('hidden');
+    }
+  }
+
+  // ── 탭 전환 ──────────────────────────────────────
+  function switchTab(tab) {
+    if (currentTab === tab) return;
+    currentTab = tab;
+    document.getElementById('tabPosts').classList.toggle('active', tab === 'posts');
+    document.getElementById('tabComments').classList.toggle('active', tab === 'comments');
+    document.getElementById('postsSection').classList.toggle('hidden', tab !== 'posts');
+    document.getElementById('commentsSection').classList.toggle('hidden', tab !== 'comments');
+    document.getElementById('loadMoreBtn').classList.add('hidden');
+
+    if (tab === 'posts' && myPosts.length === 0) loadMyPosts(true);
+    if (tab === 'comments' && myComments.length === 0) loadMyComments(true);
+  }
+
+  // ── 내 글 로드 ───────────────────────────────────
+  async function loadMyPosts(reset = false) {
+    if (reset) { myPosts = []; postsOffset = 0; }
+    const sec = document.getElementById('postsSection');
+    if (reset) sec.innerHTML = '<div class="skel" style="height:100px;margin-bottom:10px;"></div>'.repeat(3);
+
+    try {
+      const r = await fetch(`${API}/my/posts?limit=${LIMIT}&offset=${postsOffset}`, { credentials:'include' });
+      const d = await r.json();
+      const newPosts = d.posts || [];
+      myPosts = reset ? newPosts : [...myPosts, ...newPosts];
+      hasMore = newPosts.length === LIMIT;
+      postsOffset += newPosts.length;
+      renderPosts(reset);
+    } catch {
+      sec.innerHTML = '<div class="empty"><div class="empty-icon">😢</div><div class="empty-text">불러오기 실패</div></div>';
+    }
+  }
+
+  function renderPosts(reset = true) {
+    const sec = document.getElementById('postsSection');
+    document.getElementById('statPosts').textContent = myPosts.length + (hasMore && currentTab === 'posts' ? '+' : '');
+
+    if (!myPosts.length) {
+      sec.innerHTML = `<div class="empty">
+        <div class="empty-icon">📝</div>
+        <div class="empty-text">아직 작성한 글이 없어요</div>
+        <div class="empty-sub">홈에서 이야기를 남겨보세요!</div>
+      </div>`;
+      document.getElementById('loadMoreBtn').classList.add('hidden');
+      return;
+    }
+    if (reset) {
+      sec.innerHTML = myPosts.map(p => renderPostCard(p)).join('');
+    } else {
+      const frag = document.createDocumentFragment();
+      myPosts.slice(-LIMIT).forEach(p => {
+        if (!document.getElementById(`mp-${p.id}`)) {
+          const div = document.createElement('div');
+          div.innerHTML = renderPostCard(p);
+          frag.appendChild(div.firstElementChild);
+        }
+      });
+      sec.appendChild(frag);
+    }
+    const btn = document.getElementById('loadMoreBtn');
+    if (hasMore && currentTab === 'posts') { btn.classList.remove('hidden'); btn.textContent = '더 보기'; }
+    else btn.classList.add('hidden');
+  }
+
+  function renderPostCard(p) {
+    return `<div class="post-card" id="mp-${p.id}" onclick="openDetail(${p.id})">
+      <div class="post-title">${esc(p.title || p.body?.slice(0,30) || '')}</div>
+      ${p.body ? `<div class="post-body">${esc(p.body)}</div>` : ''}
+      <div class="post-meta">
+        <span>💬 ${p.comment_count||0}</span>
+        <span>🌟 ${p.yar_count||0}</span>
+        <span>👁 ${p.view_count||0}</span>
+        <span>${relTime(p.created_at)}</span>
+        <button class="post-del" onclick="deletePost(event,${p.id})">삭제</button>
+      </div>
+    </div>`;
+  }
+
+  // ── 내 댓글 로드 ─────────────────────────────────
+  async function loadMyComments(reset = false) {
+    if (reset) { myComments = []; commentsOffset = 0; }
+    const sec = document.getElementById('commentsSection');
+    if (reset) sec.innerHTML = '<div class="skel" style="height:80px;margin-bottom:10px;"></div>'.repeat(3);
+
+    try {
+      const r = await fetch(`${API}/my/comments?limit=${LIMIT}&offset=${commentsOffset}`, { credentials:'include' });
+      const d = await r.json();
+      const newCmts = d.comments || [];
+      myComments = reset ? newCmts : [...myComments, ...newCmts];
+      hasMore = newCmts.length === LIMIT;
+      commentsOffset += newCmts.length;
+      renderCommentList(reset);
+    } catch {
+      sec.innerHTML = '<div class="empty"><div class="empty-icon">😢</div><div class="empty-text">불러오기 실패</div></div>';
+    }
+  }
+
+  function renderCommentList(reset = true) {
+    const sec = document.getElementById('commentsSection');
+    document.getElementById('statComments').textContent = myComments.length + (hasMore && currentTab === 'comments' ? '+' : '');
+
+    if (!myComments.length) {
+      sec.innerHTML = `<div class="empty">
+        <div class="empty-icon">💬</div>
+        <div class="empty-text">아직 작성한 댓글이 없어요</div>
+        <div class="empty-sub">이야기에 댓글을 남겨보세요!</div>
+      </div>`;
+      document.getElementById('loadMoreBtn').classList.add('hidden');
+      return;
+    }
+    if (reset) {
+      sec.innerHTML = myComments.map(cm => renderCommentCard(cm)).join('');
+    } else {
+      const frag = document.createDocumentFragment();
+      myComments.slice(-LIMIT).forEach(cm => {
+        if (!document.getElementById(`mc-${cm.id}`)) {
+          const div = document.createElement('div');
+          div.innerHTML = renderCommentCard(cm);
+          frag.appendChild(div.firstElementChild);
+        }
+      });
+      sec.appendChild(frag);
+    }
+    const btn = document.getElementById('loadMoreBtn');
+    if (hasMore && currentTab === 'comments') { btn.classList.remove('hidden'); btn.textContent = '더 보기'; }
+    else btn.classList.add('hidden');
+  }
+
+  function renderCommentCard(cm) {
+    const postTitle = cm.post_title ? esc(cm.post_title) : '게시글 보기';
+    return `<div class="cmt-card" id="mc-${cm.id}">
+      <div class="cmt-origin" onclick="openDetail(${cm.post_id})">📎 ${postTitle} →</div>
+      <div class="cmt-body">${esc(cm.body)}</div>
+      <div class="cmt-meta">
+        <span>${relTime(cm.created_at)}</span>
+        <button class="cmt-del" onclick="deleteComment(event,${cm.id})">삭제</button>
+      </div>
+    </div>`;
+  }
+
+  // ── 더 보기 ──────────────────────────────────────
+  async function loadMore() {
+    const btn = document.getElementById('loadMoreBtn');
+    btn.disabled = true; btn.textContent = '불러오는 중...';
+    if (currentTab === 'posts') await loadMyPosts(false);
+    else await loadMyComments(false);
+    btn.disabled = false; btn.textContent = '더 보기';
+  }
+
+  // ── 삭제 ─────────────────────────────────────────
+  async function deletePost(e, postId) {
+    e.stopPropagation();
+    if (!confirm('이 글을 삭제할까요?')) return;
+    try {
+      const r = await fetch(`${API}/posts/${postId}`, { method:'DELETE', credentials:'include' });
+      const d = await r.json();
+      if (d.ok) {
+        myPosts = myPosts.filter(p => p.id !== postId);
+        document.getElementById(`mp-${postId}`)?.remove();
+        if (!myPosts.length) renderPosts(true);
+        document.getElementById('statPosts').textContent = myPosts.length;
+      } else {
+        alert(d.error === 'not_your_post' ? '내 글이 아니에요' : (d.error || '오류가 발생했어요'));
+      }
+    } catch { alert('오류가 발생했어요'); }
+  }
+
+  async function deleteComment(e, cmtId) {
+    e.stopPropagation();
+    if (!confirm('이 댓글을 삭제할까요?')) return;
+    try {
+      const r = await fetch(`${API}/comments/${cmtId}`, { method:'DELETE', credentials:'include' });
+      const d = await r.json();
+      if (d.ok) {
+        myComments = myComments.filter(c => c.id !== cmtId);
+        document.getElementById(`mc-${cmtId}`)?.remove();
+        if (!myComments.length) renderCommentList(true);
+        document.getElementById('statComments').textContent = myComments.length;
+      } else {
+        alert(d.error === 'not_your_comment' ? '내 댓글이 아니에요' : (d.error || '오류가 발생했어요'));
+      }
+    } catch { alert('오류가 발생했어요'); }
+  }
+
+  // ── 야르~ 카운트 집계 ────────────────────────────
+  function calcTotalYars() {
+    const total = myPosts.reduce((s, p) => s + (p.yar_count || 0), 0);
+    document.getElementById('statYars').textContent = total;
+  }
+
+  // ── 게시글 상세 패널 ─────────────────────────────
+  async function openDetail(postId) {
+    commentSort = 'latest';
+    switchCommentTab('latest', false);
+    document.getElementById('dTitle').textContent  = '';
+    document.getElementById('dBody').innerHTML     = '불러오는 중...';
+    document.getElementById('dAuthor').textContent = '';
+    document.getElementById('dTime').textContent   = '';
+    document.getElementById('dStats').textContent  = '';
+    document.getElementById('dMedia').innerHTML    = '';
+    document.getElementById('dComments').innerHTML = '';
+    document.getElementById('commentInput').value  = '';
+    document.getElementById('detailOverlay').classList.remove('hidden');
+
+    fetch(`${API}/posts/${postId}/view`, { method:'POST' }).catch(() => {});
+
+    try {
+      const r = await fetch(`${API}/posts/${postId}`);
+      const d = await r.json();
+      if (!d.ok) { document.getElementById('dBody').textContent = '불러올 수 없어요'; return; }
+      const p = d.post;
+      currentPost     = p;
+      currentComments = d.comments || [];
+
+      const isSystem   = p.author_type === 'system';
+      const authorName = isSystem ? (p.character_name||'캐릭터') : (p.nickname||'익명');
+
+      document.getElementById('dTitle').textContent  = p.title || '';
+      document.getElementById('dBody').innerHTML     = linkify(p.body || '');
+      document.getElementById('dAuthor').textContent = authorName;
+      document.getElementById('dTime').textContent   = relTime(p.created_at);
+      document.getElementById('dStats').textContent  =
+        `💬 댓글 ${d.comments?.length||0} · 👁 조회 ${p.view_count||0}`;
+
+      // 미디어
+      const mediaWrap = document.getElementById('dMedia');
+      mediaWrap.innerHTML = '';
+      if (p.media_url) {
+        const mtype = detectMediaType(p.media_url);
+        if (mtype === 'image') {
+          mediaWrap.innerHTML = `<img src="${esc(p.media_url)}" alt="이미지" onclick="this.requestFullscreen?.()" style="cursor:zoom-in;">`;
+        } else if (mtype === 'video') {
+          mediaWrap.innerHTML = `<video src="${esc(p.media_url)}" controls playsinline></video>`;
+        } else if (mtype === 'audio') {
+          mediaWrap.innerHTML = `<div style="font-size:13px;color:var(--sub);margin-bottom:4px;">🎵 음악</div><audio src="${esc(p.media_url)}" controls></audio>`;
+        } else if (mtype === 'youtube') {
+          const m = p.media_url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+          if (m) mediaWrap.innerHTML = `<div style="position:relative;padding-top:56.25%;border-radius:12px;overflow:hidden;"><iframe src="https://www.youtube.com/embed/${m[1]}" style="position:absolute;inset:0;width:100%;height:100%;border:none;" allowfullscreen></iframe></div>`;
+        }
+      }
+
+      const isYar = getYar(postId);
+      syncDetailYar(p.yar_count||0, isYar);
+      renderDetailComments(currentComments);
+    } catch (e) {
+      document.getElementById('dBody').textContent = `오류: ${e.message}`;
+    }
+  }
+
+  function syncDetailYar(count, active) {
+    const btn = document.getElementById('dYarBtn');
+    btn.className = `detail-yar${active?' active':''}`;
+    btn.innerHTML = `🌟 야르~ ${count}`;
+  }
+
+  async function toggleDetailYar() {
+    if (!currentPost) return;
+    if (!myNickname) { alert('닉네임을 먼저 설정해주세요'); return; }
+    const postId = currentPost.id;
+    const wasYar = getYar(postId);
+    setYar(postId, !wasYar);
+    try {
+      const r = await fetch(`${API}/posts/${postId}/yar`, {
+        method: wasYar ? 'DELETE' : 'POST',
+        credentials: 'include',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({}),
+      });
+      const d = await r.json();
+      if (d.ok) {
+        syncDetailYar(d.yar_count, !wasYar);
+        currentPost.yar_count = d.yar_count;
+        // 내 글 목록의 야르 수 업데이트
+        const mp = myPosts.find(p => p.id == postId);
+        if (mp) { mp.yar_count = d.yar_count; calcTotalYars(); }
+      }
+    } catch {}
+  }
+
+  function closeDetail() {
+    document.getElementById('detailOverlay').classList.add('hidden');
+    currentPost = null; currentComments = [];
+  }
+  function handleDetailOverlay(e) { if (e.target.id === 'detailOverlay') closeDetail(); }
+
+  function switchCommentTab(sort, rerender = true) {
+    commentSort = sort;
+    const btnL = document.getElementById('cTabLatest');
+    const btnP = document.getElementById('cTabPopular');
+    if (!btnL || !btnP) return;
+    btnL.className = 'ctab' + (sort === 'latest'  ? ' ctab-active' : '');
+    btnP.className = 'ctab' + (sort === 'popular' ? ' ctab-active' : '');
+    if (rerender) renderDetailComments(currentComments);
+  }
+
+  function renderDetailComments(comments) {
+    const wrap = document.getElementById('dComments');
+    if (!comments.length) {
+      wrap.innerHTML = '<div style="color:var(--sub);font-size:13px;padding:8px 0 16px;">아직 댓글이 없어요.</div>';
+      return;
+    }
+    let sorted = [...comments];
+    if (commentSort === 'popular') {
+      sorted.sort((a, b) => {
+        const aS = a.author_type === 'system' ? 1 : 0;
+        const bS = b.author_type === 'system' ? 1 : 0;
+        if (bS !== aS) return bS - aS;
+        return new Date(b.created_at) - new Date(a.created_at);
+      });
+    } else {
+      sorted.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    }
+    wrap.innerHTML = sorted.map(cm => {
+      const nick       = cm.system_users?.display_name || cm.nickname || '익명';
+      const imgUrl     = cm.system_users?.image_url;
+      const emoji      = cm.system_users?.emoji || '🗣️';
+      const avatarHtml = imgUrl
+        ? `<img src="${esc(imgUrl)}" alt="${esc(nick)}" data-emoji="${esc(emoji)}" onerror="this.outerHTML='<span style=\\'font-size:15px;\\'>' + this.dataset.emoji + '</span>'">`
+        : `<span style="font-size:15px;">${esc(emoji)}</span>`;
+      return `<div class="comment-item">
+        <div class="comment-avatar">${avatarHtml}</div>
+        <div class="comment-right">
+          <div class="comment-nick">${esc(nick)}</div>
+          <div class="comment-body">${esc(cm.body)}</div>
+          <div class="comment-time">${relTime(cm.created_at)}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  document.getElementById('commentInput').addEventListener('keypress', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitComment(); }
+  });
+
+  async function submitComment() {
+    if (!currentPost) return;
+    if (!myNickname) { alert('닉네임을 먼저 설정해주세요'); return; }
+    const body = document.getElementById('commentInput').value.trim();
+    if (!body) return;
+    const btn = document.getElementById('commentSendBtn');
+    btn.disabled = true; btn.textContent = '전송중';
+    try {
+      const r = await fetch(`${API}/posts/${currentPost.id}/comments`, {
+        method:'POST', credentials:'include',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ body, guest_id: guestId }),
+      });
+      const d = await r.json();
+      if (d.ok) {
+        document.getElementById('commentInput').value = '';
+        const r2 = await fetch(`${API}/posts/${currentPost.id}`);
+        const d2 = await r2.json();
+        currentComments = d2.comments || [];
+        renderDetailComments(currentComments);
+        document.getElementById('dStats').textContent =
+          `💬 댓글 ${d2.comments?.length||0} · 👁 조회 ${d2.post?.view_count||0}`;
+        // 내 댓글 목록도 갱신 필요 시 초기화
+        if (currentTab === 'comments') { myComments = []; commentsOffset = 0; loadMyComments(true); }
+      } else {
+        alert(d.error || '오류가 발생했어요');
+      }
+    } catch (e) { alert(`오류: ${e.message}`); }
+    btn.disabled = false; btn.textContent = '전송';
+  }
+
+  // ── 초기화 ───────────────────────────────────────
+  async function init() {
+    await initGuest();
+
+    // 닉네임 표시
+    document.getElementById('nickDisplay').textContent = myNickname || '닉네임 없음';
+    updateProfileSub();
+
+    // 내 글 로드
+    await loadMyPosts(true);
+    calcTotalYars();
+
+    document.getElementById('globalLoader').classList.add('hidden');
+  }
+  init();
+</script>
+</body>
+</html>

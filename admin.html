@@ -160,6 +160,55 @@
 
 <div class="container">
 
+  <!-- 캐릭터 추가 (전체 너비) -->
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:16px;">
+    <div class="tool-title">➕ 새 캐릭터 추가</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-bottom:8px;">
+      <div>
+        <div style="font-size:11px;color:var(--sub);margin-bottom:3px;">이름 *</div>
+        <input class="input" id="newName" placeholder="쨩예시" style="margin-bottom:0;">
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--sub);margin-bottom:3px;">이모지</div>
+        <input class="input" id="newEmoji" placeholder="🐱" style="margin-bottom:0;">
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--sub);margin-bottom:3px;">그룹</div>
+        <select class="select" id="newGroup" style="margin-bottom:0;">
+          <option value="kindergarten">유치원</option>
+          <option value="daycare">어린이집</option>
+          <option value="teacher">선생님</option>
+        </select>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--sub);margin-bottom:3px;">동물종류</div>
+        <input class="input" id="newAnimal" placeholder="고양이" style="margin-bottom:0;">
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--sub);margin-bottom:3px;">성별 (자유입력)</div>
+        <input class="input" id="newGender" placeholder="female / male / 고자..." style="margin-bottom:0;">
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--sub);margin-bottom:3px;">MBTI</div>
+        <input class="input" id="newMbti" placeholder="ENFP" style="margin-bottom:0;">
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--sub);margin-bottom:3px;">좋아하는 것</div>
+        <input class="input" id="newLikes" placeholder="귀여운 것" style="margin-bottom:0;">
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--sub);margin-bottom:3px;">취미</div>
+        <input class="input" id="newHobby" placeholder="노래부르기" style="margin-bottom:0;">
+      </div>
+      <div style="grid-column:1/-1;">
+        <div style="font-size:11px;color:var(--sub);margin-bottom:3px;">말투 힌트 (AI 생성 프롬프트에 사용)</div>
+        <input class="input" id="newSpeech" placeholder="밝고 귀여운 말투, 음식 이야기를 좋아함" style="margin-bottom:0;">
+      </div>
+    </div>
+    <button class="btn btn-blue" id="btnAddChar" onclick="addCharacter()">➕ 캐릭터 추가</button>
+    <div class="status" id="addCharStatus"></div>
+  </div>
+
   <!-- 글로벌 도구: 공지 작성 / 게시글 관리 / 공지 관리 -->
   <div class="tools">
 
@@ -425,6 +474,49 @@
     renderGrid();
     await Promise.all([loadManagePosts(), loadManageNotices(), loadFeed()]);
     if (selectedChar) renderPostPicker();
+  }
+
+  // ── 캐릭터 추가 ──────────────────────────────────
+  async function addCharacter() {
+    const name = document.getElementById('newName').value.trim();
+    if (!name) { showStatus('addCharStatus', '이름을 입력하세요', 'error'); return; }
+
+    const payload = {
+      display_name: name,
+      emoji:        document.getElementById('newEmoji').value.trim() || '🙂',
+      group_type:   document.getElementById('newGroup').value,
+      animal_type:  document.getElementById('newAnimal').value.trim() || null,
+      gender:       document.getElementById('newGender').value.trim() || null,
+      mbti:         document.getElementById('newMbti').value.trim()   || null,
+      likes:        document.getElementById('newLikes').value.trim()  || null,
+      hobby:        document.getElementById('newHobby').value.trim()  || null,
+      speech_style: document.getElementById('newSpeech').value.trim() || null,
+    };
+
+    const btn = document.getElementById('btnAddChar');
+    btn.disabled = true; btn.innerHTML = '<span class="spin"></span> 추가중';
+    showStatus('addCharStatus', '추가 중...', 'info');
+
+    try {
+      const r = await adminFetch('/admin/characters', { method:'POST', body:JSON.stringify(payload) });
+      const d = await r.json();
+      if (d.ok) {
+        // 입력 초기화
+        ['newName','newEmoji','newAnimal','newGender','newMbti','newLikes','newHobby','newSpeech'].forEach(id => {
+          document.getElementById(id).value = '';
+        });
+        document.getElementById('newGroup').value = 'kindergarten';
+        showStatus('addCharStatus', `✅ "${name}" 추가 완료! 그리드가 새로고침됩니다.`, 'success');
+        // 캐릭터 목록 새로고침
+        await loadCharacters();
+        renderGrid();
+      } else {
+        showStatus('addCharStatus', `❌ ${d.error}`, 'error');
+      }
+    } catch (e) {
+      showStatus('addCharStatus', `❌ ${e.message}`, 'error');
+    }
+    btn.disabled = false; btn.innerHTML = '➕ 캐릭터 추가';
   }
 
   async function loadCharacters() {
