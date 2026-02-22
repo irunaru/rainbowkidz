@@ -592,6 +592,26 @@
 
   // ── 로그인
   document.getElementById('loginInput').addEventListener('keypress', e => { if (e.key === 'Enter') doLogin(); });
+  // iOS 키보드 대응: 포커스 시 입력창이 가려지지 않도록 스크롤
+  document.getElementById('loginInput').addEventListener('focus', () => {
+    setTimeout(() => { try { document.getElementById('loginInput').scrollIntoView({ block:'center' }); } catch {} }, 80);
+  });
+
+  // 비밀번호 기억
+  (function restorePw(){
+    try {
+      const saved = localStorage.getItem('rkAdminPw');
+      const cb = document.getElementById('rememberPw');
+      if (saved) {
+        const v = atob(saved);
+        document.getElementById('loginInput').value = v;
+        if (cb) cb.checked = true;
+      } else {
+        if (cb) cb.checked = false;
+      }
+    } catch {}
+  })();
+
 
   async function doLogin() {
     const pwRaw = document.getElementById('loginInput').value;
@@ -636,7 +656,7 @@
 
         showMainPanel();
       } else {
-        err.textContent = '비밀번호가 틀렸어요';
+        err.textContent = d.error ? `비밀번호 오류: ${d.error}` : '비밀번호가 틀렸어요';
       }
     } catch {
       err.textContent = '서버 오류가 발생했어요';
@@ -660,6 +680,7 @@
     document.getElementById('loginBtn').disabled = false;
     document.getElementById('loginBtn').textContent = '입장하기';
     document.getElementById('loginInput').focus();
+  setTimeout(() => { try { document.getElementById('loginInput').scrollIntoView({ block:'center' }); } catch {} }, 120);
   }
 
   function showMainPanel() {
@@ -1352,6 +1373,7 @@
   restoreLoginPrefs();
   tryAutoLogin();
   document.getElementById('loginInput').focus();
+  setTimeout(() => { try { document.getElementById('loginInput').scrollIntoView({ block:'center' }); } catch {} }, 120);
 </script>
 </body>
 </html>
