@@ -334,6 +334,12 @@
 
 <script>
   const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
+  const apiUrl = (path, needGuest = false) => {
+    if (!needGuest || !guestId) return `${API}${path}`;
+    const sep = path.includes('?') ? '&' : '?';
+    return `${API}${path}${sep}guest_id=${encodeURIComponent(guestId)}`;
+  };
+
 
   // ── 상태 ─────────────────────────────────────────
   let guestId     = null;
@@ -383,12 +389,11 @@
   // ── 게스트 초기화 ────────────────────────────────
   async function initGuest() {
     try {
-      const localGid = localStorage.getItem('rkGuestId');
-      const r = await fetch(`${API}/guest/init`, {
+      const r = await fetch(apiUrl('/guest/init'), {
         method:'POST',
         credentials:'include',
-        headers: { 'Content-Type':'application/json' },
-        body: JSON.stringify({ existing_gid: localGid }),
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ existing_gid: localStorage.getItem('rkGuestId') || null }),
       });
       if (!r.ok) return;
       const d = await r.json();
@@ -397,7 +402,7 @@
 
       // 항상 /me 호출로 닉네임 확인 (서버가 최종 권위)
       try {
-        const m = await fetch(`${API}/me?guest_id=${encodeURIComponent(guestId||'')}`, { credentials:'include' });
+        const m = await fetch(apiUrl('/me', true), { credentials:'include' });
         if (m.ok) {
           const md = await m.json();
           myNickname = md.guest?.nickname || null;
@@ -414,7 +419,7 @@
   async function openWrite() {
     if (!myNickname && guestId) {
       try {
-        const m = await fetch(`${API}/me?guest_id=${encodeURIComponent(guestId||'')}`, { credentials:'include' });
+        const m = await fetch(apiUrl('/me', true), { credentials:'include' });
         if (m.ok) { const md = await m.json(); myNickname = md.guest?.nickname || null; }
       } catch {}
       if (!myNickname) myNickname = localStorage.getItem('rkNickname');
@@ -479,7 +484,7 @@
     if (guestId) formData.append('guest_id', guestId);
 
     try {
-      const r = await fetch(`${API}/guest/upload-image`, {
+      const r = await fetch(apiUrl('/guest/upload-image', true), {
         method: 'POST', credentials: 'include', body: formData,
       });
       const d = await r.json();
@@ -587,7 +592,7 @@
     if (reset) sec.innerHTML = '<div class="skel" style="height:100px;margin-bottom:10px;"></div>'.repeat(3);
 
     try {
-      const r = await fetch(`${API}/my/posts?limit=${LIMIT}&offset=${postsOffset}&guest_id=${encodeURIComponent(guestId||'')}`, { credentials:'include' });
+      const r = await fetch(apiUrl(`/my/posts?limit=${LIMIT}&offset=${postsOffset}`, true), { credentials:'include' });
       const d = await r.json();
       const newPosts = d.posts || [];
       myPosts = reset ? newPosts : [...myPosts, ...newPosts];
@@ -652,7 +657,7 @@
     if (reset) sec.innerHTML = '<div class="skel" style="height:80px;margin-bottom:10px;"></div>'.repeat(3);
 
     try {
-      const r = await fetch(`${API}/my/comments?limit=${LIMIT}&offset=${commentsOffset}&guest_id=${encodeURIComponent(guestId||'')}`, { credentials:'include' });
+      const r = await fetch(apiUrl(`/my/comments?limit=${LIMIT}&offset=${commentsOffset}`, true), { credentials:'include' });
       const d = await r.json();
       const newCmts = d.comments || [];
       myComments = reset ? newCmts : [...myComments, ...newCmts];
@@ -746,7 +751,7 @@
     e.stopPropagation();
     if (!confirm('이 글을 삭제할까요?')) return;
     try {
-      const r = await fetch(`${API}/posts/${postId}`, { method:'DELETE', credentials:'include' });
+      const r = await fetch(apiUrl(`/posts/${postId}`, true), { method:'DELETE', credentials:'include' });
       const d = await r.json();
       if (d.ok) {
         myPosts = myPosts.filter(p => p.id !== postId);
@@ -852,7 +857,7 @@
     fetch(`${API}/posts/${postId}/view`, { method:'POST' }).catch(() => {});
 
     try {
-      const r = await fetch(`${API}/posts/${postId}`);
+      const r = await fetch(apiUrl(`/posts/${postId}`, true));
       const d = await r.json();
       if (!d.ok) { document.getElementById('dBody').textContent = '불러올 수 없어요'; return; }
       const p = d.post;
@@ -911,7 +916,7 @@
         method: wasYar ? 'DELETE' : 'POST',
         credentials: 'include',
         headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ guest_id: guestId }),
+        body: JSON.stringify({}),
       });
       const d = await r.json();
       if (d.ok) {
@@ -1020,7 +1025,7 @@
 
     // 프로필 이미지 로드 (/me에서 image_url 포함)
     try {
-      const m = await fetch(`${API}/me`, { credentials:'include' });
+      const m = await fetch(apiUrl('/me', true), { credentials:'include' });
       if (m.ok) {
         const md = await m.json();
         if (md.guest?.image_url) {

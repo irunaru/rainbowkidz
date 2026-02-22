@@ -373,6 +373,12 @@
 
 <script>
   const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
+  const apiUrl = (path, needGuest = false) => {
+    if (!needGuest || !guestId) return `${API}${path}`;
+    const sep = path.includes('?') ? '&' : '?';
+    return `${API}${path}${sep}guest_id=${encodeURIComponent(guestId)}`;
+  };
+
 
   // ── 상태 ─────────────────────────────────────────
   let characters   = [];
@@ -442,12 +448,11 @@
   // ── 게스트 초기화 ────────────────────────────────
   async function initGuest() {
     try {
-      const localGid = localStorage.getItem('rkGuestId');
-      const r = await fetch(`${API}/guest/init`, {
+      const r = await fetch(apiUrl('/guest/init'), {
         method:'POST',
         credentials:'include',
-        headers: { 'Content-Type':'application/json' },
-        body: JSON.stringify({ existing_gid: localGid }),
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ existing_gid: localStorage.getItem('rkGuestId') || null }),
       });
       if (!r.ok) return;
       const d = await r.json();
@@ -465,7 +470,7 @@
 
       // 항상 /me 호출로 닉네임 확인 (서버가 최종 권위)
       try {
-        const m = await fetch(`${API}/me?guest_id=${encodeURIComponent(guestId||'')}`, { credentials:'include' });
+        const m = await fetch(apiUrl('/me', true), { credentials:'include' });
         if (m.ok) {
           const md = await m.json();
           myNickname = md.guest?.nickname || null;
@@ -682,10 +687,7 @@
       return;
     }
     const wasYar = getYar(postId);
-    const post =
-      feedPosts.find(p => p.id == postId) ||
-      allNotices.find(p => p.id == postId) ||
-      (currentPost && currentPost.id == postId ? currentPost : null);
+    const post = feedPosts.find(p => p.id == postId) || allNotices.find(p => p.id == postId) || null;
     if (!post) return;
 
     post.yar_count = (post.yar_count||0) + (wasYar ? -1 : 1);
@@ -700,7 +702,7 @@
     if (currentPost?.id == postId) syncDetailYar(post.yar_count, !wasYar);
 
     try {
-      const r = await fetch(`${API}/posts/${postId}/yar?guest_id=${encodeURIComponent(guestId||'')}`, {
+      const r = await fetch(apiUrl(`/posts/${postId}/yar`, true), {
         method: wasYar ? 'DELETE' : 'POST',
         credentials: 'include',
         headers: { 'Content-Type':'application/json' },
@@ -876,7 +878,7 @@
     // 닉네임이 없으면 서버에서 재확인 후 판단
     if (!myNickname && guestId) {
       try {
-        const m = await fetch(`${API}/me`, { credentials:'include' });
+        const m = await fetch(apiUrl('/me', true), { credentials:'include' });
         if (m.ok) { const md = await m.json(); myNickname = md.guest?.nickname || null; }
       } catch {}
       if (!myNickname) myNickname = localStorage.getItem('rkNickname');
@@ -967,7 +969,7 @@
     // 닉네임이 없으면 서버에서 재확인
     if (!myNickname && guestId) {
       try {
-        const m = await fetch(`${API}/me`, { credentials:'include' });
+        const m = await fetch(apiUrl('/me', true), { credentials:'include' });
         if (m.ok) { const md = await m.json(); myNickname = md.guest?.nickname || null; }
       } catch {}
       if (!myNickname) myNickname = localStorage.getItem('rkNickname');
@@ -998,7 +1000,7 @@
 
     btn.disabled = true; btn.textContent = '게시 중...';
     try {
-      const r = await fetch(`${API}/posts`, {
+      const r = await fetch(apiUrl('/posts', true), {
         method: 'POST', credentials: 'include',
         headers: { 'Content-Type':'application/json' },
         body: JSON.stringify({ title, body, guest_id: guestId }),
