@@ -388,14 +388,18 @@
       const d = await r.json();
       guestId = d.guest_id;
 
-      if (d.has_nickname) {
+      // 항상 /me 호출로 닉네임 확인 (서버가 최종 권위)
+      try {
         const m = await fetch(`${API}/me`, { credentials:'include' });
         if (m.ok) {
           const md = await m.json();
           myNickname = md.guest?.nickname || null;
+          if (myNickname) localStorage.setItem('rkNickname', myNickname);
+          else localStorage.removeItem('rkNickname');
         }
+      } catch {
+        myNickname = localStorage.getItem('rkNickname') || null;
       }
-      if (!myNickname) myNickname = localStorage.getItem('rkNickname');
     } catch {}
   }
 
@@ -464,6 +468,8 @@
 
     const formData = new FormData();
     formData.append('image', file);
+    // 쿠키가 누락될 경우를 대비해 guest_id도 함께 전송
+    if (guestId) formData.append('guest_id', guestId);
 
     try {
       const r = await fetch(`${API}/guest/upload-image`, {

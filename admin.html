@@ -185,8 +185,15 @@
         <input class="input" id="newAnimal" placeholder="고양이" style="margin-bottom:0;">
       </div>
       <div>
-        <div style="font-size:11px;color:var(--sub);margin-bottom:3px;">성별 (자유입력)</div>
-        <input class="input" id="newGender" placeholder="female / male / 고자..." style="margin-bottom:0;">
+        <div style="font-size:11px;color:var(--sub);margin-bottom:3px;">성별</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+          <label style="font-size:13px;display:flex;align-items:center;gap:3px;cursor:pointer;"><input type="radio" name="newGenderR" value="female" onchange="handleNewGender(this)"> 여성</label>
+          <label style="font-size:13px;display:flex;align-items:center;gap:3px;cursor:pointer;"><input type="radio" name="newGenderR" value="male" onchange="handleNewGender(this)"> 남성</label>
+          <label style="font-size:13px;display:flex;align-items:center;gap:3px;cursor:pointer;"><input type="radio" name="newGenderR" value="other" onchange="handleNewGender(this)"> 기타</label>
+          <label style="font-size:13px;display:flex;align-items:center;gap:3px;cursor:pointer;"><input type="radio" name="newGenderR" value="none" onchange="handleNewGender(this)" checked> 밝히고 싶지 않음</label>
+        </div>
+        <input class="input" id="newGenderOther" placeholder="직접 입력..." style="margin-bottom:0;margin-top:4px;display:none;">
+        <input type="hidden" id="newGender" value="">
       </div>
       <div>
         <div style="font-size:11px;color:var(--sub);margin-bottom:3px;">MBTI</div>
@@ -203,6 +210,10 @@
       <div style="grid-column:1/-1;">
         <div style="font-size:11px;color:var(--sub);margin-bottom:3px;">말투 힌트 (AI 생성 프롬프트에 사용)</div>
         <input class="input" id="newSpeech" placeholder="밝고 귀여운 말투, 음식 이야기를 좋아함" style="margin-bottom:0;">
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--sub);margin-bottom:3px;">답댓글 반응속도 (분, 기본 30)</div>
+        <input class="input" type="number" id="newResponseSpeed" placeholder="30" min="1" max="1440" value="30" style="margin-bottom:0;">
       </div>
     </div>
     <button class="btn btn-blue" id="btnAddChar" onclick="addCharacter()">➕ 캐릭터 추가</button>
@@ -347,8 +358,17 @@
               <option value="teacher">선생님</option>
             </select>
           </div>
-          <!-- 성별: 자유입력 (임일후 = '고자' 지원) -->
-          <div class="field"><label>성별 (자유입력)</label><input class="input" id="fGender" placeholder="female, male, 고자..."></div>
+          <div class="field">
+            <label>성별</label>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:4px;">
+              <label style="font-size:13px;display:flex;align-items:center;gap:3px;cursor:pointer;"><input type="radio" name="fGenderR" value="female" onchange="handleEditGender(this)"> 여성</label>
+              <label style="font-size:13px;display:flex;align-items:center;gap:3px;cursor:pointer;"><input type="radio" name="fGenderR" value="male" onchange="handleEditGender(this)"> 남성</label>
+              <label style="font-size:13px;display:flex;align-items:center;gap:3px;cursor:pointer;"><input type="radio" name="fGenderR" value="other" onchange="handleEditGender(this)"> 기타</label>
+              <label style="font-size:13px;display:flex;align-items:center;gap:3px;cursor:pointer;"><input type="radio" name="fGenderR" value="none" onchange="handleEditGender(this)"> 밝히고 싶지 않음</label>
+            </div>
+            <input class="input" id="fGenderOther" placeholder="직접 입력..." style="margin-bottom:0;display:none;">
+            <input type="hidden" id="fGender" value="">
+          </div>
           <div class="field"><label>MBTI</label><input class="input" id="fMbti" placeholder="ENFP"></div>
         </div>
         <div class="row2">
@@ -370,6 +390,10 @@
         <div class="field" style="margin-bottom:12px;">
           <label>말투 힌트 (speech_style) — AI 생성 프롬프트에 사용됩니다</label>
           <input class="input" id="fSpeech" placeholder="밝고 장난기 많은 말투, 민초 덕후" style="margin-bottom:0;">
+        </div>
+        <div class="field" style="margin-bottom:12px;">
+          <label>답댓글 반응속도 (분) — 값이 낮을수록 빠르게 반응, 기본 30분</label>
+          <input class="input" type="number" id="fResponseSpeed" placeholder="30" min="1" max="1440" style="margin-bottom:0;">
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
           <button class="btn btn-green" id="btnSave" onclick="saveProfile()">💾 저장</button>
@@ -402,6 +426,57 @@
     if (s < 86400) return `${Math.floor(s / 3600)}시간 전`;
     return `${Math.floor(s / 86400)}일 전`;
   };
+
+  // ── 성별 라디오 핸들러 ─────────────────────────
+  function handleNewGender(radio) {
+    const otherInput = document.getElementById('newGenderOther');
+    const hiddenInput = document.getElementById('newGender');
+    if (radio.value === 'other') {
+      otherInput.style.display = '';
+      otherInput.oninput = () => { hiddenInput.value = otherInput.value.trim(); };
+      hiddenInput.value = otherInput.value.trim();
+    } else if (radio.value === 'none') {
+      otherInput.style.display = 'none';
+      hiddenInput.value = '';
+    } else {
+      otherInput.style.display = 'none';
+      hiddenInput.value = radio.value;
+    }
+  }
+  function handleEditGender(radio) {
+    const otherInput = document.getElementById('fGenderOther');
+    const hiddenInput = document.getElementById('fGender');
+    if (radio.value === 'other') {
+      otherInput.style.display = '';
+      otherInput.oninput = () => { hiddenInput.value = otherInput.value.trim(); };
+      hiddenInput.value = otherInput.value.trim();
+    } else if (radio.value === 'none') {
+      otherInput.style.display = 'none';
+      hiddenInput.value = '';
+    } else {
+      otherInput.style.display = 'none';
+      hiddenInput.value = radio.value;
+    }
+  }
+  // 편집 폼 로드 시 기존 gender 값으로 라디오 세팅
+  function setGenderRadio(gender) {
+    const known = ['female', 'male', ''];
+    let radioVal = 'none';
+    if (gender === 'female') radioVal = 'female';
+    else if (gender === 'male') radioVal = 'male';
+    else if (gender && gender !== '') radioVal = 'other';
+    document.querySelectorAll('input[name="fGenderR"]').forEach(r => { r.checked = r.value === radioVal; });
+    const otherInput = document.getElementById('fGenderOther');
+    const hiddenInput = document.getElementById('fGender');
+    hiddenInput.value = gender || '';
+    if (radioVal === 'other') {
+      otherInput.style.display = '';
+      otherInput.value = gender || '';
+    } else {
+      otherInput.style.display = 'none';
+      otherInput.value = '';
+    }
+  }
 
   function showStatus(id, msg, type = 'info') {
     const el = document.getElementById(id);
@@ -486,11 +561,12 @@
       emoji:        document.getElementById('newEmoji').value.trim() || '🙂',
       group_type:   document.getElementById('newGroup').value,
       animal_type:  document.getElementById('newAnimal').value.trim() || null,
-      gender:       document.getElementById('newGender').value.trim() || null,
-      mbti:         document.getElementById('newMbti').value.trim()   || null,
-      likes:        document.getElementById('newLikes').value.trim()  || null,
-      hobby:        document.getElementById('newHobby').value.trim()  || null,
-      speech_style: document.getElementById('newSpeech').value.trim() || null,
+      gender:         document.getElementById('newGender').value.trim() || null,
+      mbti:           document.getElementById('newMbti').value.trim()   || null,
+      likes:          document.getElementById('newLikes').value.trim()  || null,
+      hobby:          document.getElementById('newHobby').value.trim()  || null,
+      speech_style:   document.getElementById('newSpeech').value.trim() || null,
+      response_speed: parseInt(document.getElementById('newResponseSpeed').value) || 30,
     };
 
     const btn = document.getElementById('btnAddChar');
@@ -502,9 +578,14 @@
       const d = await r.json();
       if (d.ok) {
         // 입력 초기화
-        ['newName','newEmoji','newAnimal','newGender','newMbti','newLikes','newHobby','newSpeech'].forEach(id => {
+        ['newName','newEmoji','newAnimal','newMbti','newLikes','newHobby','newSpeech'].forEach(id => {
           document.getElementById(id).value = '';
         });
+        document.getElementById('newGender').value = '';
+        document.getElementById('newGenderOther').value = '';
+        document.getElementById('newGenderOther').style.display = 'none';
+        document.querySelectorAll('input[name="newGenderR"]').forEach(r => { r.checked = r.value === 'none'; });
+        document.getElementById('newResponseSpeed').value = '30';
         document.getElementById('newGroup').value = 'kindergarten';
         showStatus('addCharStatus', `✅ "${name}" 추가 완료! 그리드가 새로고침됩니다.`, 'success');
         // 캐릭터 목록 새로고침
@@ -600,20 +681,21 @@
   }
 
   function fillForm(c) {
-    document.getElementById('fName').value        = c.display_name || '';
-    document.getElementById('fEmoji').value       = c.emoji        || '';
-    document.getElementById('fGroup').value       = c.group_type   || 'kindergarten';
-    document.getElementById('fGender').value      = c.gender       || '';
-    document.getElementById('fMbti').value        = c.mbti         || '';
-    document.getElementById('fAnimal').value      = c.animal_type  || '';
-    document.getElementById('fPersonality').value = c.personality  || '';
-    document.getElementById('fBirthday').value    = c.birthday     || '';
-    document.getElementById('fAge').value         = c.age          != null ? c.age : '';
-    document.getElementById('fLikes').value       = c.likes        || '';
-    document.getElementById('fDislikes').value    = c.dislikes     || '';
-    document.getElementById('fHobby').value       = c.hobby        || '';
-    document.getElementById('fSecret').value      = c.secret       || '';
-    document.getElementById('fSpeech').value      = c.speech_style || '';
+    document.getElementById('fName').value          = c.display_name   || '';
+    document.getElementById('fEmoji').value         = c.emoji           || '';
+    document.getElementById('fGroup').value         = c.group_type      || 'kindergarten';
+    setGenderRadio(c.gender || '');
+    document.getElementById('fMbti').value          = c.mbti            || '';
+    document.getElementById('fAnimal').value        = c.animal_type     || '';
+    document.getElementById('fPersonality').value   = c.personality     || '';
+    document.getElementById('fBirthday').value      = c.birthday        || '';
+    document.getElementById('fAge').value           = c.age != null     ? c.age : '';
+    document.getElementById('fLikes').value         = c.likes           || '';
+    document.getElementById('fDislikes').value      = c.dislikes        || '';
+    document.getElementById('fHobby').value         = c.hobby           || '';
+    document.getElementById('fSecret').value        = c.secret          || '';
+    document.getElementById('fSpeech').value        = c.speech_style    || '';
+    document.getElementById('fResponseSpeed').value = c.response_speed  != null ? c.response_speed : 30;
   }
 
   function resetForm() {
@@ -637,7 +719,8 @@
       dislikes:     document.getElementById('fDislikes').value.trim(),
       hobby:        document.getElementById('fHobby').value.trim(),
       secret:       document.getElementById('fSecret').value.trim(),
-      speech_style: document.getElementById('fSpeech').value.trim(),
+      speech_style:   document.getElementById('fSpeech').value.trim(),
+      response_speed: parseInt(document.getElementById('fResponseSpeed').value) || 30,
     };
     const btn = document.getElementById('btnSave');
     btn.disabled = true; btn.innerHTML = '<span class="spin"></span> 저장중';
