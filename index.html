@@ -53,6 +53,28 @@
     /* 링크 */
     .detail-body a { color:var(--blue); text-decoration:underline; word-break:break-all; }
 
+    /* 공지 시간 */
+    .notice-time { font-size:11px; color:var(--sub); margin-top:4px; }
+    /* 공지 더보기 버튼 */
+    .notice-more-btn { width:100%; padding:10px; background:transparent; border:1.5px solid var(--border); border-radius:var(--radius-card); font-size:13px; font-weight:700; color:var(--sub); cursor:pointer; font-family:inherit; margin-bottom:10px; }
+    .notice-more-btn:active { opacity:.75; }
+    /* 글쓰기 모달 */
+    .write-overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:flex-end; justify-content:center; z-index:3000; }
+    .write-overlay.hidden { display:none; }
+    .write-panel { width:100%; max-width:640px; background:var(--card); border-radius:20px 20px 0 0; padding:0 0 env(safe-area-inset-bottom,0); }
+    .write-handle { width:36px; height:4px; background:var(--border); border-radius:2px; margin:10px auto; }
+    .write-head { padding:0 16px 12px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border); }
+    .write-head-title { font-size:17px; font-weight:900; }
+    .write-close { padding:6px 14px; border:1px solid var(--border); border-radius:20px; background:var(--bg); font-size:12px; cursor:pointer; font-family:inherit; }
+    .write-body { padding:16px; }
+    .write-input { width:100%; padding:12px; border:1.5px solid var(--border); border-radius:12px; font-size:15px; font-family:inherit; margin-bottom:10px; }
+    .write-input:focus { outline:none; border-color:var(--text); }
+    .write-textarea { width:100%; padding:12px; border:1.5px solid var(--border); border-radius:12px; font-size:14px; font-family:inherit; min-height:120px; resize:none; line-height:1.6; }
+    .write-textarea:focus { outline:none; border-color:var(--text); }
+    .write-footer { display:flex; gap:8px; padding:12px 16px; border-top:1px solid var(--border); padding-bottom:calc(12px + env(safe-area-inset-bottom,0)); }
+    .write-submit { flex:1; padding:13px; background:var(--text); color:#fff; border:none; border-radius:12px; font-size:15px; font-weight:700; cursor:pointer; font-family:inherit; }
+    .write-submit:disabled { opacity:.5; }
+    .write-error { font-size:12px; color:var(--accent); min-height:16px; padding:0 16px 8px; }
     /* 섹션 헤더 */
     .section-header { padding:16px 16px 8px; display:flex; align-items:center; justify-content:space-between; }
     .section-title  { font-size:15px; font-weight:700; }
@@ -62,11 +84,11 @@
     .char-scroll-wrap { overflow-x:auto; padding:0 16px 8px; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
     .char-scroll-wrap::-webkit-scrollbar { display:none; }
     .char-grid { display:flex; gap:10px; width:max-content; }
-    .char-item { display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer; width:64px; flex-shrink:0; }
-    .char-icon { width:64px; height:64px; border-radius:var(--radius-icon); background:var(--card); border:1.5px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:28px; overflow:hidden; position:relative; box-shadow:0 1px 4px rgba(0,0,0,.08); transition:transform .15s; }
+    .char-item { display:flex; flex-direction:column; align-items:center; gap:5px; cursor:pointer; width:80px; flex-shrink:0; }
+    .char-icon { width:80px; height:80px; border-radius:var(--radius-icon); background:var(--card); border:1.5px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:34px; overflow:hidden; position:relative; box-shadow:0 1px 4px rgba(0,0,0,.08); transition:transform .15s; }
     .char-item:active .char-icon { transform:scale(.93); }
     .char-icon img { width:100%; height:100%; object-fit:cover; }
-    .char-name { font-size:11px; font-weight:700; color:var(--sub); width:64px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:center; }
+    .char-name { font-size:11px; font-weight:700; color:var(--sub); width:80px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:center; }
     .unread-badge { position:absolute; top:-3px; right:-3px; width:10px; height:10px; background:var(--accent); border-radius:50%; border:2px solid var(--bg); }
 
     /* 탭 */
@@ -256,7 +278,29 @@
 <!-- 바텀 네비 -->
 <div class="bottom-nav">
   <a href="index.html" class="active"><span class="nav-icon">🏠</span>홈</a>
+  <a href="#" onclick="openWrite();return false;" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 0 6px;text-decoration:none;color:var(--sub);font-size:10px;font-weight:600;gap:2px;">
+    <span style="font-size:22px;width:42px;height:28px;background:var(--text);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:18px;">✏️</span>글쓰기
+  </a>
   <a href="mypage.html"><span class="nav-icon">👤</span>내 페이지</a>
+</div>
+
+<!-- 글쓰기 모달 -->
+<div class="write-overlay hidden" id="writeOverlay" onclick="handleWriteOverlay(event)">
+  <div class="write-panel" onclick="event.stopPropagation()">
+    <div class="write-handle"></div>
+    <div class="write-head">
+      <div class="write-head-title">✏️ 이야기 쓰기</div>
+      <button class="write-close" onclick="closeWrite()">✕ 닫기</button>
+    </div>
+    <div class="write-body">
+      <input class="write-input" id="writeTitle" placeholder="제목 (2~80자)" maxlength="80">
+      <textarea class="write-textarea" id="writeBody" placeholder="내용을 입력하세요... (5자 이상)" maxlength="5000"></textarea>
+    </div>
+    <div class="write-error" id="writeError"></div>
+    <div class="write-footer">
+      <button class="write-submit" id="writeSubmitBtn" onclick="submitWrite()">게시하기</button>
+    </div>
+  </div>
 </div>
 
 <!-- 게시글 상세 패널 -->
@@ -391,7 +435,7 @@
   // ESC 닫기
   document.addEventListener('keydown', e => {
     if (e.key !== 'Escape') return;
-    closeDetail(); closeProfile();
+    closeDetail(); closeProfile(); closeWrite();
     document.getElementById('nickOverlay').classList.add('hidden');
   });
 
@@ -412,47 +456,74 @@
       }
       localStorage.setItem('rkSeen', '1');
 
-      if (d.has_nickname) {
+      // 항상 /me 호출 (has_nickname 여부와 무관하게 닉네임 확인)
+      try {
         const m = await fetch(`${API}/me`, { credentials:'include' });
         if (m.ok) { const md = await m.json(); myNickname = md.guest?.nickname || null; }
-      }
+      } catch {}
+      // /me 실패 시 localStorage 폴백
       if (!myNickname) myNickname = localStorage.getItem('rkNickname');
     } catch {}
   }
 
   // ── 공지사항 ─────────────────────────────────────
+  let allNotices = [];
+  let noticesExpanded = false;
+
   async function loadNotices() {
     const sec = document.getElementById('noticeSection');
     try {
-      const r = await fetch(`${API}/notices?limit=3`);
+      const r = await fetch(`${API}/notices?limit=10`);
       const d = await r.json();
-      sec.innerHTML = '';
-      if (!d.notices?.length) return;
-      d.notices.forEach(n => {
-        const card = document.createElement('div');
-        card.className = 'notice-card';
-        // 미디어 썸네일 (이미지만 카드에 표시)
-        // 공지 카드: 미디어 썸네일 (이미지만 표시)
-        const mtype = detectMediaType(n.media_url);
-        const thumbHtml = (n.media_url && mtype === 'image')
-          ? `<img src="${esc(n.media_url)}" style="width:100%;border-radius:8px;margin-top:8px;max-height:120px;object-fit:cover;" loading="lazy">`
-          : (n.media_url && mtype === 'video')
-          ? `<div style="margin-top:6px;font-size:12px;color:var(--sub);">🎬 동영상 첨부</div>`
-          : (n.media_url && mtype === 'audio')
-          ? `<div style="margin-top:6px;font-size:12px;color:var(--sub);">🎵 음악 첨부</div>`
-          : '';
-        card.innerHTML = `
-          <div class="notice-label">
-            <span>📌 공지</span>
-            <span class="notice-label-hint">탭하면 자세히 보기 ›</span>
-          </div>
-          <div class="notice-title">${esc(n.title||'')}</div>
-          <div class="notice-body">${esc(n.body||'')}</div>
-          ${thumbHtml}`;
-        card.onclick = () => openDetail(n.id);
-        sec.appendChild(card);
-      });
+      allNotices = d.notices || [];
+      renderNotices();
     } catch { sec.innerHTML = ''; }
+  }
+
+  function renderNotices() {
+    const sec = document.getElementById('noticeSection');
+    sec.innerHTML = '';
+    if (!allNotices.length) return;
+
+    const visible = noticesExpanded ? allNotices : allNotices.slice(0, 1);
+    visible.forEach(n => {
+      const card = document.createElement('div');
+      card.className = 'notice-card';
+      const mtype = detectMediaType(n.media_url);
+      const thumbHtml = (n.media_url && mtype === 'image')
+        ? `<img src="${esc(n.media_url)}" style="width:100%;border-radius:8px;margin-top:8px;max-height:120px;object-fit:cover;" loading="lazy">`
+        : (n.media_url && mtype === 'video')
+        ? `<div style="margin-top:6px;font-size:12px;color:var(--sub);">🎬 동영상 첨부</div>`
+        : (n.media_url && mtype === 'audio')
+        ? `<div style="margin-top:6px;font-size:12px;color:var(--sub);">🎵 음악 첨부</div>`
+        : '';
+      card.innerHTML = `
+        <div class="notice-label">
+          <span>📌 공지</span>
+          <span class="notice-label-hint">탭하면 자세히 보기 ›</span>
+        </div>
+        <div class="notice-title">${esc(n.title||'')}</div>
+        <div class="notice-body">${esc(n.body||'')}</div>
+        <div class="notice-time">${relTime(n.created_at)}</div>
+        ${thumbHtml}`;
+      card.onclick = () => openDetail(n.id);
+      sec.appendChild(card);
+    });
+
+    // 공지가 2개 이상이면 더보기/접기 버튼
+    if (allNotices.length > 1) {
+      const moreBtn = document.createElement('button');
+      moreBtn.className = 'notice-more-btn';
+      moreBtn.id = 'noticeMoreBtn';
+      moreBtn.textContent = noticesExpanded
+        ? `▲ 접기`
+        : `▼ 공지 더보기 (${allNotices.length - 1}개 더)`;
+      moreBtn.onclick = () => {
+        noticesExpanded = !noticesExpanded;
+        renderNotices();
+      };
+      sec.appendChild(moreBtn);
+    }
   }
 
   // ── 캐릭터 ───────────────────────────────────────
@@ -623,13 +694,27 @@
         post.yar_count = d.yar_count;
         if (btn) btn.innerHTML = `🌟 야르~ ${d.yar_count}`;
         if (currentPost?.id == postId) syncDetailYar(d.yar_count, !wasYar);
+      } else {
+        // 서버 실패 → 롤백
+        post.yar_count = (post.yar_count||0) + (wasYar ? 1 : -1);
+        setYar(postId, wasYar);
+        if (btn) { btn.className = `yar-btn${wasYar?' active':''}`; btn.innerHTML = `🌟 야르~ ${post.yar_count}`; }
+        if (currentPost?.id == postId) syncDetailYar(post.yar_count, wasYar);
+        if (d.error === 'nickname_required') { myNickname = null; openNickModal('야르~를 누르려면 닉네임이 필요해요!'); }
       }
-    } catch {}
+    } catch {
+      // 네트워크 오류 → 롤백
+      post.yar_count = (post.yar_count||0) + (wasYar ? 1 : -1);
+      setYar(postId, wasYar);
+      if (btn) { btn.className = `yar-btn${wasYar?' active':''}`; btn.innerHTML = `🌟 야르~ ${post.yar_count}`; }
+      if (currentPost?.id == postId) syncDetailYar(post.yar_count, wasYar);
+    }
   }
 
   // ── 게시글 상세 패널 ─────────────────────────────
   async function openDetail(postId) {
-    currentPost = feedPosts.find(p => p.id == postId) || null;
+    // feedPosts 또는 공지(allNotices)에서 찾기
+    currentPost = feedPosts.find(p => p.id == postId) || allNotices.find(p => p.id == postId) || null;
     // 초기화
     commentSort = 'latest';
     switchCommentTab('latest', false);
@@ -771,6 +856,14 @@
 
   async function submitComment() {
     if (!currentPost) return;
+    // 닉네임이 없으면 서버에서 재확인 후 판단
+    if (!myNickname && guestId) {
+      try {
+        const m = await fetch(`${API}/me`, { credentials:'include' });
+        if (m.ok) { const md = await m.json(); myNickname = md.guest?.nickname || null; }
+      } catch {}
+      if (!myNickname) myNickname = localStorage.getItem('rkNickname');
+    }
     if (!myNickname) {
       pendingAction = 'comment';
       openNickModal('댓글을 쓰려면 닉네임이 필요해요!');
@@ -801,8 +894,13 @@
         // 피드 카드 댓글 수 업데이트
         const fp = feedPosts.find(p => p.id == currentPost.id);
         if (fp) { fp.comment_count = (fp.comment_count||0)+1; renderFeed(); }
+      } else if (d.error === 'nickname_required') {
+        // 서버가 닉네임 없다고 응답 → myNickname 초기화 후 모달 표시
+        myNickname = null;
+        pendingAction = 'comment';
+        openNickModal('댓글을 쓰려면 닉네임이 필요해요!');
       } else {
-        alert(d.error==='nickname_required' ? '닉네임을 먼저 설정해주세요' : (d.error||'오류가 발생했어요'));
+        alert(d.error || '오류가 발생했어요');
       }
     } catch (e) { alert(`오류: ${e.message}`); }
 
@@ -847,6 +945,58 @@
   function closeProfile()                 { document.getElementById('profileOverlay').classList.add('hidden'); }
   function handleProfileOverlay(e)        { if (e.target.id === 'profileOverlay') closeProfile(); }
 
+  // ── 글쓰기 모달 ─────────────────────────────────
+  function openWrite() {
+    if (!myNickname) {
+      pendingAction = 'write';
+      openNickModal('글을 쓰려면 닉네임이 필요해요!');
+      return;
+    }
+    document.getElementById('writeOverlay').classList.remove('hidden');
+    document.getElementById('writeTitle').focus();
+    document.getElementById('writeError').textContent = '';
+  }
+  function closeWrite() {
+    document.getElementById('writeOverlay').classList.add('hidden');
+  }
+  function handleWriteOverlay(e) { if (e.target.id === 'writeOverlay') closeWrite(); }
+
+  async function submitWrite() {
+    const title = document.getElementById('writeTitle').value.trim();
+    const body  = document.getElementById('writeBody').value.trim();
+    const errEl = document.getElementById('writeError');
+    const btn   = document.getElementById('writeSubmitBtn');
+
+    if (title.length < 2) { errEl.textContent = '제목은 2자 이상 입력해주세요'; return; }
+    if (body.length  < 5) { errEl.textContent = '내용은 5자 이상 입력해주세요'; return; }
+    errEl.textContent = '';
+
+    btn.disabled = true; btn.textContent = '게시 중...';
+    try {
+      const r = await fetch(`${API}/posts`, {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type':'application/json' },
+        body: JSON.stringify({ title, body, guest_id: guestId }),
+      });
+      const d = await r.json();
+      if (d.ok) {
+        document.getElementById('writeTitle').value = '';
+        document.getElementById('writeBody').value  = '';
+        closeWrite();
+        // 피드 새로고침
+        await loadFeed(true);
+      } else if (d.error === 'nickname_required') {
+        myNickname = null; closeWrite();
+        openNickModal('글을 쓰려면 닉네임이 필요해요!');
+      } else if (d.error === 'rate_limit_post') {
+        errEl.textContent = '너무 빠릅니다. 잠시 후 다시 시도해주세요';
+      } else {
+        errEl.textContent = d.error || '오류가 발생했어요';
+      }
+    } catch { errEl.textContent = '오류가 발생했어요'; }
+    btn.disabled = false; btn.textContent = '게시하기';
+  }
+
   // ── 닉네임 모달 ──────────────────────────────────
   function openNickModal(sub) {
     document.getElementById('nickSub').textContent = sub || '닉네임이 필요해요!';
@@ -881,6 +1031,9 @@
         } else if (pendingAction === 'comment') {
           pendingAction = null;
           document.getElementById('commentInput').focus();
+        } else if (pendingAction === 'write') {
+          pendingAction = null;
+          openWrite();
         }
       } else {
         errEl.textContent = d.error || '오류가 발생했어요';
