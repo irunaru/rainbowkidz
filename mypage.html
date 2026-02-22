@@ -54,6 +54,19 @@
     .nick-edit-error { font-size:12px; color:var(--accent); margin-top:6px; min-height:16px; }
     .nick-edit-cooldown { font-size:12px; color:var(--sub); margin-top:6px; }
 
+    /* 프로필 이미지 업로드 */
+    .avatar-wrap { position:relative; width:64px; height:64px; flex-shrink:0; }
+    .profile-avatar { width:64px; height:64px; border-radius:16px; background:var(--bg); border:1.5px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:32px; overflow:hidden; width:100%; height:100%; }
+    .profile-avatar img { width:100%; height:100%; object-fit:cover; }
+    .avatar-upload-btn { position:absolute; bottom:-4px; right:-4px; width:22px; height:22px; background:var(--text); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; cursor:pointer; border:2px solid var(--card); }
+    /* 새 댓글 배지 */
+    .tab-badge { display:inline-block; background:var(--accent); color:#fff; border-radius:10px; font-size:10px; font-weight:700; padding:1px 6px; margin-left:4px; vertical-align:middle; }
+    /* 야르 목록 */
+    .yar-item { display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--border); }
+    .yar-item:last-child { border-bottom:none; }
+    .yar-nick { font-size:14px; font-weight:700; }
+    .yar-post-title { font-size:12px; color:var(--sub); margin-top:2px; }
+    .yar-time { font-size:11px; color:var(--sub); margin-left:auto; white-space:nowrap; }
     /* 기기 안내 */
     .device-notice { background:#fff9ee; border:1px solid #ffe5b4; border-radius:12px; padding:12px 14px; font-size:13px; color:#7c5c00; line-height:1.5; margin-bottom:16px; }
 
@@ -101,6 +114,23 @@
     .bottom-nav a.active { color:var(--text); }
     .nav-icon { font-size:22px; }
 
+    /* 글쓰기 모달 */
+    .write-overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:flex-end; justify-content:center; z-index:3000; }
+    .write-overlay.hidden { display:none; }
+    .write-panel { width:100%; max-width:640px; background:var(--card); border-radius:20px 20px 0 0; padding:0 0 env(safe-area-inset-bottom,0); }
+    .write-handle { width:36px; height:4px; background:var(--border); border-radius:2px; margin:10px auto; }
+    .write-head { padding:0 16px 12px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border); }
+    .write-head-title { font-size:17px; font-weight:900; }
+    .write-close { padding:6px 14px; border:1px solid var(--border); border-radius:20px; background:var(--bg); font-size:12px; cursor:pointer; font-family:inherit; }
+    .write-body { padding:16px; }
+    .write-input { width:100%; padding:12px; border:1.5px solid var(--border); border-radius:12px; font-size:15px; font-family:inherit; margin-bottom:10px; }
+    .write-input:focus { outline:none; border-color:var(--text); }
+    .write-textarea { width:100%; padding:12px; border:1.5px solid var(--border); border-radius:12px; font-size:14px; font-family:inherit; min-height:120px; resize:none; line-height:1.6; }
+    .write-textarea:focus { outline:none; border-color:var(--text); }
+    .write-footer { display:flex; gap:8px; padding:12px 16px; border-top:1px solid var(--border); padding-bottom:calc(12px + env(safe-area-inset-bottom,0)); }
+    .write-submit { flex:1; padding:13px; background:var(--text); color:#fff; border:none; border-radius:12px; font-size:15px; font-weight:700; cursor:pointer; font-family:inherit; }
+    .write-submit:disabled { opacity:.5; }
+    .write-error { font-size:12px; color:var(--accent); min-height:16px; padding:0 16px 8px; }
     /* 게시글 상세 오버레이 (index.html에서 복사) */
     .overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:flex-end; justify-content:center; z-index:2000; }
     .overlay.hidden { display:none; }
@@ -162,7 +192,11 @@
   <!-- 프로필 카드 -->
   <div class="profile-card" id="profileCard">
     <div class="profile-top">
-      <div class="profile-avatar">👤</div>
+      <div class="avatar-wrap" onclick="document.getElementById('avatarFileInput').click()" title="프로필 사진 변경" style="cursor:pointer;">
+        <div class="profile-avatar" id="profileAvatar">👤</div>
+        <div class="avatar-upload-btn">📷</div>
+      </div>
+      <input type="file" id="avatarFileInput" accept="image/*" style="display:none" onchange="uploadAvatar(this)">
       <div class="profile-info">
         <div class="profile-nick" id="nickDisplay">닉네임 없음</div>
         <div class="profile-sub" id="profileSub">이 기기에서 작성한 글과 댓글을 볼 수 있어요</div>
@@ -209,7 +243,8 @@
   <!-- 탭 -->
   <div class="tab-bar">
     <button class="tab-btn active" id="tabPosts"    onclick="switchTab('posts')">📝 내 글</button>
-    <button class="tab-btn"        id="tabComments" onclick="switchTab('comments')">💬 내 댓글</button>
+    <button class="tab-btn"        id="tabComments" onclick="switchTab('comments')">💬 내 댓글<span class="tab-badge hidden" id="cmtBadge"></span></button>
+    <button class="tab-btn"        id="tabYars"     onclick="switchTab('yars')">🌟 야르~</button>
   </div>
 
   <!-- 내 글 목록 -->
@@ -224,6 +259,9 @@
     <div class="skel" style="height:80px;margin-bottom:10px;"></div>
   </div>
 
+  <!-- 받은 야르~ 목록 -->
+  <div id="yarsSection" class="hidden"></div>
+
   <!-- 더 보기 -->
   <button class="load-more hidden" id="loadMoreBtn" onclick="loadMore()">더 보기</button>
 
@@ -232,7 +270,29 @@
 <!-- 바텀 네비 -->
 <div class="bottom-nav">
   <a href="index.html"><span class="nav-icon">🏠</span>홈</a>
+  <a href="#" onclick="openWrite();return false;" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 0 6px;text-decoration:none;color:var(--sub);font-size:10px;font-weight:600;gap:2px;">
+    <span style="width:42px;height:28px;background:var(--text);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:18px;">✏️</span>글쓰기
+  </a>
   <a href="mypage.html" class="active"><span class="nav-icon">👤</span>내 페이지</a>
+</div>
+
+<!-- 글쓰기 모달 -->
+<div class="write-overlay hidden" id="writeOverlay" onclick="handleWriteOverlay(event)">
+  <div class="write-panel" onclick="event.stopPropagation()">
+    <div class="write-handle"></div>
+    <div class="write-head">
+      <div class="write-head-title">✏️ 이야기 쓰기</div>
+      <button class="write-close" onclick="closeWrite()">✕ 닫기</button>
+    </div>
+    <div class="write-body">
+      <input class="write-input" id="writeTitle" placeholder="제목 (2~80자)" maxlength="80">
+      <textarea class="write-textarea" id="writeBody" placeholder="내용을 입력하세요... (5자 이상)" maxlength="5000"></textarea>
+    </div>
+    <div class="write-error" id="writeError"></div>
+    <div class="write-footer">
+      <button class="write-submit" id="writeSubmitBtn" onclick="submitWrite()">게시하기</button>
+    </div>
+  </div>
 </div>
 
 <!-- 게시글 상세 패널 -->
@@ -339,6 +399,90 @@
     } catch {}
   }
 
+  // ── 글쓰기 모달 ─────────────────────────────────
+  async function openWrite() {
+    if (!myNickname && guestId) {
+      try {
+        const m = await fetch(`${API}/me`, { credentials:'include' });
+        if (m.ok) { const md = await m.json(); myNickname = md.guest?.nickname || null; }
+      } catch {}
+      if (!myNickname) myNickname = localStorage.getItem('rkNickname');
+    }
+    if (!myNickname) {
+      alert('닉네임을 먼저 설정해주세요. 내 페이지 상단에서 닉네임을 입력해주세요!');
+      toggleNickEdit();
+      return;
+    }
+    document.getElementById('writeOverlay').classList.remove('hidden');
+    document.getElementById('writeTitle').focus();
+    document.getElementById('writeError').textContent = '';
+  }
+  function closeWrite() { document.getElementById('writeOverlay').classList.add('hidden'); }
+  function handleWriteOverlay(e) { if (e.target.id === 'writeOverlay') closeWrite(); }
+
+  async function submitWrite() {
+    const title = document.getElementById('writeTitle').value.trim();
+    const body  = document.getElementById('writeBody').value.trim();
+    const errEl = document.getElementById('writeError');
+    const btn   = document.getElementById('writeSubmitBtn');
+    if (title.length < 2) { errEl.textContent = '제목은 2자 이상 입력해주세요'; return; }
+    if (body.length  < 5) { errEl.textContent = '내용은 5자 이상 입력해주세요'; return; }
+    errEl.textContent = '';
+    btn.disabled = true; btn.textContent = '게시 중...';
+    try {
+      const r = await fetch(`${API}/posts`, {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type':'application/json' },
+        body: JSON.stringify({ title, body, guest_id: guestId }),
+      });
+      const d = await r.json();
+      if (d.ok) {
+        document.getElementById('writeTitle').value = '';
+        document.getElementById('writeBody').value  = '';
+        closeWrite();
+        // 내 글 목록 새로고침
+        myPosts = []; postsOffset = 0;
+        await loadMyPosts(true);
+        switchTab('posts');
+      } else if (d.error === 'rate_limit_post') {
+        errEl.textContent = '너무 빠릅니다. 잠시 후 다시 시도해주세요';
+      } else {
+        errEl.textContent = d.error || '오류가 발생했어요';
+      }
+    } catch { errEl.textContent = '오류가 발생했어요'; }
+    btn.disabled = false; btn.textContent = '게시하기';
+  }
+
+  // ── 프로필 이미지 업로드 ────────────────────────────
+  async function uploadAvatar(input) {
+    const file = input.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { alert('5MB 이하 이미지만 가능해요'); return; }
+
+    const avatarEl = document.getElementById('profileAvatar');
+    avatarEl.innerHTML = '<div class="spinner"></div>';
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      const r = await fetch(`${API}/guest/upload-image`, {
+        method: 'POST', credentials: 'include', body: formData,
+      });
+      const d = await r.json();
+      if (d.ok) {
+        avatarEl.innerHTML = `<img src="${d.image_url}?t=${Date.now()}" alt="프로필">`;
+      } else {
+        alert(d.error || '업로드 실패');
+        avatarEl.textContent = '👤';
+      }
+    } catch {
+      alert('업로드 오류가 발생했어요');
+      avatarEl.textContent = '👤';
+    }
+    input.value = '';
+  }
+
   // ── 닉네임 편집 ──────────────────────────────────
   function toggleNickEdit() {
     const wrap = document.getElementById('nickEditWrap');
@@ -412,12 +556,15 @@
     currentTab = tab;
     document.getElementById('tabPosts').classList.toggle('active', tab === 'posts');
     document.getElementById('tabComments').classList.toggle('active', tab === 'comments');
+    document.getElementById('tabYars').classList.toggle('active', tab === 'yars');
     document.getElementById('postsSection').classList.toggle('hidden', tab !== 'posts');
     document.getElementById('commentsSection').classList.toggle('hidden', tab !== 'comments');
+    document.getElementById('yarsSection').classList.toggle('hidden', tab !== 'yars');
     document.getElementById('loadMoreBtn').classList.add('hidden');
 
     if (tab === 'posts' && myPosts.length === 0) loadMyPosts(true);
-    if (tab === 'comments' && myComments.length === 0) loadMyComments(true);
+    if (tab === 'comments') { markCommentsRead(); if (myComments.length === 0) loadMyComments(true); }
+    if (tab === 'yars') loadYarers();
   }
 
   // ── 내 글 로드 ───────────────────────────────────
@@ -442,6 +589,7 @@
   function renderPosts(reset = true) {
     const sec = document.getElementById('postsSection');
     document.getElementById('statPosts').textContent = myPosts.length + (hasMore && currentTab === 'posts' ? '+' : '');
+    checkNewComments();
 
     if (!myPosts.length) {
       sec.innerHTML = `<div class="empty">
@@ -501,6 +649,31 @@
     } catch {
       sec.innerHTML = '<div class="empty"><div class="empty-icon">😢</div><div class="empty-text">불러오기 실패</div></div>';
     }
+  }
+
+  // 새 댓글 알림: 내 글에 달린 댓글 수를 마지막 확인 시점과 비교
+  function checkNewComments() {
+    if (!myPosts.length) return;
+    const savedCounts = JSON.parse(localStorage.getItem('rkCmtCounts') || '{}');
+    let hasNew = false;
+    let totalNew = 0;
+    myPosts.forEach(p => {
+      const saved = savedCounts[p.id] || 0;
+      if (p.comment_count > saved) { hasNew = true; totalNew += p.comment_count - saved; }
+    });
+    const badge = document.getElementById('cmtBadge');
+    if (badge) {
+      badge.textContent = totalNew > 0 ? totalNew : '';
+      badge.classList.toggle('hidden', !hasNew);
+    }
+  }
+
+  function markCommentsRead() {
+    const counts = {};
+    myPosts.forEach(p => { counts[p.id] = p.comment_count; });
+    localStorage.setItem('rkCmtCounts', JSON.stringify(counts));
+    const badge = document.getElementById('cmtBadge');
+    if (badge) { badge.textContent = ''; badge.classList.add('hidden'); }
   }
 
   function renderCommentList(reset = true) {
@@ -592,8 +765,61 @@
 
   // ── 야르~ 카운트 집계 ────────────────────────────
   function calcTotalYars() {
+    // 야르~ 수는 yar_count 합산으로 빠르게 표시 (상세 목록은 탭 클릭 시 로드)
     const total = myPosts.reduce((s, p) => s + (p.yar_count || 0), 0);
     document.getElementById('statYars').textContent = total;
+  }
+
+  // ── 받은 야르~ 목록 ────────────────────────────────
+  async function loadYarers() {
+    const sec = document.getElementById('yarsSection');
+    if (!myPosts.length) {
+      sec.innerHTML = '<div class="empty"><div class="empty-icon">🌟</div><div class="empty-text">작성한 글이 없어요</div></div>';
+      return;
+    }
+    sec.innerHTML = '<div class="skel" style="height:60px;margin-bottom:8px;"></div>'.repeat(3);
+
+    try {
+      // 내 글 전체의 야르~ 목록을 병렬로 가져오기
+      const results = await Promise.all(
+        myPosts.map(p =>
+          fetch(`${API}/posts/${p.id}/yars`)
+            .then(r => r.json())
+            .then(d => ({ post: p, yarers: d.yarers || [] }))
+            .catch(() => ({ post: p, yarers: [] }))
+        )
+      );
+
+      // 전체 야르~ 목록 합산 (최신순)
+      const allYarers = [];
+      results.forEach(({ post, yarers }) => {
+        yarers.forEach(y => allYarers.push({ ...y, post_title: post.title || post.body?.slice(0,30) || '' }));
+      });
+      allYarers.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+      // 통계 업데이트
+      document.getElementById('statYars').textContent = allYarers.length;
+
+      if (!allYarers.length) {
+        sec.innerHTML = '<div class="empty"><div class="empty-icon">🌟</div><div class="empty-text">아직 받은 야르~가 없어요</div><div class="empty-sub">좋은 글을 쓰면 친구들이 야르~를 누를 거예요!</div></div>';
+        return;
+      }
+
+      sec.innerHTML = `<div style="background:var(--card);border-radius:var(--radius-card);padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.06);">
+        ${allYarers.map(y => `<div class="yar-item">
+          <div>
+            <div style="font-size:16px;">🌟</div>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div class="yar-nick">${esc(y.nickname)}</div>
+            <div class="yar-post-title">${esc(y.post_title)}</div>
+          </div>
+          <div class="yar-time">${relTime(y.created_at)}</div>
+        </div>`).join('')}
+      </div>`;
+    } catch {
+      sec.innerHTML = '<div class="empty"><div class="empty-icon">😢</div><div class="empty-text">불러오기 실패</div></div>';
+    }
   }
 
   // ── 게시글 상세 패널 ─────────────────────────────
@@ -775,9 +1001,25 @@
   async function init() {
     await initGuest();
 
-    // 닉네임 표시
+    // 닉네임 + 프로필 이미지 표시
     document.getElementById('nickDisplay').textContent = myNickname || '닉네임 없음';
     updateProfileSub();
+
+    // 프로필 이미지 로드 (/me에서 image_url 포함)
+    try {
+      const m = await fetch(`${API}/me`, { credentials:'include' });
+      if (m.ok) {
+        const md = await m.json();
+        if (md.guest?.image_url) {
+          document.getElementById('profileAvatar').innerHTML =
+            `<img src="${md.guest.image_url}" alt="프로필">`;
+        }
+        if (md.guest?.nickname && !myNickname) {
+          myNickname = md.guest.nickname;
+          document.getElementById('nickDisplay').textContent = myNickname;
+        }
+      }
+    } catch {}
 
     // 내 글 로드
     await loadMyPosts(true);
