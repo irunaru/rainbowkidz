@@ -383,14 +383,21 @@
   // ── 게스트 초기화 ────────────────────────────────
   async function initGuest() {
     try {
-      const r = await fetch(`${API}/guest/init`, { method:'POST', credentials:'include' });
+      const localGid = localStorage.getItem('rkGuestId');
+      const r = await fetch(`${API}/guest/init`, {
+        method:'POST',
+        credentials:'include',
+        headers: { 'Content-Type':'application/json' },
+        body: JSON.stringify({ existing_gid: localGid }),
+      });
       if (!r.ok) return;
       const d = await r.json();
       guestId = d.guest_id;
+      if (guestId) localStorage.setItem('rkGuestId', guestId);
 
       // 항상 /me 호출로 닉네임 확인 (서버가 최종 권위)
       try {
-        const m = await fetch(`${API}/me`, { credentials:'include' });
+        const m = await fetch(`${API}/me?guest_id=${encodeURIComponent(guestId||'')}`, { credentials:'include' });
         if (m.ok) {
           const md = await m.json();
           myNickname = md.guest?.nickname || null;
@@ -407,7 +414,7 @@
   async function openWrite() {
     if (!myNickname && guestId) {
       try {
-        const m = await fetch(`${API}/me`, { credentials:'include' });
+        const m = await fetch(`${API}/me?guest_id=${encodeURIComponent(guestId||'')}`, { credentials:'include' });
         if (m.ok) { const md = await m.json(); myNickname = md.guest?.nickname || null; }
       } catch {}
       if (!myNickname) myNickname = localStorage.getItem('rkNickname');
@@ -580,7 +587,7 @@
     if (reset) sec.innerHTML = '<div class="skel" style="height:100px;margin-bottom:10px;"></div>'.repeat(3);
 
     try {
-      const r = await fetch(`${API}/my/posts?limit=${LIMIT}&offset=${postsOffset}`, { credentials:'include' });
+      const r = await fetch(`${API}/my/posts?limit=${LIMIT}&offset=${postsOffset}&guest_id=${encodeURIComponent(guestId||'')}`, { credentials:'include' });
       const d = await r.json();
       const newPosts = d.posts || [];
       myPosts = reset ? newPosts : [...myPosts, ...newPosts];
@@ -645,7 +652,7 @@
     if (reset) sec.innerHTML = '<div class="skel" style="height:80px;margin-bottom:10px;"></div>'.repeat(3);
 
     try {
-      const r = await fetch(`${API}/my/comments?limit=${LIMIT}&offset=${commentsOffset}`, { credentials:'include' });
+      const r = await fetch(`${API}/my/comments?limit=${LIMIT}&offset=${commentsOffset}&guest_id=${encodeURIComponent(guestId||'')}`, { credentials:'include' });
       const d = await r.json();
       const newCmts = d.comments || [];
       myComments = reset ? newCmts : [...myComments, ...newCmts];
@@ -904,7 +911,7 @@
         method: wasYar ? 'DELETE' : 'POST',
         credentials: 'include',
         headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({}),
+        body: JSON.stringify({ guest_id: guestId }),
       });
       const d = await r.json();
       if (d.ok) {

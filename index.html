@@ -442,10 +442,17 @@
   // ── 게스트 초기화 ────────────────────────────────
   async function initGuest() {
     try {
-      const r = await fetch(`${API}/guest/init`, { method:'POST', credentials:'include' });
+      const localGid = localStorage.getItem('rkGuestId');
+      const r = await fetch(`${API}/guest/init`, {
+        method:'POST',
+        credentials:'include',
+        headers: { 'Content-Type':'application/json' },
+        body: JSON.stringify({ existing_gid: localGid }),
+      });
       if (!r.ok) return;
       const d = await r.json();
       guestId = d.guest_id;
+      if (guestId) localStorage.setItem('rkGuestId', guestId);
 
       // 새 기기 감지: is_new=true이고 이전에 본 적 없으면 토스트
       if (d.is_new && !localStorage.getItem('rkSeen')) {
@@ -458,7 +465,7 @@
 
       // 항상 /me 호출로 닉네임 확인 (서버가 최종 권위)
       try {
-        const m = await fetch(`${API}/me`, { credentials:'include' });
+        const m = await fetch(`${API}/me?guest_id=${encodeURIComponent(guestId||'')}`, { credentials:'include' });
         if (m.ok) {
           const md = await m.json();
           myNickname = md.guest?.nickname || null;
@@ -675,7 +682,10 @@
       return;
     }
     const wasYar = getYar(postId);
-    const post = feedPosts.find(p => p.id == postId) || allNotices.find(p => p.id == postId) || null;
+    const post =
+      feedPosts.find(p => p.id == postId) ||
+      allNotices.find(p => p.id == postId) ||
+      (currentPost && currentPost.id == postId ? currentPost : null);
     if (!post) return;
 
     post.yar_count = (post.yar_count||0) + (wasYar ? -1 : 1);
@@ -690,11 +700,11 @@
     if (currentPost?.id == postId) syncDetailYar(post.yar_count, !wasYar);
 
     try {
-      const r = await fetch(`${API}/posts/${postId}/yar`, {
+      const r = await fetch(`${API}/posts/${postId}/yar?guest_id=${encodeURIComponent(guestId||'')}`, {
         method: wasYar ? 'DELETE' : 'POST',
         credentials: 'include',
         headers: { 'Content-Type':'application/json' },
-        body: JSON.stringify({}),
+        body: JSON.stringify({ guest_id: guestId }),
       });
       const d = await r.json();
       if (d.ok) {
