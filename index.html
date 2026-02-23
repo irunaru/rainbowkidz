@@ -361,23 +361,10 @@
 </div>
 
 <script>
-  const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
-
-  // --- API base normalization (prevents /api/v1/api/v1 bugs) ---
-  const API_ORIGIN = (typeof API !== 'undefined' && API) ? API : 'https://rainbowkidz-api.irunaru.workers.dev';
-  const API_BASE = (() => {
-    const s = String(API_ORIGIN).replace(/\/+$/,'');
-    return s.endsWith('/api/v1') ? s : (s + '/api/v1');
-  })();
-
-  function apiUrl(path){
-    return API_BASE + (path.startsWith('/') ? path : ('/' + path));
-  }
-  function apiBoardPostsUrl(slug){
-    const s = String(slug || 'classroom').trim() || 'classroom';
-    return apiUrl('/boards/' + encodeURIComponent(s) + '/posts');
-  }
-
+  (() => {
+  if (window.__rk_index_loaded) return;
+  window.__rk_index_loaded = true;
+const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
   const apiUrl = (path, needGuest = false) => {
     if (!needGuest || !guestId) return `${API}${path}`;
     const sep = path.includes('?') ? '&' : '?';
@@ -438,7 +425,6 @@
   // ── 게스트 초기화
   async function initGuest() {
     try {
-      console.log('API_BASE:', API_BASE);
       const r = await fetch(apiUrl('/guest/init'), {
         method:'POST', credentials:'include',
         headers:{'Content-Type':'application/json'},
@@ -969,108 +955,27 @@
   }
   init();
 
-  
-  async function loadActivities() {
-    const container = document.getElementById('activityFeed');
-    if (!container) return;
-
-    try {
-      container.innerHTML = '<div style="padding:20px;text-align:center;color:var(--sub,#8e8e93);">불러오는 중...</div>';
-
-      let r = await fetch(apiBoardPostsUrl('classroom'), { method:'GET', credentials:'include' });
-      if (!r.ok) {
-        r = await fetch(apiUrl('/posts'), { method:'GET', credentials:'include' });
-      }
-      if (!r.ok) {
-        r = await fetch(apiUrl('/timeline'), { method:'GET', credentials:'include' });
-      }
-      if (!r.ok) {
-        const t = await r.text().catch(()=>'');
-        throw new Error('HTTP_' + r.status + (t ? (' ' + t.slice(0,160)) : ''));
-      }
-
-      const d = await r.json();
-      const raw = d.posts || d.data || (Array.isArray(d) ? d : []);
-      // Client-side safety: exclude system-only posts unless explicitly requested
-      const posts = (raw || []).filter(p => !(p && (p.is_system_post === true)));
-
-      if (!posts || posts.length === 0) {
-        container.innerHTML = '<div style="padding:40px;text-align:center;color:var(--sub,#8e8e93);">첫 번째 이야기를 들려주세요! 🐾</div>';
-        return;
-      }
-
-      // Stable author mapping
-      const mapped = posts.map(p => {
-        const isSystem = p.author_type === 'system' || !!p.system_user_id || !!p.system_users;
-        const authorName = isSystem
-          ? (p.system_users?.display_name || p.character_name || '친구')
-          : (p.guests?.nickname || p.nickname || '익명 친구');
-        const authorEmoji = isSystem
-          ? (p.system_users?.emoji || p.character_emoji || '🐾')
-          : '👤';
-        const authorImage = isSystem
-          ? (p.system_users?.image_url || p.character_image_url || '')
-          : (p.guests?.image_url || p.guest_image_url || '');
-        return { ...p, __authorName: authorName, __authorEmoji: authorEmoji, __authorImage: authorImage };
-      });
-
-      if (typeof makeFeedCard === 'function') {
-        container.innerHTML = mapped.map(p => makeFeedCard(p)).join('');
-      } else if (typeof renderActivity === 'function') {
-        renderActivity(mapped);
-      } else {
-        container.innerHTML = mapped.map(item => `
-          <div class="activity-card">
-            <div class="card-header">
-              <div class="avatar-wrap">
-                ${item.__authorImage ? `<img loading="lazy" class="avatar-img" src="${esc(item.__authorImage)}" alt="avatar">`
-                  : `<div class="avatar">${esc(item.__authorEmoji)}</div>`}
-              </div>
-              <div class="user-info">
-                <div class="name">${esc(item.__authorName)}</div>
-                <div class="time">${(typeof formatTime==='function') ? esc(formatTime(item.created_at)) : ''}</div>
-              </div>
-            </div>
-            <div class="card-body">${safeTextToHtml(item.body || '')}</div>
-            ${item.media_url ? `<img loading="lazy" src="${esc(item.media_url)}" class="card-image" alt="image">` : ''}
-          </div>
-        `).join('');
-      }
-    } catch (err) {
-      console.error('loadActivities error:', err);
-      container.innerHTML = '<div style="padding:20px;text-align:center;color:var(--red,#ff3b30);">이야기를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.</div>';
-    }
-  }
-
-
-      // Prefer existing card builder if present; fallback to simple template
-      if (typeof makeFeedCard === 'function') {
-        container.innerHTML = posts.map(p => makeFeedCard(p)).join('');
-      } else if (typeof renderActivity === 'function') {
-        renderActivity(posts);
-      } else {
-        container.innerHTML = posts.map(item => `
-          <div class="activity-card">
-            <div class="card-header">
-              <div class="avatar">${(item.system_users?.emoji || item.character_emoji || '🐾')}</div>
-              <div class="user-info">
-                <div class="name">${esc(item.system_users?.display_name || item.character_name || item.nickname || '친구')}</div>
-                <div class="time">${(typeof formatTime==='function')?esc(formatTime(item.created_at)):''}</div>
-              </div>
-            </div>
-            <div class="card-body">${safeTextToHtml(item.body || '')}</div>
-            ${item.media_url ? `<img loading="lazy" src="${esc(item.media_url)}" class="card-image">` : ''}
-          </div>
-        `).join('');
-      }
-    } catch (err) {
-      console.error('loadActivities error:', err);
-      container.innerHTML = '<div style="padding:20px;text-align:center;color:var(--red,#ff3b30);">이야기를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.</div>';
-    }
-  }
-
+  // Expose handlers used by inline onclick attributes
+  if (typeof closeDetail === 'function') window.closeDetail = closeDetail;
+  if (typeof closeProfile === 'function') window.closeProfile = closeProfile;
+  if (typeof closeWrite === 'function') window.closeWrite = closeWrite;
+  if (typeof handleDetailOverlay === 'function') window.handleDetailOverlay = handleDetailOverlay;
+  if (typeof handleNickOverlay === 'function') window.handleNickOverlay = handleNickOverlay;
+  if (typeof handleProfileOverlay === 'function') window.handleProfileOverlay = handleProfileOverlay;
+  if (typeof handleWriteOverlay === 'function') window.handleWriteOverlay = handleWriteOverlay;
+  if (typeof loadMore === 'function') window.loadMore = loadMore;
+  if (typeof openDetail === 'function') window.openDetail = openDetail;
+  if (typeof openProfile === 'function') window.openProfile = openProfile;
+  if (typeof openWrite === 'function') window.openWrite = openWrite;
+  if (typeof softRefresh === 'function') window.softRefresh = softRefresh;
+  if (typeof submitComment === 'function') window.submitComment = submitComment;
+  if (typeof submitNickname === 'function') window.submitNickname = submitNickname;
+  if (typeof submitWrite === 'function') window.submitWrite = submitWrite;
+  if (typeof switchCommentTab === 'function') window.switchCommentTab = switchCommentTab;
+  if (typeof switchTab === 'function') window.switchTab = switchTab;
+  if (typeof toggleDetailYar === 'function') window.toggleDetailYar = toggleDetailYar;
+  if (typeof toggleYar === 'function') window.toggleYar = toggleYar;
+})();
 </script>
-
-<div id="activityFeed"></div>
 </body>
 </html>
