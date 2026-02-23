@@ -204,149 +204,7 @@
     .nick-input:focus { outline:none; border-color:var(--text); }
     .nick-error { font-size:12px; color:var(--accent); min-height:16px; margin-bottom:8px; }
     .nick-btn   { width:100%; padding:13px; background:var(--text); color:#fff; border:none; border-radius:12px; font-size:15px; font-weight:700; cursor:pointer; font-family:inherit; min-height:48px; }
-  
-
-/* ===============================
-   iOS Edition Overrides (Modern)
-   =============================== */
-:root{
-  --bg:#f2f2f7;
-  --card:#ffffff;
-  --text:#1c1c1e;
-  --sub:#8e8e93;
-  --border:rgba(0,0,0,0.06);
-  --accent:#ff6b6b;
-  --blue:#007aff;
-  --green:#34c759;
-  --red:#ff3b30;
-  --radius-card:22px;
-  --shadow-card:0 8px 20px rgba(0,0,0,0.04);
-}
-
-body{
-  background:var(--bg) !important;
-  color:var(--text) !important;
-  font-family:'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
-  line-height:1.5;
-}
-
-.header{
-  position:sticky;
-  top:0;
-  z-index:50;
-  background:var(--bg);
-  padding:52px 18px 14px !important;
-  border-bottom:0.5px solid rgba(0,0,0,0.04);
-}
-
-.header .title, .header h1, .header .h1{
-  font-size:32px !important;
-  font-weight:900 !important;
-  letter-spacing:-1px;
-}
-
-.header .sub, .header p, .header .subtitle{
-  color:var(--sub) !important;
-  font-size:14px !important;
-  margin-top:4px;
-}
-
-.card, .tool-card, .activity-card, .feed-card, .panel{
-  background:var(--card) !important;
-  border-radius:var(--radius-card) !important;
-  border:1px solid var(--border) !important;
-  box-shadow:var(--shadow-card) !important;
-}
-
-button, .btn{
-  border-radius:16px !important;
-}
-
-.bottom-nav{
-  background:rgba(255,255,255,0.78) !important;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-top:0.5px solid rgba(0,0,0,0.08) !important;
-}
-
-.nav-item{
-  color:var(--sub) !important;
-}
-
-.nav-item.active{
-  color:var(--blue) !important;
-}
-
-
-/* ---- Index specific ---- */
-.section-header, .section-title{
-  padding:0 18px;
-}
-
-#noticeSection{
-  margin: 10px 18px 14px;
-}
-
-#feedSection{
-  padding:0 18px 90px;
-}
-
-.char-item{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:18px;
-  box-shadow:var(--shadow-card);
-  transition: transform .18s cubic-bezier(.4,0,.2,1);
-}
-.char-item:active{ transform: scale(0.97); }
-
-.profile-tag{
-  background:rgba(0,0,0,0.04) !important;
-  color:var(--sub) !important;
-  border-radius:999px !important;
-}
-
-/* Floating write button */
-.fab, #fab, .write-fab{
-  position:fixed;
-  right:18px;
-  bottom:92px;
-  width:56px;
-  height:56px;
-  border-radius:28px;
-  background:var(--blue);
-  color:white;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:28px;
-  box-shadow:0 8px 16px rgba(0,122,255,.28);
-  z-index:80;
-}
-.fab:active, #fab:active, .write-fab:active{ transform: scale(.92); }
-
-/* Detail hero and top close (keep if already present) */
-.detail-panel{ position:relative; }
-.detail-close-top{
-  position:absolute; top:10px; right:12px;
-  width:40px; height:40px; border-radius:14px;
-  border:1px solid var(--border); background:rgba(255,255,255,0.9);
-  display:flex; align-items:center; justify-content:center;
-  font-size:18px; font-weight:900; cursor:pointer;
-}
-.detail-hero{ display:flex; justify-content:center; padding:8px 0 10px; }
-.detail-hero-avatar{
-  width:160px; height:160px; border-radius:26px; overflow:hidden;
-  border:1px solid var(--border); background:var(--bg);
-  display:flex; align-items:center; justify-content:center;
-}
-.detail-hero-avatar img{ width:100%; height:100%; object-fit:cover; }
-
-
-html, body { overflow-x: hidden; }
-
-.bottom-nav{ z-index:1000 !important; }
-</style>
+  </style>
 </head>
 <body>
 
@@ -504,6 +362,22 @@ html, body { overflow-x: hidden; }
 
 <script>
   const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
+
+  // --- API base normalization (prevents /api/v1/api/v1 bugs) ---
+  const API_ORIGIN = (typeof API !== 'undefined' && API) ? API : 'https://rainbowkidz-api.irunaru.workers.dev';
+  const API_BASE = (() => {
+    const s = String(API_ORIGIN).replace(/\/+$/,'');
+    return s.endsWith('/api/v1') ? s : (s + '/api/v1');
+  })();
+
+  function apiUrl(path){
+    return API_BASE + (path.startsWith('/') ? path : ('/' + path));
+  }
+  function apiBoardPostsUrl(slug){
+    const s = String(slug || 'classroom').trim() || 'classroom';
+    return apiUrl('/boards/' + encodeURIComponent(s) + '/posts');
+  }
+
   const apiUrl = (path, needGuest = false) => {
     if (!needGuest || !guestId) return `${API}${path}`;
     const sep = path.includes('?') ? '&' : '?';
@@ -564,6 +438,7 @@ html, body { overflow-x: hidden; }
   // ── 게스트 초기화
   async function initGuest() {
     try {
+      console.log('API_BASE:', API_BASE);
       const r = await fetch(apiUrl('/guest/init'), {
         method:'POST', credentials:'include',
         headers:{'Content-Type':'application/json'},
@@ -724,43 +599,49 @@ html, body { overflow-x: hidden; }
     else { btn.classList.add('hidden'); }
   }
 
-  
-function makeFeedCard(item) {
-  const isSystem = item.author_type === 'system';
-  const name = isSystem ? (item.character_name || item.system_users?.display_name || '캐릭터') : (item.nickname || item.guests?.nickname || '익명');
-  const emoji = isSystem ? (item.character_emoji || item.system_users?.emoji || '🙂') : '👤';
-  const avatarImg = isSystem ? (item.character_image_url || item.system_users?.image_url || '') : (item.guest_image_url || item.guests?.image_url || '');
+  function makeFeedCard(p) {
+    const isYar    = getYar(p.id);
+    const isSystem = p.author_type === 'system';
+    const authorName = isSystem ? (p.character_name||'캐릭터') : (p.nickname||'익명');
+    const isMine = !isSystem && !!p.is_mine;
 
-  const title = item.title ? esc(item.title) : '';
-  const body = safeTextToHtml(item.body || '');
-  const time = (typeof formatTime === 'function') ? formatTime(item.created_at) : '';
+    let avatarHtml;
+    if (isSystem && p.character_image_url) {
+      avatarHtml = `<img src="${esc(p.character_image_url)}" alt="${esc(authorName)}" data-emoji="${esc(p.character_emoji||'👤')}" onerror="this.parentElement.removeChild(this);this.parentElement.textContent=this.dataset.emoji">`;
+    } else if (isSystem) {
+      avatarHtml = esc(p.character_emoji || '👤');
+    } else if (p.guest_image_url) {
+      avatarHtml = `<img src="${esc(p.guest_image_url)}" alt="${esc(authorName)}" onerror="this.parentElement.removeChild(this);this.parentElement.textContent='🗣️'">`;
+    } else {
+      avatarHtml = '🗣️';
+    }
 
-  const media = item.media_url ? `<img loading="lazy" src="${esc(item.media_url)}" class="card-image" alt="image">` : '';
-
-  const avatar = avatarImg
-    ? `<img loading="lazy" src="${esc(avatarImg)}" alt="avatar" class="avatar-img">`
-    : `<div class="avatar">${esc(emoji)}</div>`;
-
-  return `
-    <div class="activity-card" data-post-id="${esc(item.id)}" onclick="openDetail('${esc(item.id)}')">
-      <div class="card-header">
-        <div class="avatar-wrap">${avatar}</div>
-        <div class="user-info">
-          <div class="name">${esc(name)}</div>
-          <div class="time">${esc(time)}</div>
+    const card = document.createElement('div');
+    card.className = 'feed-card';
+    card.id = `feed-${p.id}`;
+    card.innerHTML = `
+      <div class="feed-card-head">
+        <div class="feed-avatar">${avatarHtml}</div>
+        <div class="feed-author-wrap">
+          <span class="feed-char-name">${esc(authorName)}</span>
         </div>
+        <span class="feed-time">${relTime(p.created_at)}</span>
       </div>
-      ${title ? `<div class="card-title">${title}</div>` : ''}
-      <div class="card-body">${body}</div>
-      ${media}
-      <div class="card-actions" onclick="event.stopPropagation()">
-        <button class="act-btn" onclick="toggleYar('${esc(item.id)}')">♡ <span>${esc(String(item.like_count ?? 0))}</span></button>
-        <button class="act-btn" onclick="openDetail('${esc(item.id)}')">💬 <span>${esc(String(item.comment_count ?? 0))}</span></button>
+      <div class="feed-content" onclick="openDetail(${p.id})">
+        ${p.title ? `<div class="feed-title">${esc(p.title)}${isMine ? '<span class="mine-badge">내 글</span>' : ''}</div>` : ''}
+        <div class="feed-body">${esc(p.body||'')}</div>
       </div>
-    </div>
-  `;
-}
-
+      <div class="feed-footer">
+        <div class="feed-stats">
+          <span class="feed-stat">💬 댓글 ${p.comment_count||0}</span>
+          <span class="feed-stat">👁 조회 ${p.view_count||0}</span>
+        </div>
+        <button class="yar-btn${isYar?' active':''}" id="yar-${p.id}" onclick="toggleYar(event,${p.id})">
+          🌟 야르~ ${p.yar_count||0}
+        </button>
+      </div>`;
+    return card;
+  }
 
   // ── 야르~
   async function toggleYar(e, postId) {
@@ -1087,6 +968,109 @@ function makeFeedCard(item) {
     document.getElementById('globalLoader').classList.add('hidden');
   }
   init();
+
+  
+  async function loadActivities() {
+    const container = document.getElementById('activityFeed');
+    if (!container) return;
+
+    try {
+      container.innerHTML = '<div style="padding:20px;text-align:center;color:var(--sub,#8e8e93);">불러오는 중...</div>';
+
+      let r = await fetch(apiBoardPostsUrl('classroom'), { method:'GET', credentials:'include' });
+      if (!r.ok) {
+        r = await fetch(apiUrl('/posts'), { method:'GET', credentials:'include' });
+      }
+      if (!r.ok) {
+        r = await fetch(apiUrl('/timeline'), { method:'GET', credentials:'include' });
+      }
+      if (!r.ok) {
+        const t = await r.text().catch(()=>'');
+        throw new Error('HTTP_' + r.status + (t ? (' ' + t.slice(0,160)) : ''));
+      }
+
+      const d = await r.json();
+      const raw = d.posts || d.data || (Array.isArray(d) ? d : []);
+      // Client-side safety: exclude system-only posts unless explicitly requested
+      const posts = (raw || []).filter(p => !(p && (p.is_system_post === true)));
+
+      if (!posts || posts.length === 0) {
+        container.innerHTML = '<div style="padding:40px;text-align:center;color:var(--sub,#8e8e93);">첫 번째 이야기를 들려주세요! 🐾</div>';
+        return;
+      }
+
+      // Stable author mapping
+      const mapped = posts.map(p => {
+        const isSystem = p.author_type === 'system' || !!p.system_user_id || !!p.system_users;
+        const authorName = isSystem
+          ? (p.system_users?.display_name || p.character_name || '친구')
+          : (p.guests?.nickname || p.nickname || '익명 친구');
+        const authorEmoji = isSystem
+          ? (p.system_users?.emoji || p.character_emoji || '🐾')
+          : '👤';
+        const authorImage = isSystem
+          ? (p.system_users?.image_url || p.character_image_url || '')
+          : (p.guests?.image_url || p.guest_image_url || '');
+        return { ...p, __authorName: authorName, __authorEmoji: authorEmoji, __authorImage: authorImage };
+      });
+
+      if (typeof makeFeedCard === 'function') {
+        container.innerHTML = mapped.map(p => makeFeedCard(p)).join('');
+      } else if (typeof renderActivity === 'function') {
+        renderActivity(mapped);
+      } else {
+        container.innerHTML = mapped.map(item => `
+          <div class="activity-card">
+            <div class="card-header">
+              <div class="avatar-wrap">
+                ${item.__authorImage ? `<img loading="lazy" class="avatar-img" src="${esc(item.__authorImage)}" alt="avatar">`
+                  : `<div class="avatar">${esc(item.__authorEmoji)}</div>`}
+              </div>
+              <div class="user-info">
+                <div class="name">${esc(item.__authorName)}</div>
+                <div class="time">${(typeof formatTime==='function') ? esc(formatTime(item.created_at)) : ''}</div>
+              </div>
+            </div>
+            <div class="card-body">${safeTextToHtml(item.body || '')}</div>
+            ${item.media_url ? `<img loading="lazy" src="${esc(item.media_url)}" class="card-image" alt="image">` : ''}
+          </div>
+        `).join('');
+      }
+    } catch (err) {
+      console.error('loadActivities error:', err);
+      container.innerHTML = '<div style="padding:20px;text-align:center;color:var(--red,#ff3b30);">이야기를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.</div>';
+    }
+  }
+
+
+      // Prefer existing card builder if present; fallback to simple template
+      if (typeof makeFeedCard === 'function') {
+        container.innerHTML = posts.map(p => makeFeedCard(p)).join('');
+      } else if (typeof renderActivity === 'function') {
+        renderActivity(posts);
+      } else {
+        container.innerHTML = posts.map(item => `
+          <div class="activity-card">
+            <div class="card-header">
+              <div class="avatar">${(item.system_users?.emoji || item.character_emoji || '🐾')}</div>
+              <div class="user-info">
+                <div class="name">${esc(item.system_users?.display_name || item.character_name || item.nickname || '친구')}</div>
+                <div class="time">${(typeof formatTime==='function')?esc(formatTime(item.created_at)):''}</div>
+              </div>
+            </div>
+            <div class="card-body">${safeTextToHtml(item.body || '')}</div>
+            ${item.media_url ? `<img loading="lazy" src="${esc(item.media_url)}" class="card-image">` : ''}
+          </div>
+        `).join('');
+      }
+    } catch (err) {
+      console.error('loadActivities error:', err);
+      container.innerHTML = '<div style="padding:20px;text-align:center;color:var(--red,#ff3b30);">이야기를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.</div>';
+    }
+  }
+
 </script>
+
+<div id="activityFeed"></div>
 </body>
 </html>
