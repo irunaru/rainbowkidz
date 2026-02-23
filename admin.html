@@ -677,7 +677,7 @@
     if(file.size>5*1024*1024) { toast('5MB 이하 이미지만 가능해요',true); return; }
     const thumb = document.getElementById(thumbId);
     thumb.innerHTML='<div class="spinner" style="border-top-color:var(--blue);border-color:var(--border);"></div>';
-    const fd=new FormData(); fd.append('image',file); fd.append('character_id', String(selectedChar?.id||''));
+    const fd=new FormData(); fd.append('image',file);
     try {
       const r = await adminFetch('/admin/upload-image', { method:'POST', body:fd, headers:{'X-Admin-Key':adminKey} });
       const d = await r.json();
@@ -875,7 +875,7 @@
     if(!confirm('이 댓글을 삭제할까요?')) return;
     try {
       // admin 삭제 endpoint 없으면 일반 삭제 시도
-      const r=await adminFetch(`/admin/comments/${cmtId}`, {method:'DELETE'});
+      const r=await adminFetch(`/comments/${cmtId}`, {method:'DELETE'});
       const d=await r.json();
       if(d.ok) { toast('🗑 댓글 삭제 완료'); loadSelectedPostComments(); }
       else { toast(d.error||'삭제 실패',true); }
@@ -951,7 +951,7 @@
   async function deleteNotice(id) {
     if(!confirm('이 공지를 삭제할까요?')) return;
     try {
-      const r=await adminFetch(`/admin/posts/${id}`, {method:'DELETE'});
+      const r=await adminFetch(`/admin/notices/${id}`, {method:'DELETE'});
       const d=await r.json();
       if(d.ok) { document.getElementById(`mn-${id}`)?.remove(); showStatus('noticeManageStatus','✅ 삭제됐어요','success'); }
       else { showStatus('noticeManageStatus','❌ '+(d.error||'실패'),'error'); }
