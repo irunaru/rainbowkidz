@@ -4,274 +4,245 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>🌈 RainbowKidz Admin</title>
+  <title>🌈 관리자 - 무지개 유치원</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
   <style>
     * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
     :root {
-      --bg:#f2f2f7; --card:#fff; --text:#1c1c1e; --sub:#6e6e73; --border:#e5e5ea;
-      --blue:#007aff; --green:#34c759; --orange:#ff9f0a; --red:#ff3b30; --purple:#af52de;
+      --bg:#f2f2f7; --card:#fff; --text:#1c1c1e; --sub:#636366; --border:#e5e5ea;
+      --blue:#007aff; --green:#34c759; --red:#ff3b30; --orange:#ff9f0a; --purple:#af52de;
       --radius:16px;
     }
     body { font-family:'Noto Sans KR',-apple-system,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
     .hidden { display:none !important; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+    .skel { background:linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%); background-size:200% 100%; animation:shimmer 1.4s ease-in-out infinite; border-radius:12px; }
+    .spinner { display:inline-block; width:14px; height:14px; border:2px solid rgba(255,255,255,.35); border-top-color:#fff; border-radius:50%; animation:spin .7s linear infinite; }
 
 ```
-/* 비밀번호 게이트 - 상단 배치 (모바일 키보드에 안 가림) */
-#pwGate { position:fixed; inset:0; background:#fff; display:flex; align-items:flex-start; justify-content:center; z-index:9999; padding-top:60px; overflow-y:auto; }
-.pw-box   { text-align:center; padding:32px 28px; max-width:360px; width:90%; }
+/* ── 로그인 게이트 (상단 정렬 - 모바일 키보드에 안 가림) */
+#pwGate { position:fixed; inset:0; background:var(--bg); display:flex; align-items:flex-start; justify-content:center; z-index:9999; padding:60px 20px 20px; overflow-y:auto; }
+.pw-box   { background:var(--card); border-radius:20px; padding:32px 28px; width:100%; max-width:360px; text-align:center; box-shadow:0 4px 24px rgba(0,0,0,.1); }
 .pw-logo  { font-size:48px; margin-bottom:12px; }
 .pw-title { font-size:20px; font-weight:900; margin-bottom:4px; }
 .pw-sub   { font-size:13px; color:var(--sub); margin-bottom:24px; }
-.pw-input { width:100%; padding:14px 18px; border:2px solid var(--border); border-radius:14px; font-size:20px; text-align:center; letter-spacing:6px; margin-bottom:10px; font-family:inherit; }
+.pw-input { width:100%; padding:14px 16px; border:2px solid var(--border); border-radius:14px; font-size:20px; text-align:center; letter-spacing:6px; font-family:inherit; margin-bottom:10px; }
 .pw-input:focus { outline:none; border-color:var(--text); }
-.pw-btn   { width:100%; padding:14px; background:var(--text); color:#fff; border:none; border-radius:14px; font-size:16px; font-weight:800; cursor:pointer; font-family:inherit; margin-bottom:10px; }
-.pw-save  { display:flex; align-items:center; justify-content:center; gap:6px; font-size:13px; color:var(--sub); cursor:pointer; }
-.pw-save input { cursor:pointer; }
-.pw-error { margin-top:6px; font-size:13px; color:var(--red); min-height:18px; }
+.pw-btn { width:100%; padding:14px; background:var(--text); color:#fff; border:none; border-radius:14px; font-size:16px; font-weight:800; cursor:pointer; font-family:inherit; margin-bottom:10px; }
+.pw-btn:disabled { opacity:.5; }
+.pw-save { display:flex; align-items:center; justify-content:center; gap:6px; font-size:13px; color:var(--sub); cursor:pointer; margin-bottom:6px; }
+.pw-save input { cursor:pointer; accent-color:var(--text); width:16px; height:16px; }
+.pw-error { font-size:13px; color:var(--red); min-height:18px; margin-top:4px; }
 
-/* 헤더 */
-.header { background:var(--card); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:100; }
-.header-inner { max-width:980px; margin:0 auto; padding:12px 16px; display:flex; align-items:center; justify-content:space-between; }
-.logo       { display:flex; align-items:center; gap:8px; }
-.logo-main  { font-size:18px; font-weight:900; }
-.logo-badge { padding:3px 10px; background:var(--red); color:#fff; border-radius:20px; font-size:11px; font-weight:800; }
-.logout-btn { padding:7px 14px; border:1px solid var(--border); border-radius:20px; background:var(--bg); font-size:12px; color:var(--sub); cursor:pointer; font-family:inherit; }
+/* ── 헤더 */
+.header { background:var(--card); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:200; }
+.header-inner { max-width:1000px; margin:0 auto; padding:11px 16px; display:flex; align-items:center; justify-content:space-between; }
+.logo { display:flex; align-items:center; gap:8px; }
+.logo-icon  { font-size:22px; }
+.logo-name  { font-size:17px; font-weight:900; }
+.logo-badge { padding:2px 10px; background:var(--red); color:#fff; border-radius:20px; font-size:11px; font-weight:800; }
+.hdr-right { display:flex; align-items:center; gap:8px; }
+.hdr-btn { padding:7px 14px; border:1px solid var(--border); border-radius:20px; background:var(--bg); font-size:12px; color:var(--sub); cursor:pointer; font-family:inherit; text-decoration:none; display:inline-block; }
 
-.container { max-width:980px; margin:0 auto; padding:16px 16px 80px; }
+.container { max-width:1000px; margin:0 auto; padding:16px 16px 80px; }
 
-/* 글로벌 도구 카드 (공지 + 게시글관리 + 공지관리) */
-.tools     { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:16px; }
-.tool-card { flex:1; min-width:240px; background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:16px; }
-.tool-title { font-size:14px; font-weight:900; margin-bottom:10px; }
+/* ── 상단 도구 영역 */
+.tools-row { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); gap:12px; margin-bottom:16px; }
+.tool-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:16px; }
+.tool-title { font-size:14px; font-weight:900; margin-bottom:12px; }
 
-/* 폼 요소 */
-.input, .textarea, .select {
+/* ── 폼 요소 */
+.inp, .txa, .sel {
   width:100%; padding:10px 12px; border:1.5px solid var(--border);
-  border-radius:10px; font-size:14px; font-family:inherit; margin-bottom:8px;
+  border-radius:10px; font-size:14px; font-family:inherit; background:var(--card); margin-bottom:8px;
 }
-.textarea { min-height:80px; resize:vertical; line-height:1.6; }
-.input:focus, .textarea:focus, .select:focus { outline:none; border-color:var(--blue); }
+.txa { min-height:76px; resize:vertical; line-height:1.6; }
+.inp:focus, .txa:focus, .sel:focus { outline:none; border-color:var(--blue); }
+.inp-sm { padding:8px 10px; font-size:13px; }
 
-/* 버튼 */
-.btn { padding:10px 16px; border-radius:10px; border:none; cursor:pointer; font-size:13px; font-weight:900; font-family:inherit; display:inline-flex; align-items:center; gap:6px; transition:opacity .15s; white-space:nowrap; }
-.btn:active   { opacity:.75; }
-.btn:disabled { opacity:.5; cursor:not-allowed; }
-.btn-ghost  { background:var(--bg); color:var(--text); border:1px solid var(--border); }
+/* ── 버튼 */
+.btn { padding:9px 16px; border-radius:10px; border:none; cursor:pointer; font-size:13px; font-weight:700; font-family:inherit; display:inline-flex; align-items:center; gap:5px; white-space:nowrap; }
+.btn:disabled { opacity:.45; cursor:not-allowed; }
+.btn-ghost  { background:var(--bg); color:var(--text); border:1.5px solid var(--border); }
 .btn-blue   { background:var(--blue);   color:#fff; }
 .btn-green  { background:var(--green);  color:#fff; }
 .btn-purple { background:var(--purple); color:#fff; }
 .btn-red    { background:var(--red);    color:#fff; }
-.btn-sm     { padding:7px 12px; font-size:12px; }
+.btn-sm     { padding:6px 11px; font-size:12px; }
+.btn-full   { width:100%; justify-content:center; }
+.btn-row    { display:flex; gap:8px; flex-wrap:wrap; }
 
-/* 상태 메시지 */
-.status { display:none; padding:10px 12px; border-radius:10px; font-size:13px; margin-top:8px; word-break:break-all; }
+/* ── 상태 메시지 */
+.status { display:none; padding:9px 12px; border-radius:10px; font-size:13px; margin-top:8px; word-break:break-all; }
 .status.show    { display:block; }
 .status.info    { background:#dbeafe; color:#1e40af; }
 .status.success { background:#d1fae5; color:#065f46; }
 .status.error   { background:#fee2e2; color:#991b1b; }
 
-/* 게시글/공지 관리 목록 */
-.manage-list { max-height:240px; overflow-y:auto; }
-.manage-item { display:flex; align-items:flex-start; gap:10px; background:var(--bg); border-radius:12px; padding:10px; margin-bottom:8px; }
-.manage-emoji { font-size:20px; flex-shrink:0; }
-.manage-info  { flex:1; min-width:0; }
+/* ── 관리 목록 */
+.manage-list { max-height:220px; overflow-y:auto; margin-top:8px; }
+.manage-item { display:flex; align-items:flex-start; gap:8px; background:var(--bg); border-radius:10px; padding:10px; margin-bottom:6px; }
+.manage-em   { font-size:18px; flex-shrink:0; padding-top:1px; }
+.manage-info { flex:1; min-width:0; }
 .manage-title { font-size:13px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .manage-meta  { font-size:11px; color:var(--sub); margin-top:2px; }
-.manage-del   { padding:5px 9px; background:var(--red); color:#fff; border:none; border-radius:8px; font-size:11px; font-weight:700; cursor:pointer; font-family:inherit; flex-shrink:0; }
+.manage-del { padding:5px 9px; background:var(--red); color:#fff; border:none; border-radius:8px; font-size:11px; font-weight:700; cursor:pointer; font-family:inherit; flex-shrink:0; }
 
-/* ── 캐릭터 그리드 ────────────────────────────── */
+/* ── 캐릭터 그리드 (5열 기준) */
 .list-head { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
-/* [Fix] 검색창 너비 고정 - flex:1 제거하고 max-width 설정 */
-.search-input { flex:1; min-width:0; max-width:320px; padding:10px 14px; border:1.5px solid var(--border); border-radius:10px; font-size:14px; font-family:inherit; }
-.search-input:focus { outline:none; border-color:var(--blue); }
+.search-inp { flex:1; max-width:300px; padding:9px 13px; border:1.5px solid var(--border); border-radius:10px; font-size:14px; font-family:inherit; }
+.search-inp:focus { outline:none; border-color:var(--blue); }
 
-.char-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
-@media (min-width:520px) { .char-grid { grid-template-columns:repeat(6,1fr); } }
-@media (min-width:720px) { .char-grid { grid-template-columns:repeat(8,1fr); } }
-.char-tile { background:var(--card); border:1.5px solid var(--border); border-radius:14px; padding:10px 8px; cursor:pointer; text-align:center; transition:border-color .15s; }
-.char-tile:hover { border-color:var(--blue); }
-.char-emoji { font-size:26px; }
-.char-thumb { width:44px; height:44px; border-radius:10px; object-fit:cover; display:block; margin:0 auto; }
-.char-name  { font-size:11px; font-weight:900; color:var(--sub); margin-top:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.char-group { font-size:10px; color:var(--sub); opacity:.8; margin-top:1px; }
+.char-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; }
+@media (max-width:480px) { .char-grid { grid-template-columns:repeat(4,1fr); } }
+@media (min-width:700px) { .char-grid { grid-template-columns:repeat(6,1fr); } }
+@media (min-width:900px) { .char-grid { grid-template-columns:repeat(8,1fr); } }
 
-/* 캐릭터 패널 오버레이 */
-.overlay { position:fixed; inset:0; background:rgba(0,0,0,.45); display:flex; align-items:flex-end; justify-content:center; z-index:2000; padding:10px; }
-.panel { width:100%; max-width:720px; background:var(--card); border-radius:20px; max-height:92vh; overflow-y:auto; border:1px solid var(--border); }
+.char-tile { background:var(--card); border:1.5px solid var(--border); border-radius:12px; padding:8px 6px; cursor:pointer; text-align:center; transition:border-color .15s,transform .1s; }
+.char-tile:hover  { border-color:var(--blue); }
+.char-tile:active { transform:scale(.94); }
+.char-av   { width:44px; height:44px; border-radius:10px; object-fit:cover; display:block; margin:0 auto; }
+.char-emoji { font-size:26px; line-height:44px; }
+.char-name  { font-size:11px; font-weight:700; color:var(--text); margin-top:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.char-group { font-size:10px; color:var(--sub); margin-top:1px; }
+
+/* ── 오버레이 패널 */
+.overlay { position:fixed; inset:0; background:rgba(0,0,0,.45); display:flex; align-items:flex-end; justify-content:center; z-index:500; padding:8px; }
+.panel { width:100%; max-width:740px; background:var(--card); border-radius:20px; max-height:93vh; overflow-y:auto; }
 .panel-head { position:sticky; top:0; background:var(--card); border-bottom:1px solid var(--border); padding:12px 16px; display:flex; align-items:center; gap:10px; border-radius:20px 20px 0 0; z-index:10; }
+.panel-av   { width:44px; height:44px; border-radius:10px; object-fit:cover; flex-shrink:0; }
 .panel-emoji { font-size:28px; }
-.panel-name  { font-size:16px; font-weight:900; }
-.panel-sub   { font-size:12px; color:var(--sub); }
-.panel-close { margin-left:auto; border:1px solid var(--border); background:var(--bg); border-radius:12px; padding:8px 12px; cursor:pointer; font-weight:900; font-family:inherit; font-size:13px; }
-.panel-body  { padding:14px; }
+.panel-name { font-size:16px; font-weight:900; }
+.panel-sub  { font-size:12px; color:var(--sub); }
+.panel-close { margin-left:auto; border:1px solid var(--border); background:var(--bg); border-radius:12px; padding:7px 14px; cursor:pointer; font-weight:700; font-family:inherit; font-size:13px; }
+.panel-body { padding:14px; }
 
-/* 패널 내 섹션 */
-.section       { background:var(--bg); border:1px solid var(--border); border-radius:14px; padding:14px; margin-bottom:12px; }
-.section-title { font-size:13px; font-weight:900; margin-bottom:10px; }
-.row2 { display:grid; grid-template-columns:1fr 1fr;     gap:10px; margin-bottom:8px; }
-.row3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:8px; }
-@media (max-width:480px) { .row2, .row3 { grid-template-columns:1fr; } }
-.field label   { font-size:11px; font-weight:700; color:var(--sub); display:block; margin-bottom:4px; }
-.field .input,
-.field .select { margin-bottom:0; }
+/* ── 패널 섹션 */
+.sec { background:var(--bg); border:1px solid var(--border); border-radius:14px; padding:14px; margin-bottom:12px; }
+.sec-title { font-size:13px; font-weight:900; margin-bottom:10px; }
 
-/* 이미지 프리뷰 */
-.avatar-wrap { width:72px; height:72px; border-radius:18px; background:var(--card); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:34px; overflow:hidden; flex-shrink:0; }
-.avatar-wrap img { width:100%; height:100%; object-fit:cover; }
+/* ── 이미지 미리보기+업로드 인라인 (4번 요구사항) */
+.img-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+.img-thumb { width:60px; height:60px; border-radius:12px; object-fit:cover; background:var(--card); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:28px; flex-shrink:0; overflow:hidden; }
+.img-thumb img { width:100%; height:100%; object-fit:cover; }
+.img-url-inp { flex:1; padding:10px 12px; border:1.5px solid var(--border); border-radius:10px; font-size:13px; font-family:inherit; background:var(--card); }
+.img-url-inp:focus { outline:none; border-color:var(--blue); }
+.img-up-btn { padding:10px 13px; background:var(--bg); border:1.5px solid var(--border); border-radius:10px; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit; flex-shrink:0; }
 
-/* AI 댓글용 게시글 피커 */
-.postpick { max-height:200px; overflow-y:auto; display:flex; flex-direction:column; gap:6px; margin-bottom:10px; }
-.postitem         { background:var(--card); border:1.5px solid var(--border); border-radius:10px; padding:10px; cursor:pointer; transition:border-color .15s; }
-.postitem.selected { border-color:var(--blue); }
-.postitem-title   { font-size:13px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.postitem-meta    { font-size:11px; color:var(--sub); margin-top:2px; }
+/* ── 성별 라디오 */
+.gender-wrap { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:6px; }
+.gender-wrap label { font-size:13px; display:flex; align-items:center; gap:4px; cursor:pointer; }
 
-/* 버튼 내 스피너 */
-.spin { display:inline-block; width:13px; height:13px; border:2px solid rgba(255,255,255,.4); border-top-color:#fff; border-radius:50%; animation:spn .8s linear infinite; }
-@keyframes spn { to { transform:rotate(360deg); } }
+/* ── 캐릭터 수정 폼 그리드 */
+.row2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
+.row3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:10px; }
+@media (max-width:500px) { .row2, .row3 { grid-template-columns:1fr; } }
+.field label { font-size:11px; font-weight:700; color:var(--sub); display:block; margin-bottom:4px; }
+.field .inp, .field .sel { margin-bottom:0; }
+
+/* ── 게시글 피커 (AI 댓글용) */
+.postpick { max-height:180px; overflow-y:auto; display:flex; flex-direction:column; gap:5px; margin-bottom:10px; }
+.postitem { background:var(--card); border:1.5px solid var(--border); border-radius:10px; padding:9px 11px; cursor:pointer; transition:border-color .1s; }
+.postitem.sel { border-color:var(--blue); background:#eef5ff; }
+.postitem-title { font-size:13px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.postitem-meta  { font-size:11px; color:var(--sub); margin-top:2px; }
+
+/* ── 댓글 목록 확장 */
+.cmt-wrap { background:var(--bg); border-radius:10px; padding:10px; margin-top:8px; }
+.cmt-item { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; padding:7px 0; border-bottom:1px solid var(--border); }
+.cmt-item:last-child { border-bottom:none; }
+.cmt-body { font-size:13px; flex:1; }
+.cmt-meta { font-size:11px; color:var(--sub); margin-top:2px; }
+
+/* ── 캐릭터 추가 영역 */
+.addchar-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:16px; margin-bottom:16px; }
+
+/* ── 토스트 */
+.toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:#1c1c1e; color:#fff; padding:10px 20px; border-radius:20px; font-size:13px; font-weight:600; z-index:9999; opacity:0; transition:opacity .25s; pointer-events:none; white-space:nowrap; max-width:90vw; text-align:center; }
+.toast.show  { opacity:1; }
+.toast.err   { background:var(--red); }
 ```
 
   </style>
 </head>
 <body>
 
-<!-- 비밀번호 게이트 -->
+<div class="toast" id="toast"></div>
+
+<!-- ── 로그인 게이트 -->
 
 <div id="pwGate">
   <div class="pw-box">
     <div class="pw-logo">🌈</div>
     <div class="pw-title">관리자 로그인</div>
-    <div class="pw-sub">RainbowKidz 관리자 전용 페이지</div>
+    <div class="pw-sub">무지개 유치원 & 어린이집</div>
     <input type="password" class="pw-input" id="pwInput" placeholder="비밀번호 입력" autocomplete="current-password">
-    <button class="pw-btn" onclick="checkPw()">입장하기</button>
-    <label class="pw-save"><input type="checkbox" id="pwSave"> 비밀번호 기억하기</label>
+    <button class="pw-btn" id="pwBtn" onclick="checkPw()">입장하기</button>
+    <label class="pw-save"><input type="checkbox" id="pwSave"> 이 기기에서 기억하기</label>
     <div class="pw-error" id="pwError"></div>
   </div>
 </div>
 
-<!-- 헤더 -->
+<!-- ── 헤더 -->
 
-<div class="header">
+<div class="header hidden" id="mainHeader">
   <div class="header-inner">
     <div class="logo">
-      <span style="font-size:24px;">🌈</span>
-      <span class="logo-main">무지개</span>
+      <span class="logo-icon">🌈</span>
+      <span class="logo-name">무지개 관리자</span>
       <span class="logo-badge">ADMIN</span>
     </div>
-    <button class="logout-btn" onclick="logout()">로그아웃</button>
+    <div class="hdr-right">
+      <a href="index.html" class="hdr-btn">🏠 홈</a>
+      <button class="hdr-btn" onclick="logout()">로그아웃</button>
+    </div>
   </div>
 </div>
 
-<div class="container">
+<div class="container hidden" id="mainContent">
 
-  <!-- 캐릭터 추가 (전체 너비) -->
+  <!-- ── 상단 도구 영역 -->
 
-  <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:16px;">
-    <div class="tool-title">➕ 새 캐릭터 추가</div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-bottom:8px;">
-      <div>
-        <div style="font-size:11px;color:var(--sub);margin-bottom:3px;">이름 *</div>
-        <input class="input" id="newName" placeholder="쨩예시" style="margin-bottom:0;">
-      </div>
-      <div>
-        <div style="font-size:11px;color:var(--sub);margin-bottom:3px;">이모지</div>
-        <input class="input" id="newEmoji" placeholder="🐱" style="margin-bottom:0;">
-      </div>
-      <div>
-        <div style="font-size:11px;color:var(--sub);margin-bottom:3px;">그룹</div>
-        <select class="select" id="newGroup" style="margin-bottom:0;">
-          <option value="kindergarten">유치원</option>
-          <option value="daycare">어린이집</option>
-          <option value="teacher">선생님</option>
-        </select>
-      </div>
-      <div>
-        <div style="font-size:11px;color:var(--sub);margin-bottom:3px;">동물종류</div>
-        <input class="input" id="newAnimal" placeholder="고양이" style="margin-bottom:0;">
-      </div>
-      <div>
-        <div style="font-size:11px;color:var(--sub);margin-bottom:3px;">성별</div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-          <label style="font-size:13px;display:flex;align-items:center;gap:3px;cursor:pointer;"><input type="radio" name="newGenderR" value="female" onchange="handleNewGender(this)"> 여성</label>
-          <label style="font-size:13px;display:flex;align-items:center;gap:3px;cursor:pointer;"><input type="radio" name="newGenderR" value="male" onchange="handleNewGender(this)"> 남성</label>
-          <label style="font-size:13px;display:flex;align-items:center;gap:3px;cursor:pointer;"><input type="radio" name="newGenderR" value="other" onchange="handleNewGender(this)"> 기타</label>
-          <label style="font-size:13px;display:flex;align-items:center;gap:3px;cursor:pointer;"><input type="radio" name="newGenderR" value="none" onchange="handleNewGender(this)" checked> 밝히고 싶지 않음</label>
-        </div>
-        <input class="input" id="newGenderOther" placeholder="직접 입력..." style="margin-bottom:0;margin-top:4px;display:none;">
-        <input type="hidden" id="newGender" value="">
-      </div>
-      <div>
-        <div style="font-size:11px;color:var(--sub);margin-bottom:3px;">MBTI</div>
-        <input class="input" id="newMbti" placeholder="ENFP" style="margin-bottom:0;">
-      </div>
-      <div>
-        <div style="font-size:11px;color:var(--sub);margin-bottom:3px;">좋아하는 것</div>
-        <input class="input" id="newLikes" placeholder="귀여운 것" style="margin-bottom:0;">
-      </div>
-      <div>
-        <div style="font-size:11px;color:var(--sub);margin-bottom:3px;">취미</div>
-        <input class="input" id="newHobby" placeholder="노래부르기" style="margin-bottom:0;">
-      </div>
-      <div style="grid-column:1/-1;">
-        <div style="font-size:11px;color:var(--sub);margin-bottom:3px;">말투 힌트 (AI 생성 프롬프트에 사용)</div>
-        <input class="input" id="newSpeech" placeholder="밝고 귀여운 말투, 음식 이야기를 좋아함" style="margin-bottom:0;">
-      </div>
-      <div>
-        <div style="font-size:11px;color:var(--sub);margin-bottom:3px;">답댓글 반응속도 (분, 기본 30)</div>
-        <input class="input" type="number" id="newResponseSpeed" placeholder="30" min="1" max="1440" value="30" style="margin-bottom:0;">
-      </div>
-    </div>
-    <button class="btn btn-blue" id="btnAddChar" onclick="addCharacter()">➕ 캐릭터 추가</button>
-    <div class="status" id="addCharStatus"></div>
-  </div>
-
-  <!-- 글로벌 도구: 공지 작성 / 게시글 관리 / 공지 관리 -->
-
-  <div class="tools">
+  <div class="tools-row">
 
 ```
-<!-- 공지사항 작성 (쑤갈쌈 고정) -->
+<!-- 공지 작성 -->
 <div class="tool-card">
-  <div class="tool-title">📌 공지사항 작성 (쑤갈쌈 명의)</div>
-  <input class="input" id="noticeTitle" placeholder="공지 제목">
-  <textarea class="textarea" id="noticeBody" placeholder="공지 내용..."></textarea>
-
-  <!-- 미디어 첨부 (이미지/동영상/음악 통합) -->
-  <div style="margin:10px 0 6px;font-size:13px;font-weight:700;color:var(--sub);">📎 미디어 첨부 (선택)</div>
-  <div style="margin-bottom:12px;">
-    <div style="font-size:12px;color:var(--sub);margin-bottom:6px;">이미지·동영상·음악 파일 또는 URL (YouTube 포함)</div>
-    <input type="file" id="noticeMediaFile" accept="image/*,video/*,audio/*" style="display:none;" onchange="uploadNoticeMedia()">
-    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('noticeMediaFile').click()">📁 파일 선택</button>
-      <input class="input" id="noticeMediaUrl" placeholder="또는 URL 직접 입력 (YouTube, 이미지 등)" style="flex:1;min-width:180px;margin:0;" oninput="onNoticeUrlInput()">
-      <button class="btn btn-ghost btn-sm" onclick="clearNoticeMedia()">✕ 제거</button>
-    </div>
-    <div id="noticeMediaStatus" style="font-size:12px;color:var(--sub);margin-top:4px;min-height:16px;"></div>
-    <div id="noticeMediaPreview" style="margin-top:8px;"></div>
-  </div>
-
-  <button class="btn btn-blue" onclick="publishNotice()">📌 공지 등록</button>
+  <div class="tool-title">📌 공지 작성</div>
+  <input  class="inp" id="noticeTitle" placeholder="공지 제목">
+  <textarea class="txa" id="noticeBody" placeholder="공지 내용..." style="min-height:64px;"></textarea>
+  <input class="inp" id="noticeMediaUrl" placeholder="미디어 URL (선택)">
+  <button class="btn btn-blue btn-full" id="noticeSendBtn" onclick="publishNotice()">📌 공지 게시</button>
   <div class="status" id="noticeStatus"></div>
 </div>
 
 <!-- 게시글 관리 -->
 <div class="tool-card">
-  <div class="tool-title">📋 게시글 관리</div>
-  <button class="btn btn-ghost btn-sm" onclick="loadManagePosts()" style="margin-bottom:10px;">🔄 새로고침</button>
-  <div class="manage-list" id="manageList">
-    <div style="color:var(--sub);font-size:13px;">로딩 중...</div>
+  <div class="tool-title">🔧 게시글 관리</div>
+  <div style="display:flex;gap:6px;margin-bottom:8px;">
+    <select class="sel" id="mgmtFilter" style="margin-bottom:0;flex:1;" onchange="loadManagePosts()">
+      <option value="all">전체 글</option>
+      <option value="system">캐릭터 글</option>
+      <option value="guest">게스트 글</option>
+    </select>
+    <button class="btn btn-ghost btn-sm" onclick="loadManagePosts()">🔄</button>
+  </div>
+  <div class="manage-list" id="managePosts">
+    <div class="skel" style="height:50px;margin-bottom:6px;"></div>
+    <div class="skel" style="height:50px;"></div>
   </div>
   <div class="status" id="manageStatus"></div>
 </div>
 
-<!-- 공지 관리 (삭제 가능) -->
+<!-- 공지 관리 -->
 <div class="tool-card">
-  <div class="tool-title">🗑️ 공지 관리</div>
-  <button class="btn btn-ghost btn-sm" onclick="loadManageNotices()" style="margin-bottom:10px;">🔄 새로고침</button>
+  <div class="tool-title">📋 공지 관리</div>
+  <button class="btn btn-ghost btn-sm" onclick="loadManageNotices()" style="margin-bottom:8px;">🔄 새로고침</button>
   <div class="manage-list" id="manageNotices">
-    <div style="color:var(--sub);font-size:13px;">로딩 중...</div>
+    <div class="skel" style="height:50px;margin-bottom:6px;"></div>
+    <div class="skel" style="height:50px;"></div>
   </div>
   <div class="status" id="noticeManageStatus"></div>
 </div>
@@ -279,896 +250,739 @@
 
   </div>
 
-  <!-- 캐릭터 검색 + 그리드 -->
+  <!-- ── 캐릭터 추가 -->
 
-  <div class="list-head">
-    <!-- [Fix] max-width로 검색창 너비 제한 → 버튼 공간 확보 -->
-    <input class="search-input" id="charSearch" placeholder="캐릭터 검색..." oninput="renderGrid()">
-    <button class="btn btn-ghost btn-sm" onclick="reloadAll()" style="flex-shrink:0;">전체 새로고침</button>
-  </div>
-  <div class="char-grid" id="charGrid">
-    <div style="color:var(--sub);font-size:13px;grid-column:1/-1;">로딩 중...</div>
-  </div>
-
-</div>
-
-<!-- 캐릭터 프로필 패널 -->
-
-<div id="overlay" class="overlay hidden" onclick="handleOverlayClick(event)">
-  <div class="panel" onclick="event.stopPropagation()">
-
-```
-<div class="panel-head">
-  <div class="panel-emoji" id="pEmoji">🙂</div>
-  <div>
-    <div class="panel-name" id="pName">캐릭터</div>
-    <div class="panel-sub"  id="pSub"></div>
-  </div>
-  <button class="panel-close" onclick="closePanel()">✕ 닫기</button>
-</div>
-
-<div class="panel-body">
-
-  <!-- ① 이미지 업로드 -->
-  <div class="section">
-    <div class="section-title">🖼️ 프로필 이미지</div>
-    <div style="display:flex;align-items:center;gap:14px;">
-      <div class="avatar-wrap" id="pAvatar">🙂</div>
-      <div style="flex:1;">
-        <div style="font-size:12px;color:var(--sub);margin-bottom:10px;">Supabase Storage에 업로드됩니다 (최대 5MB)</div>
-        <input type="file" id="pImgFile" accept="image/*" style="display:none;" onchange="uploadImage()">
-        <button class="btn btn-blue btn-sm" onclick="document.getElementById('pImgFile').click()">📸 이미지 업로드</button>
-        <div class="status" id="pImgStatus"></div>
+  <div class="addchar-card" id="addCharCard">
+    <div class="tool-title" style="cursor:pointer;" onclick="toggleAddChar()">➕ 새 캐릭터 추가 <span id="addCharArrow">▶</span></div>
+    <div id="addCharBody" class="hidden">
+      <div class="row2" style="margin-bottom:8px;">
+        <div class="field"><label>이름 *</label><input class="inp" id="acName" placeholder="쨩예시" style="margin-bottom:0;"></div>
+        <div class="field"><label>이모지</label><input class="inp" id="acEmoji" placeholder="🐱" style="margin-bottom:0;"></div>
       </div>
+      <!-- 이미지 (이름 다음 바로) -->
+      <div style="font-size:11px;font-weight:700;color:var(--sub);margin-bottom:5px;">프로필 이미지</div>
+      <div class="img-row">
+        <div class="img-thumb" id="acThumb">🐾</div>
+        <input class="img-url-inp" id="acImgUrl" placeholder="이미지 URL 직접 입력" oninput="syncThumb('acImgUrl','acThumb','acEmoji')">
+        <input type="file" id="acImgFile" accept="image/*" style="display:none;" onchange="uploadImg(this,'acImgUrl','acThumb','acEmoji')">
+        <button class="img-up-btn" onclick="document.getElementById('acImgFile').click()">📷 업로드</button>
+      </div>
+      <div class="row3" style="margin-bottom:8px;">
+        <div class="field">
+          <label>소속</label>
+          <select class="sel" id="acGroup" style="margin-bottom:0;">
+            <option value="kindergarten">유치원</option>
+            <option value="daycare">어린이집</option>
+            <option value="teacher">선생님</option>
+          </select>
+        </div>
+        <div class="field"><label>동물종류</label><input class="inp" id="acAnimal" placeholder="고양이" style="margin-bottom:0;"></div>
+        <div class="field"><label>MBTI</label><input class="inp" id="acMbti" placeholder="ENFP" style="margin-bottom:0;"></div>
+      </div>
+      <div style="font-size:11px;font-weight:700;color:var(--sub);margin-bottom:5px;">성별</div>
+      <div class="gender-wrap" id="acGenderWrap">
+        <label><input type="radio" name="acGR" value="female" checked onchange="handleGender('ac',this)"> 여자</label>
+        <label><input type="radio" name="acGR" value="male"   onchange="handleGender('ac',this)"> 남자</label>
+        <label><input type="radio" name="acGR" value="other"  onchange="handleGender('ac',this)"> 기타</label>
+        <label><input type="radio" name="acGR" value="secret" onchange="handleGender('ac',this)"> 밝히고싶지않음</label>
+      </div>
+      <input class="inp inp-sm hidden" id="acGenderOther" placeholder="성별 직접 입력" style="margin-top:4px;">
+      <div class="row2" style="margin-bottom:8px;margin-top:4px;">
+        <div class="field"><label>좋아하는 것</label><input class="inp" id="acLikes" placeholder="아이돌" style="margin-bottom:0;"></div>
+        <div class="field"><label>취미</label><input class="inp" id="acHobby" placeholder="눕기" style="margin-bottom:0;"></div>
+      </div>
+      <div style="font-size:11px;font-weight:700;color:var(--sub);margin-bottom:5px;">AI 말투 힌트</div>
+      <input class="inp" id="acSpeech" placeholder="밝고 장난기 많은 말투, 민초 덕후">
+      <button class="btn btn-green btn-full" id="acAddBtn" onclick="addCharacter()">➕ 캐릭터 등록</button>
+      <div class="status" id="acStatus"></div>
     </div>
   </div>
 
+  <!-- ── 캐릭터 검색 + 그리드 -->
+
+  <div class="list-head">
+    <input class="search-inp" id="charSearch" placeholder="🔍 캐릭터 검색..." oninput="renderGrid()">
+    <button class="btn btn-ghost btn-sm" onclick="loadCharacters()">🔄 새로고침</button>
+  </div>
+  <div class="char-grid" id="charGrid">
+    <div class="skel" style="height:80px;"></div>
+    <div class="skel" style="height:80px;"></div>
+    <div class="skel" style="height:80px;"></div>
+    <div class="skel" style="height:80px;"></div>
+    <div class="skel" style="height:80px;"></div>
+  </div>
+
+</div><!-- /container -->
+
+<!-- ── 캐릭터 패널 오버레이 -->
+
+<div id="overlay" class="overlay hidden" onclick="if(event.target===this)closePanel()">
+  <div class="panel" onclick="event.stopPropagation()">
+    <div class="panel-head">
+      <div id="pHeadAv" class="panel-emoji">🙂</div>
+      <div style="flex:1;min-width:0;">
+        <div class="panel-name" id="pName">캐릭터</div>
+        <div class="panel-sub"  id="pSub"></div>
+      </div>
+      <button class="panel-close" onclick="closePanel()">✕ 닫기</button>
+    </div>
+    <div class="panel-body">
+
+```
+  <!-- ① 이름 + 이미지 (이름 다음 바로) -->
+  <div class="sec">
+    <div class="sec-title">👤 기본 정보 · 이미지</div>
+    <div class="row2" style="margin-bottom:10px;">
+      <div class="field"><label>이름</label><input class="inp" id="fName" style="margin-bottom:0;"></div>
+      <div class="field"><label>이모지</label><input class="inp" id="fEmoji" style="margin-bottom:0;"></div>
+    </div>
+    <!-- 이미지 인라인 (4번) -->
+    <div style="font-size:11px;font-weight:700;color:var(--sub);margin-bottom:5px;">프로필 이미지</div>
+    <div class="img-row">
+      <div class="img-thumb" id="pThumb">🙂</div>
+      <input class="img-url-inp" id="fImgUrl" placeholder="이미지 URL 직접 입력" oninput="syncThumb('fImgUrl','pThumb','fEmoji')">
+      <input type="file" id="pImgFile" accept="image/*" style="display:none;" onchange="uploadImg(this,'fImgUrl','pThumb','fEmoji')">
+      <button class="img-up-btn" onclick="document.getElementById('pImgFile').click()">📷 업로드</button>
+    </div>
+    <div class="status" id="pImgStatus"></div>
+  </div>
+
   <!-- ② AI 게시글 생성 -->
-  <!-- [Fix] 섹션 순서 변경: 이미지 → AI게시글 → AI댓글 → 캐릭터편집 -->
-  <div class="section">
-    <div class="section-title">✨ AI 게시글 제안</div>
-    <div style="font-size:12px;color:var(--sub);margin-bottom:10px;">AI가 이 캐릭터 말투로 초안을 제안해요. 직접 수정 후 게시하세요!</div>
-    <input class="input" id="aiTitle" placeholder="제목 (AI 제안 후 여기에 나타나요)">
-    <textarea class="textarea" id="aiBody" placeholder="본문 (AI 제안 후 여기에 나타나요 — 자유롭게 수정하세요)"></textarea>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-      <button class="btn btn-purple" id="btnGenPost"  onclick="generatePost()">🤖 AI 제안 받기</button>
-      <button class="btn btn-green"  id="btnPubPost"  onclick="publishPost()">📤 게시하기</button>
+  <div class="sec">
+    <div class="sec-title">✨ AI 게시글 제안</div>
+    <div style="font-size:12px;color:var(--sub);margin-bottom:8px;">AI가 이 캐릭터 말투로 초안을 제안해요. 수정 후 게시하세요!</div>
+    <input class="inp" id="aiTitle" placeholder="제목">
+    <textarea class="txa" id="aiBody" placeholder="본문"></textarea>
+    <input class="inp" id="aiMediaUrl" placeholder="미디어 URL (선택)">
+    <div class="btn-row">
+      <button class="btn btn-purple" id="btnGenPost" onclick="generatePost()">🤖 AI 제안</button>
+      <button class="btn btn-green"  id="btnPubPost" onclick="publishPost()">📤 게시</button>
       <button class="btn btn-ghost btn-sm" onclick="clearPost()">초기화</button>
     </div>
     <div class="status" id="aiPostStatus"></div>
   </div>
 
-  <!-- ③ AI 댓글 생성 -->
-  <div class="section">
-    <div class="section-title">💬 AI 댓글 제안</div>
-    <div style="font-size:12px;color:var(--sub);margin-bottom:8px;">게시글을 선택하면 AI가 이 캐릭터 말투로 댓글 초안을 제안해요. 수정 후 게시하세요!</div>
-    <div class="postpick" id="postPicker">
-      <div style="color:var(--sub);font-size:13px;">게시글이 없습니다</div>
-    </div>
-    <textarea class="textarea" id="aiComment" placeholder="댓글 내용..." style="min-height:60px;"></textarea>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-      <button class="btn btn-purple" id="btnGenComment" onclick="generateComment()">🤖 AI 제안 받기</button>
-      <button class="btn btn-green"  id="btnPubComment" onclick="publishComment()">📤 댓글 게시</button>
+  <!-- ③ AI 댓글 생성 + 예약 시간 (5번) -->
+  <div class="sec">
+    <div class="sec-title">💬 AI 댓글 제안</div>
+    <div style="font-size:12px;color:var(--sub);margin-bottom:8px;">게시글을 선택하면 AI가 이 캐릭터 말투로 댓글을 제안해요.</div>
+    <div class="postpick" id="postPicker"><div style="color:var(--sub);font-size:13px;">게시글 없음</div></div>
+    <textarea class="txa" id="aiComment" placeholder="댓글 내용..." style="min-height:56px;"></textarea>
+    <div style="font-size:11px;font-weight:700;color:var(--sub);margin-bottom:4px;">예약 게시 시간 (비워두면 즉시)</div>
+    <input class="inp" type="datetime-local" id="cmtScheduled" style="margin-bottom:10px;">
+    <div class="btn-row">
+      <button class="btn btn-purple" id="btnGenCmt" onclick="generateComment()">🤖 AI 제안</button>
+      <button class="btn btn-green"  id="btnPubCmt" onclick="publishComment()">📤 댓글 게시</button>
       <button class="btn btn-ghost btn-sm" onclick="document.getElementById('aiComment').value=''">초기화</button>
     </div>
     <div class="status" id="aiCommentStatus"></div>
   </div>
 
-  <!-- ④ 캐릭터 정보 편집 (맨 아래로 이동) -->
-  <div class="section">
-    <div class="section-title">👥 캐릭터 정보 편집</div>
+  <!-- ④ 댓글 보기/삭제 -->
+  <div class="sec">
+    <div class="sec-title">🗂 댓글 관리</div>
+    <div style="font-size:12px;color:var(--sub);margin-bottom:8px;">위에서 게시글을 선택하면 해당 글의 댓글을 관리할 수 있어요.</div>
+    <button class="btn btn-ghost btn-sm" onclick="loadSelectedPostComments()">💬 선택한 게시글 댓글 보기</button>
+    <div id="cmtManageWrap"></div>
+  </div>
 
-    <div class="row2">
-      <div class="field"><label>이름 (display_name)</label><input class="input" id="fName"></div>
-      <div class="field"><label>이모지</label><input class="input" id="fEmoji"></div>
-    </div>
+  <!-- ⑤ 캐릭터 정보 편집 -->
+  <div class="sec">
+    <div class="sec-title">📝 캐릭터 정보 편집</div>
     <div class="row3">
       <div class="field">
         <label>소속</label>
-        <select class="select" id="fGroup">
+        <select class="sel" id="fGroup" style="margin-bottom:0;">
           <option value="kindergarten">유치원</option>
           <option value="daycare">어린이집</option>
           <option value="teacher">선생님</option>
         </select>
       </div>
-      <div class="field">
-        <label>성별</label>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:4px;">
-          <label style="font-size:13px;display:flex;align-items:center;gap:3px;cursor:pointer;"><input type="radio" name="fGenderR" value="female" onchange="handleEditGender(this)"> 여성</label>
-          <label style="font-size:13px;display:flex;align-items:center;gap:3px;cursor:pointer;"><input type="radio" name="fGenderR" value="male" onchange="handleEditGender(this)"> 남성</label>
-          <label style="font-size:13px;display:flex;align-items:center;gap:3px;cursor:pointer;"><input type="radio" name="fGenderR" value="other" onchange="handleEditGender(this)"> 기타</label>
-          <label style="font-size:13px;display:flex;align-items:center;gap:3px;cursor:pointer;"><input type="radio" name="fGenderR" value="none" onchange="handleEditGender(this)"> 밝히고 싶지 않음</label>
-        </div>
-        <input class="input" id="fGenderOther" placeholder="직접 입력..." style="margin-bottom:0;display:none;">
-        <input type="hidden" id="fGender" value="">
-      </div>
-      <div class="field"><label>MBTI</label><input class="input" id="fMbti" placeholder="ENFP"></div>
+      <div class="field"><label>동물종류</label><input class="inp" id="fAnimal" style="margin-bottom:0;"></div>
+      <div class="field"><label>MBTI</label><input class="inp" id="fMbti" placeholder="ENFP" style="margin-bottom:0;"></div>
     </div>
+    <!-- 성별 라디오 (3번) -->
+    <div style="font-size:11px;font-weight:700;color:var(--sub);margin:10px 0 5px;">성별</div>
+    <div class="gender-wrap">
+      <label><input type="radio" name="fGR" value="female" onchange="handleGender('f',this)"> 여자</label>
+      <label><input type="radio" name="fGR" value="male"   onchange="handleGender('f',this)"> 남자</label>
+      <label><input type="radio" name="fGR" value="other"  onchange="handleGender('f',this)"> 기타</label>
+      <label><input type="radio" name="fGR" value="secret" onchange="handleGender('f',this)"> 밝히고싶지않음</label>
+    </div>
+    <input class="inp inp-sm hidden" id="fGenderOther" placeholder="성별 직접 입력" style="margin-top:4px;margin-bottom:8px;">
     <div class="row2">
-      <div class="field"><label>동물종류 (animal_type)</label><input class="input" id="fAnimal"></div>
-      <div class="field"><label>특징 (personality)</label><input class="input" id="fPersonality"></div>
+      <div class="field"><label>좋아하는 것</label><input class="inp" id="fLikes" style="margin-bottom:0;"></div>
+      <div class="field"><label>취미</label><input class="inp" id="fHobby" style="margin-bottom:0;"></div>
     </div>
-    <div class="row2">
-      <div class="field"><label>생년월일</label><input class="input" type="date" id="fBirthday"></div>
-      <div class="field"><label>나이</label><input class="input" type="number" id="fAge" placeholder="3" min="0" max="20"></div>
+    <div class="row2" style="margin-top:10px;">
+      <div class="field"><label>싫어하는 것</label><input class="inp" id="fDislikes" style="margin-bottom:0;"></div>
+      <div class="field"><label>비밀</label><input class="inp" id="fSecret" style="margin-bottom:0;"></div>
     </div>
-    <div class="row2">
-      <div class="field"><label>좋아하는 것 (likes)</label><input class="input" id="fLikes"></div>
-      <div class="field"><label>싫어하는 것 (dislikes)</label><input class="input" id="fDislikes"></div>
+    <div style="margin-top:10px;">
+      <div style="font-size:11px;font-weight:700;color:var(--sub);margin-bottom:4px;">AI 말투 힌트 (speech_style)</div>
+      <input class="inp" id="fSpeech" placeholder="밝고 장난기 많은 말투, 민초 덕후">
     </div>
-    <div class="row2">
-      <div class="field"><label>취미 (hobby)</label><input class="input" id="fHobby"></div>
-      <div class="field"><label>비밀 (secret)</label><input class="input" id="fSecret"></div>
+    <div style="margin-top:2px;">
+      <div style="font-size:11px;font-weight:700;color:var(--sub);margin-bottom:4px;">답댓글 반응속도 (분, 기본 30)</div>
+      <input class="inp" type="number" id="fSpeed" placeholder="30" min="1" max="1440">
     </div>
-    <div class="field" style="margin-bottom:12px;">
-      <label>말투 힌트 (speech_style) — AI 생성 프롬프트에 사용됩니다</label>
-      <input class="input" id="fSpeech" placeholder="밝고 장난기 많은 말투, 민초 덕후" style="margin-bottom:0;">
-    </div>
-    <div class="field" style="margin-bottom:12px;">
-      <label>답댓글 반응속도 (분) — 값이 낮을수록 빠르게 반응, 기본 30분</label>
-      <input class="input" type="number" id="fResponseSpeed" placeholder="30" min="1" max="1440" style="margin-bottom:0;">
-    </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <div class="btn-row">
       <button class="btn btn-green" id="btnSave" onclick="saveProfile()">💾 저장</button>
       <button class="btn btn-ghost btn-sm" onclick="resetForm()">되돌리기</button>
     </div>
     <div class="status" id="pSaveStatus"></div>
   </div>
 
-</div><!-- /panel-body -->
+</div>
 ```
 
-  </div><!-- /panel -->
-</div><!-- /overlay -->
-
+  </div>
+</div>
 <script>
-  const API       = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
-  const ADMIN_KEY = 'yimkim1221';
-  const PW        = 'yimkim1221';
+  'use strict';
+  const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
 
-  let characters    = [];
-  let cachedFeed    = [];
-  let selectedChar  = null;
-  let selectedPostId = null;
+let adminKey     = ‘’;
+let characters   = [];
+let cachedFeed   = [];
+let selectedChar = null;
+let selectedPostId = null;
 
-  // ── 유틸 ─────────────────────────────────────────
-  const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  const groupLabel = g => g === 'kindergarten' ? '유치원' : g === 'daycare' ? '어린이집' : '선생님';
-  const relTime = d => {
-    const s = (Date.now() - new Date(d)) / 1000;
-    if (s < 60)    return '방금';
-    if (s < 3600)  return `${Math.floor(s / 60)}분 전`;
-    if (s < 86400) return `${Math.floor(s / 3600)}시간 전`;
-    return `${Math.floor(s / 86400)}일 전`;
-  };
+// ── 유틸
+const esc = s => String(s ?? ‘’).replace(/&/g,’&’).replace(/</g,’<’).replace(/>/g,’>’).replace(/”/g,’"’);
+const groupLabel = g => g===‘kindergarten’?‘유치원’:g===‘daycare’?‘어린이집’:‘선생님’;
+const relTime = d => {
+const s = (Date.now()-new Date(d))/1000;
+if(s<60)    return ‘방금’;
+if(s<3600)  return `${Math.floor(s/60)}분 전`;
+if(s<86400) return `${Math.floor(s/3600)}시간 전`;
+return `${Math.floor(s/86400)}일 전`;
+};
 
-  // ── 성별 라디오 핸들러 ─────────────────────────
-  function handleNewGender(radio) {
-    const otherInput = document.getElementById('newGenderOther');
-    const hiddenInput = document.getElementById('newGender');
-    if (radio.value === 'other') {
-      otherInput.style.display = '';
-      otherInput.oninput = () => { hiddenInput.value = otherInput.value.trim(); };
-      hiddenInput.value = otherInput.value.trim();
-    } else if (radio.value === 'none') {
-      otherInput.style.display = 'none';
-      hiddenInput.value = '';
-    } else {
-      otherInput.style.display = 'none';
-      hiddenInput.value = radio.value;
-    }
-  }
-  function handleEditGender(radio) {
-    const otherInput = document.getElementById('fGenderOther');
-    const hiddenInput = document.getElementById('fGender');
-    if (radio.value === 'other') {
-      otherInput.style.display = '';
-      otherInput.oninput = () => { hiddenInput.value = otherInput.value.trim(); };
-      hiddenInput.value = otherInput.value.trim();
-    } else if (radio.value === 'none') {
-      otherInput.style.display = 'none';
-      hiddenInput.value = '';
-    } else {
-      otherInput.style.display = 'none';
-      hiddenInput.value = radio.value;
-    }
-  }
-  // 편집 폼 로드 시 기존 gender 값으로 라디오 세팅
-  function setGenderRadio(gender) {
-    const known = ['female', 'male', ''];
-    let radioVal = 'none';
-    if (gender === 'female') radioVal = 'female';
-    else if (gender === 'male') radioVal = 'male';
-    else if (gender && gender !== '') radioVal = 'other';
-    document.querySelectorAll('input[name="fGenderR"]').forEach(r => { r.checked = r.value === radioVal; });
-    const otherInput = document.getElementById('fGenderOther');
-    const hiddenInput = document.getElementById('fGender');
-    hiddenInput.value = gender || '';
-    if (radioVal === 'other') {
-      otherInput.style.display = '';
-      otherInput.value = gender || '';
-    } else {
-      otherInput.style.display = 'none';
-      otherInput.value = '';
-    }
-  }
+function toast(msg, err=false) {
+const t=document.getElementById(‘toast’);
+t.textContent=msg; t.className=‘toast show’+(err?’ err’:’’);
+clearTimeout(t._t); t._t=setTimeout(()=>{t.className=‘toast’;},3000);
+}
+function showStatus(id, msg, type=‘info’) {
+const el=document.getElementById(id); if(!el) return;
+el.textContent=msg; el.className=’status show ’+type;
+}
+function hideStatus(id) {
+const el=document.getElementById(id); if(el) el.className=‘status’;
+}
 
-  function showStatus(id, msg, type = 'info') {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.textContent = msg;
-    el.className = `status show ${type}`;
-    if (type !== 'info') setTimeout(() => el.classList.remove('show'), 6000);
-  }
+// ── API fetch 공통 (X-Admin-Key 헤더 자동 첨부)
+function adminFetch(path, opts={}) {
+const headers = { ‘X-Admin-Key’: adminKey, …(opts.body ? {‘Content-Type’:‘application/json’} : {}), …opts.headers };
+return fetch(API+path, { …opts, headers });
+}
 
-  async function adminFetch(path, opts = {}) {
-    const headers = new Headers(opts.headers || {});
-    headers.set('X-Admin-Key', ADMIN_KEY);
-    if (!(opts.body instanceof FormData) && !headers.has('Content-Type')) {
-      headers.set('Content-Type', 'application/json');
-    }
-    return fetch(API + path, { ...opts, headers });
-  }
+// ── 로그인
+document.getElementById(‘pwInput’).addEventListener(‘keypress’, e => { if(e.key===‘Enter’) checkPw(); });
 
-  // ── 비밀번호 인증 ────────────────────────────────
-  // localStorage에 저장된 비밀번호 자동 채우기
-  (function() {
-    const saved = localStorage.getItem('rk_admin_pw');
-    if (saved) {
-      document.getElementById('pwInput').value = saved;
-      document.getElementById('pwSave').checked = true;
-    }
-  })();
+async function checkPw() {
+const pw  = document.getElementById(‘pwInput’).value.trim();
+const btn = document.getElementById(‘pwBtn’);
+const err = document.getElementById(‘pwError’);
+if(!pw) { err.textContent=‘비밀번호를 입력해주세요’; return; }
+btn.disabled=true; btn.textContent=‘확인 중…’; err.textContent=’’;
+try {
+// 실제 admin 엔드포인트로 검증
+const r = await fetch(API+’/admin/notices’, { headers:{‘X-Admin-Key’:pw} });
+if(r.ok) {
+adminKey = pw;
+sessionStorage.setItem(‘rkAdminKey’, pw);
+if(document.getElementById(‘pwSave’).checked) localStorage.setItem(‘rkAdminKey’, pw);
+enterAdmin();
+} else if(r.status===401) {
+err.textContent=‘비밀번호가 틀렸어요’;
+} else {
+err.textContent=‘서버 오류 (’+r.status+’)’;
+}
+} catch(e) { err.textContent=‘네트워크 오류’; }
+btn.disabled=false; btn.textContent=‘입장하기’;
+}
 
-  function checkPw() {
-    const val = document.getElementById('pwInput').value;
-    if (val === PW) {
-      // 저장 여부에 따라 localStorage 처리
-      if (document.getElementById('pwSave').checked) {
-        localStorage.setItem('rk_admin_pw', val);
-      } else {
-        localStorage.removeItem('rk_admin_pw');
-      }
-      document.getElementById('pwGate').classList.add('hidden');
-      sessionStorage.setItem('rk_admin', '1');
-      init();
-    } else {
-      const errEl = document.getElementById('pwError');
-      errEl.textContent = '비밀번호가 틀렸어요';
-      document.getElementById('pwInput').value = '';
-      document.getElementById('pwInput').focus();
-      setTimeout(() => { errEl.textContent = ''; }, 2000);
-    }
-  }
-  function logout() {
-    sessionStorage.removeItem('rk_admin');
-    location.reload();
-  }
-  document.getElementById('pwInput').addEventListener('keypress', e => { if (e.key === 'Enter') checkPw(); });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel(); });
-  // 세션 유지 (탭 닫기 전까지)
-  if (sessionStorage.getItem('rk_admin') === '1') {
-    document.getElementById('pwGate').classList.add('hidden');
-    window.addEventListener('DOMContentLoaded', init);
-  }
+function logout() {
+adminKey=’’; sessionStorage.removeItem(‘rkAdminKey’); localStorage.removeItem(‘rkAdminKey’);
+document.getElementById(‘pwGate’).classList.remove(‘hidden’);
+document.getElementById(‘mainHeader’).classList.add(‘hidden’);
+document.getElementById(‘mainContent’).classList.add(‘hidden’);
+document.getElementById(‘pwInput’).value=’’;
+document.getElementById(‘pwSave’).checked=false;
+}
 
-  // ── 초기 로드 ────────────────────────────────────
-  async function init() {
-    await loadCharacters();
-    renderGrid();
-    await Promise.all([loadManagePosts(), loadManageNotices(), loadFeed()]);
-  }
+function enterAdmin() {
+document.getElementById(‘pwGate’).classList.add(‘hidden’);
+document.getElementById(‘mainHeader’).classList.remove(‘hidden’);
+document.getElementById(‘mainContent’).classList.remove(‘hidden’);
+init();
+}
 
-  async function reloadAll() {
-    await loadCharacters();
-    renderGrid();
-    await Promise.all([loadManagePosts(), loadManageNotices(), loadFeed()]);
-    if (selectedChar) renderPostPicker();
-  }
+// 자동 로그인
+(async function() {
+const saved = localStorage.getItem(‘rkAdminKey’) || sessionStorage.getItem(‘rkAdminKey’);
+if(!saved) { document.getElementById(‘pwInput’).focus(); return; }
+try {
+const r = await fetch(API+’/admin/notices’, { headers:{‘X-Admin-Key’:saved} });
+if(r.ok) {
+adminKey=saved;
+if(localStorage.getItem(‘rkAdminKey’)) document.getElementById(‘pwSave’).checked=true;
+enterAdmin();
+} else {
+localStorage.removeItem(‘rkAdminKey’); sessionStorage.removeItem(‘rkAdminKey’);
+document.getElementById(‘pwInput’).focus();
+}
+} catch { document.getElementById(‘pwInput’).focus(); }
+})();
 
-  // ── 캐릭터 추가 ──────────────────────────────────
-  async function addCharacter() {
-    const name = document.getElementById('newName').value.trim();
-    if (!name) { showStatus('addCharStatus', '이름을 입력하세요', 'error'); return; }
+// ── 초기화
+async function init() {
+await Promise.all([loadCharacters(), loadManagePosts(), loadManageNotices()]);
+await loadFeed();
+}
 
-    const payload = {
-      display_name: name,
-      emoji:        document.getElementById('newEmoji').value.trim() || '🙂',
-      group_type:   document.getElementById('newGroup').value,
-      animal_type:  document.getElementById('newAnimal').value.trim() || null,
-      gender:         document.getElementById('newGender').value.trim() || null,
-      mbti:           document.getElementById('newMbti').value.trim()   || null,
-      likes:          document.getElementById('newLikes').value.trim()  || null,
-      hobby:          document.getElementById('newHobby').value.trim()  || null,
-      speech_style:   document.getElementById('newSpeech').value.trim() || null,
-      response_speed: parseInt(document.getElementById('newResponseSpeed').value) || 30,
-    };
+// ── 캐릭터 로드
+async function loadCharacters() {
+try {
+const r = await adminFetch(’/characters’);
+if(r.ok) { const d=await r.json(); characters=d.characters||[]; }
+} catch {}
+renderGrid();
+}
 
-    const btn = document.getElementById('btnAddChar');
-    btn.disabled = true; btn.innerHTML = '<span class="spin"></span> 추가중';
-    showStatus('addCharStatus', '추가 중...', 'info');
+async function loadFeed(limit=50) {
+try {
+const r = await fetch(API+`/timeline?limit=${limit}&sort=latest`);
+if(r.ok) { const d=await r.json(); cachedFeed=d.posts||[]; }
+} catch {}
+}
 
-    try {
-      const r = await adminFetch('/admin/characters', { method:'POST', body:JSON.stringify(payload) });
-      const d = await r.json();
-      if (d.ok) {
-        // 입력 초기화
-        ['newName','newEmoji','newAnimal','newMbti','newLikes','newHobby','newSpeech'].forEach(id => {
-          document.getElementById(id).value = '';
-        });
-        document.getElementById('newGender').value = '';
-        document.getElementById('newGenderOther').value = '';
-        document.getElementById('newGenderOther').style.display = 'none';
-        document.querySelectorAll('input[name="newGenderR"]').forEach(r => { r.checked = r.value === 'none'; });
-        document.getElementById('newResponseSpeed').value = '30';
-        document.getElementById('newGroup').value = 'kindergarten';
-        showStatus('addCharStatus', `✅ "${name}" 추가 완료! 그리드가 새로고침됩니다.`, 'success');
-        // 캐릭터 목록 새로고침
-        await loadCharacters();
-        renderGrid();
-      } else {
-        showStatus('addCharStatus', `❌ ${d.error}`, 'error');
-      }
-    } catch (e) {
-      showStatus('addCharStatus', `❌ ${e.message}`, 'error');
-    }
-    btn.disabled = false; btn.innerHTML = '➕ 캐릭터 추가';
-  }
+function renderGrid() {
+const q    = (document.getElementById(‘charSearch’)?.value||’’).toLowerCase();
+const grid = document.getElementById(‘charGrid’);
+const list = q ? characters.filter(c=>c.display_name.toLowerCase().includes(q)) : characters;
+if(!list.length) { grid.innerHTML=’<div style="color:var(--sub);font-size:13px;grid-column:1/-1;">캐릭터 없음</div>’; return; }
+grid.innerHTML = list.map(c => {
+const avEl = c.image_url
+? `<img class="char-av" src="${esc(c.image_url)}" alt="${esc(c.display_name)}" onerror="this.style.display='none';this.nextSibling.style.display='block'"><span class="char-emoji" style="display:none;">${esc(c.emoji||'🐾')}</span>`
+: `<div class="char-emoji">${esc(c.emoji||'🐾')}</div>`;
+return `<div class="char-tile" onclick="openPanel(${c.id})"> ${avEl} <div class="char-name">${esc(c.display_name)}</div> <div class="char-group">${groupLabel(c.group_type)}</div> </div>`;
+}).join(’’);
+}
 
-  async function loadCharacters() {
-    try {
-      const r = await fetch(API + '/characters');
-      if (r.ok) {
-        const d = await r.json();
-        characters = d.characters?.length ? d.characters : MOCK_CHARS;
-      } else { characters = MOCK_CHARS; }
-    } catch { characters = MOCK_CHARS; }
-  }
+// ── 캐릭터 패널
+async function openPanel(charId) {
+const c = characters.find(x=>x.id===charId);
+if(!c) return;
+selectedChar=c; selectedPostId=null;
+// 헤더
+const hav = document.getElementById(‘pHeadAv’);
+if(c.image_url) {
+hav.innerHTML=`<img class="panel-av" src="${esc(c.image_url)}" alt="${esc(c.display_name)}" onerror="this.parentElement.textContent='${esc(c.emoji||'🐾')}'">`;
+} else { hav.textContent=c.emoji||‘🐾’; }
+document.getElementById(‘pName’).textContent = c.display_name;
+document.getElementById(‘pSub’).textContent  = `${groupLabel(c.group_type)} · ${c.animal_type||''} · ${c.mbti||''}`;
+fillForm(c);
+if(!cachedFeed.length) await loadFeed();
+renderPostPicker();
+document.getElementById(‘overlay’).classList.remove(‘hidden’);
+document.getElementById(‘aiCommentStatus’).className=‘status’;
+document.getElementById(‘aiPostStatus’).className=‘status’;
+document.getElementById(‘pSaveStatus’).className=‘status’;
+document.getElementById(‘cmtManageWrap’).innerHTML=’’;
+}
 
-  async function loadFeed(limit = 30) {
-    try {
-      const r = await fetch(API + `/feed?limit=${limit}`);
-      const d = await r.json();
-      cachedFeed = d.posts || [];
-    } catch { cachedFeed = []; }
-  }
+function closePanel() {
+document.getElementById(‘overlay’).classList.add(‘hidden’);
+selectedChar=null; selectedPostId=null;
+}
 
-  // ── 캐릭터 그리드 ────────────────────────────────
-  function renderGrid() {
-    const q = (document.getElementById('charSearch').value || '').toLowerCase();
-    const filtered = characters.filter(c =>
-      !q || `${c.display_name} ${c.group_type} ${c.mbti || ''} ${c.animal_type || ''}`.toLowerCase().includes(q)
-    );
-    document.getElementById('charGrid').innerHTML = filtered.length
-      ? filtered.map(c => {
-          const avatar = c.image_url
-            ? `<img class="char-thumb" src="${esc(c.image_url)}" alt="${esc(c.display_name)}" data-emoji="${esc(c.emoji||'🙂')}" onerror="this.outerHTML='<div class=\'char-emoji\'>' + this.dataset.emoji + '</div>'">`
-            : `<div class="char-emoji">${esc(c.emoji || '🙂')}</div>`;
-          return `<div class="char-tile" onclick="openPanel(${c.id})">
-            ${avatar}
-            <div class="char-name">${esc(c.display_name)}</div>
-            <div class="char-group">${groupLabel(c.group_type)} · ${esc(c.mbti || '')}</div>
-          </div>`;
-        }).join('')
-      : '<div style="color:var(--sub);font-size:13px;grid-column:1/-1;">검색 결과 없음</div>';
-  }
+// ── 폼 채우기
+function fillForm(c) {
+document.getElementById(‘fName’).value   = c.display_name||’’;
+document.getElementById(‘fEmoji’).value  = c.emoji||’’;
+document.getElementById(‘fGroup’).value  = c.group_type||‘kindergarten’;
+document.getElementById(‘fAnimal’).value = c.animal_type||’’;
+document.getElementById(‘fMbti’).value   = c.mbti||’’;
+document.getElementById(‘fLikes’).value  = c.likes||’’;
+document.getElementById(‘fHobby’).value  = c.hobby||’’;
+document.getElementById(‘fDislikes’).value = c.dislikes||’’;
+document.getElementById(‘fSecret’).value   = c.secret||’’;
+document.getElementById(‘fSpeech’).value   = c.speech_style||’’;
+document.getElementById(‘fSpeed’).value    = c.response_speed||’’;
+document.getElementById(‘fImgUrl’).value   = c.image_url||’’;
+// 이미지 썸네일
+const th = document.getElementById(‘pThumb’);
+if(c.image_url) th.innerHTML=`<img src="${esc(c.image_url)}" alt="${esc(c.display_name)}" onerror="this.parentElement.textContent='${esc(c.emoji||'🐾')}'">`;
+else th.textContent=c.emoji||‘🐾’;
+// 성별
+setGender(‘f’, c.gender||’’);
+}
 
-  // ── 패널 열기/닫기 ───────────────────────────────
-  function handleOverlayClick(e) { if (e.target.id === 'overlay') closePanel(); }
-  function closePanel() {
-    document.getElementById('overlay').classList.add('hidden');
-    selectedChar = null;
-    selectedPostId = null;
-  }
+function resetForm() {
+if(selectedChar) { fillForm(selectedChar); showStatus(‘pSaveStatus’,‘되돌렸습니다’,‘info’); }
+}
 
-  async function openPanel(charId) {
-    const c = characters.find(x => x.id == charId);
-    if (!c) return;
-    selectedChar   = c;
-    selectedPostId = null;
+// ── 성별 공통 핸들러
+function handleGender(prefix, radio) {
+const otherEl = document.getElementById(prefix===‘ac’?‘acGenderOther’:‘fGenderOther’);
+otherEl.classList.toggle(‘hidden’, radio.value!==‘other’);
+}
+function setGender(prefix, val) {
+const knownVals = [‘female’,‘male’,‘secret’];
+const isKnown   = knownVals.includes(val);
+const otherEl   = document.getElementById(prefix===‘ac’?‘acGenderOther’:‘fGenderOther’);
+const radioVal  = isKnown ? val : (val?‘other’:‘female’);
+const radios    = document.querySelectorAll(`input[name="${prefix}GR"]`);
+radios.forEach(r => { if(r.value===radioVal) r.checked=true; });
+otherEl.classList.toggle(‘hidden’, radioVal!==‘other’);
+if(!isKnown && val) otherEl.value=val;
+}
+function getGender(prefix) {
+const radios = document.querySelectorAll(`input[name="${prefix}GR"]`);
+let val=’’;
+radios.forEach(r=>{ if(r.checked) val=r.value; });
+if(val===‘other’) return (document.getElementById(prefix===‘ac’?‘acGenderOther’:‘fGenderOther’).value.trim());
+if(val===‘secret’) return ‘밝히고싶지않음’;
+return val;
+}
 
-    document.getElementById('pEmoji').textContent = c.emoji || '🙂';
-    document.getElementById('pName').textContent  = c.display_name;
-    document.getElementById('pSub').textContent   = `${groupLabel(c.group_type)} · ${c.animal_type || ''} · ${c.mbti || ''}`;
+// ── 이미지 업로드 공통
+function syncThumb(urlId, thumbId, emojiId) {
+const url   = document.getElementById(urlId).value.trim();
+const thumb = document.getElementById(thumbId);
+const emoji = document.getElementById(emojiId)?.value || ‘🐾’;
+if(!url) { thumb.innerHTML=’’; thumb.textContent=emoji; return; }
+thumb.innerHTML=`<img src="${esc(url)}" alt="미리보기" onerror="this.parentElement.textContent='${esc(emoji)}'">`;
+}
 
-    const av = document.getElementById('pAvatar');
-    if (c.image_url) {
-      av.innerHTML = `<img src="${esc(c.image_url)}" alt="${esc(c.display_name)}" data-emoji="${esc(c.emoji || '🙂')}" onerror="this.parentElement.removeChild(this);this.parentElement.textContent=this.dataset.emoji">`;
-    } else {
-      av.textContent = c.emoji || '🙂';
-    }
+async function uploadImg(inputEl, urlId, thumbId, emojiId) {
+const file = inputEl.files[0]; if(!file) return;
+if(file.size>5*1024*1024) { toast(‘5MB 이하 이미지만 가능해요’,true); return; }
+const thumb = document.getElementById(thumbId);
+thumb.innerHTML=’<div class="spinner" style="border-top-color:var(--blue);border-color:var(--border);"></div>’;
+const fd=new FormData(); fd.append(‘image’,file);
+try {
+const r = await adminFetch(’/admin/upload-image’, { method:‘POST’, body:fd, headers:{‘X-Admin-Key’:adminKey} });
+const d = await r.json();
+if(d.ok) {
+document.getElementById(urlId).value=d.image_url;
+syncThumb(urlId,thumbId,emojiId);
+toast(‘✅ 이미지 업로드 완료’);
+} else { toast(d.error||‘업로드 실패’,true); thumb.textContent=‘❌’; }
+} catch { toast(‘업로드 오류’,true); thumb.textContent=‘❌’; }
+inputEl.value=’’;
+}
 
-    fillForm(c);
-    clearPost();
-    document.getElementById('aiComment').value = '';
-    ['pImgStatus','pSaveStatus','aiPostStatus','aiCommentStatus'].forEach(id => {
-      const el = document.getElementById(id);
-      el.textContent = '';
-      el.className = 'status';
-    });
+// ── 캐릭터 저장
+async function saveProfile() {
+if(!selectedChar) return;
+const btn=document.getElementById(‘btnSave’);
+btn.disabled=true; btn.innerHTML=’<span class="spinner"></span> 저장 중’;
+showStatus(‘pSaveStatus’,‘저장 중…’,‘info’);
+const payload = {
+display_name:   document.getElementById(‘fName’).value.trim(),
+emoji:          document.getElementById(‘fEmoji’).value.trim(),
+group_type:     document.getElementById(‘fGroup’).value,
+animal_type:    document.getElementById(‘fAnimal’).value.trim(),
+gender:         getGender(‘f’),
+mbti:           document.getElementById(‘fMbti’).value.trim(),
+likes:          document.getElementById(‘fLikes’).value.trim(),
+hobby:          document.getElementById(‘fHobby’).value.trim(),
+dislikes:       document.getElementById(‘fDislikes’).value.trim(),
+secret:         document.getElementById(‘fSecret’).value.trim(),
+speech_style:   document.getElementById(‘fSpeech’).value.trim(),
+response_speed: parseInt(document.getElementById(‘fSpeed’).value)||null,
+image_url:      document.getElementById(‘fImgUrl’).value.trim()||null,
+};
+try {
+const r = await adminFetch(`/admin/characters/${selectedChar.id}`, {
+method:‘PATCH’, body:JSON.stringify(payload),
+});
+const d = await r.json();
+if(d.ok) {
+showStatus(‘pSaveStatus’,‘✅ 저장됐어요’,‘success’);
+await loadCharacters();
+const updated=characters.find(c=>c.id===selectedChar.id);
+if(updated) { selectedChar=updated; fillForm(updated); }
+// 헤더 아바타 갱신
+const hav=document.getElementById(‘pHeadAv’);
+if(updated?.image_url) hav.innerHTML=`<img class="panel-av" src="${esc(updated.image_url)}" alt="${esc(updated.display_name)}">`;
+else hav.textContent=updated?.emoji||‘🐾’;
+document.getElementById(‘pName’).textContent=updated?.display_name||’’;
+} else { showStatus(‘pSaveStatus’,’❌ ’+d.error,‘error’); }
+} catch(e) { showStatus(‘pSaveStatus’,’❌ ’+e.message,‘error’); }
+btn.disabled=false; btn.textContent=‘💾 저장’;
+}
 
-    // 캐시에 피드가 없을 때만 새로 로드
-    if (!cachedFeed.length) await loadFeed(30);
-    renderPostPicker();
+// ── AI 게시글
+function clearPost() {
+document.getElementById(‘aiTitle’).value=’’;
+document.getElementById(‘aiBody’).value=’’;
+document.getElementById(‘aiMediaUrl’).value=’’;
+hideStatus(‘aiPostStatus’);
+}
 
-    document.getElementById('overlay').classList.remove('hidden');
-    document.getElementById('aiTitle').focus();
-  }
+async function generatePost() {
+if(!selectedChar) { toast(‘캐릭터를 선택하세요’,true); return; }
+const btn=document.getElementById(‘btnGenPost’);
+btn.disabled=true; btn.innerHTML=’<span class="spinner"></span> 생성 중’;
+showStatus(‘aiPostStatus’,‘생성 중…’,‘info’);
+try {
+const r=await adminFetch(’/admin/generate-post’, {
+method:‘POST’, body:JSON.stringify({character_id:selectedChar.id}),
+});
+const d=await r.json();
+if(d.ok && d.post) {
+document.getElementById(‘aiTitle’).value=d.post.title||’’;
+document.getElementById(‘aiBody’).value =d.post.body ||’’;
+showStatus(‘aiPostStatus’,‘✅ AI 제안 완료! 수정 후 게시하세요’,‘success’);
+} else { showStatus(‘aiPostStatus’,’❌ ’+(d.error||‘생성 실패’),‘error’); }
+} catch(e) { showStatus(‘aiPostStatus’,’❌ ’+e.message,‘error’); }
+btn.disabled=false; btn.innerHTML=‘🤖 AI 제안’;
+}
 
-  function fillForm(c) {
-    document.getElementById('fName').value          = c.display_name   || '';
-    document.getElementById('fEmoji').value         = c.emoji           || '';
-    document.getElementById('fGroup').value         = c.group_type      || 'kindergarten';
-    setGenderRadio(c.gender || '');
-    document.getElementById('fMbti').value          = c.mbti            || '';
-    document.getElementById('fAnimal').value        = c.animal_type     || '';
-    document.getElementById('fPersonality').value   = c.personality     || '';
-    document.getElementById('fBirthday').value      = c.birthday        || '';
-    document.getElementById('fAge').value           = c.age != null     ? c.age : '';
-    document.getElementById('fLikes').value         = c.likes           || '';
-    document.getElementById('fDislikes').value      = c.dislikes        || '';
-    document.getElementById('fHobby').value         = c.hobby           || '';
-    document.getElementById('fSecret').value        = c.secret          || '';
-    document.getElementById('fSpeech').value        = c.speech_style    || '';
-    document.getElementById('fResponseSpeed').value = c.response_speed  != null ? c.response_speed : 30;
-  }
+async function publishPost() {
+if(!selectedChar) { toast(‘캐릭터를 선택하세요’,true); return; }
+const title    = document.getElementById(‘aiTitle’).value.trim();
+const body     = document.getElementById(‘aiBody’).value.trim();
+const mediaUrl = document.getElementById(‘aiMediaUrl’).value.trim();
+if(!title||!body) { showStatus(‘aiPostStatus’,‘제목과 내용을 입력하세요’,‘error’); return; }
+const btn=document.getElementById(‘btnPubPost’);
+btn.disabled=true; btn.innerHTML=’<span class="spinner"></span> 게시 중’;
+showStatus(‘aiPostStatus’,‘게시 중…’,‘info’);
+try {
+const r=await adminFetch(’/admin/posts’, {
+method:‘POST’, body:JSON.stringify({
+character_id:selectedChar.id, title, body, media_url:mediaUrl||null,
+}),
+});
+const d=await r.json();
+if(d.ok) {
+showStatus(‘aiPostStatus’,‘✅ 게시 완료’,‘success’);
+clearPost(); await loadFeed(); renderPostPicker(); loadManagePosts();
+} else { showStatus(‘aiPostStatus’,’❌ ’+(d.error||‘실패’),‘error’); }
+} catch(e) { showStatus(‘aiPostStatus’,’❌ ’+e.message,‘error’); }
+btn.disabled=false; btn.innerHTML=‘📤 게시’;
+}
 
-  function resetForm() {
-    if (selectedChar) { fillForm(selectedChar); showStatus('pSaveStatus', '되돌렸습니다', 'info'); }
-  }
+// ── 게시글 피커
+function renderPostPicker() {
+const wrap=document.getElementById(‘postPicker’);
+if(!cachedFeed.length) { wrap.innerHTML=’<div style="color:var(--sub);font-size:13px;">게시글이 없습니다</div>’; return; }
+wrap.innerHTML = cachedFeed.map(p=>` <div class="postitem${String(selectedPostId)===String(p.id)?' sel':''}" onclick="selectPost(${p.id})"> <div class="postitem-title">${esc((p.character_emoji||p.author_emoji||'👤')+' '+(p.title||p.body?.slice(0,30)||'제목없음'))}</div> <div class="postitem-meta">${esc(p.character_name||p.nickname||'익명')} · ID:${p.id} · 댓글 ${p.comment_count||0}</div> </div>`).join(’’);
+}
+function selectPost(id) { selectedPostId=id; renderPostPicker(); }
 
-  // ── 캐릭터 저장 ──────────────────────────────────
-  async function saveProfile() {
-    if (!selectedChar) return;
-    const update = {
-      display_name: document.getElementById('fName').value.trim(),
-      emoji:        document.getElementById('fEmoji').value.trim(),
-      group_type:   document.getElementById('fGroup').value,
-      gender:       document.getElementById('fGender').value.trim(),
-      mbti:         document.getElementById('fMbti').value.trim(),
-      animal_type:  document.getElementById('fAnimal').value.trim(),
-      personality:  document.getElementById('fPersonality').value.trim(),
-      birthday:     document.getElementById('fBirthday').value || null,
-      age:          document.getElementById('fAge').value !== '' ? Number(document.getElementById('fAge').value) : null,
-      likes:        document.getElementById('fLikes').value.trim(),
-      dislikes:     document.getElementById('fDislikes').value.trim(),
-      hobby:        document.getElementById('fHobby').value.trim(),
-      secret:       document.getElementById('fSecret').value.trim(),
-      speech_style:   document.getElementById('fSpeech').value.trim(),
-      response_speed: parseInt(document.getElementById('fResponseSpeed').value) || 30,
-    };
-    const btn = document.getElementById('btnSave');
-    btn.disabled = true; btn.innerHTML = '<span class="spin"></span> 저장중';
-    showStatus('pSaveStatus', '저장 중...', 'info');
-    try {
-      const r = await adminFetch(`/admin/characters/${selectedChar.id}`, { method:'PATCH', body:JSON.stringify(update) });
-      const d = await r.json();
-      if (d.ok) {
-        Object.assign(selectedChar, update);
-        document.getElementById('pEmoji').textContent = update.emoji || '🙂';
-        document.getElementById('pName').textContent  = update.display_name;
-        document.getElementById('pSub').textContent   = `${groupLabel(update.group_type)} · ${update.animal_type || ''} · ${update.mbti || ''}`;
-        renderGrid();
-        showStatus('pSaveStatus', '✅ 저장 완료', 'success');
-      } else { showStatus('pSaveStatus', `❌ ${d.error}`, 'error'); }
-    } catch (e) { showStatus('pSaveStatus', `❌ ${e.message}`, 'error'); }
-    btn.disabled = false; btn.innerHTML = '💾 저장';
-  }
+// ── AI 댓글 (예약 시간 포함, 5번)
+async function generateComment() {
+if(!selectedChar)   { showStatus(‘aiCommentStatus’,‘캐릭터를 선택하세요’,‘error’);  return; }
+if(!selectedPostId) { showStatus(‘aiCommentStatus’,‘게시글을 선택하세요’,‘error’); return; }
+const btn=document.getElementById(‘btnGenCmt’);
+btn.disabled=true; btn.innerHTML=’<span class="spinner"></span> 생성 중’;
+showStatus(‘aiCommentStatus’,‘생성 중…’,‘info’);
+try {
+const r=await adminFetch(’/admin/generate-comment’, {
+method:‘POST’, body:JSON.stringify({post_id:selectedPostId, character_id:selectedChar.id}),
+});
+const d=await r.json();
+if(d.ok) {
+document.getElementById(‘aiComment’).value=d.comment||’’;
+showStatus(‘aiCommentStatus’,‘✅ AI 제안 완료! 수정 후 게시하세요’,‘success’);
+} else { showStatus(‘aiCommentStatus’,’❌ ’+(d.error||‘실패’),‘error’); }
+} catch(e) { showStatus(‘aiCommentStatus’,’❌ ’+e.message,‘error’); }
+btn.disabled=false; btn.innerHTML=‘🤖 AI 제안’;
+}
 
-  // ── 이미지 업로드 ────────────────────────────────
-  async function uploadImage() {
-    if (!selectedChar) return;
-    const input = document.getElementById('pImgFile');
-    const file  = input.files?.[0];
-    if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      showStatus('pImgStatus', '❌ 5MB 이하 이미지만 가능합니다', 'error');
-      input.value = ''; return;
-    }
-    showStatus('pImgStatus', '업로드 중...', 'info');
-    const form = new FormData();
-    form.append('image', file);
-    form.append('character_id', selectedChar.id);
-    try {
-      const r = await fetch(API + '/admin/upload-image', {
-        method: 'POST', headers: { 'X-Admin-Key': ADMIN_KEY }, body: form,
-      });
-      const d = await r.json();
-      if (d.ok) {
-        selectedChar.image_url = d.image_url;
-        const av = document.getElementById('pAvatar');
-        av.innerHTML = `<img src="${esc(d.image_url)}" alt="">`;
-        renderGrid();
-        showStatus('pImgStatus', '✅ 업로드 완료', 'success');
-      } else { showStatus('pImgStatus', `❌ ${d.error}`, 'error'); }
-    } catch (e) { showStatus('pImgStatus', `❌ ${e.message}`, 'error'); }
-    input.value = '';
-  }
+async function publishComment() {
+if(!selectedChar)   { showStatus(‘aiCommentStatus’,‘캐릭터를 선택하세요’,‘error’);  return; }
+if(!selectedPostId) { showStatus(‘aiCommentStatus’,‘게시글을 선택하세요’,‘error’); return; }
+const body      = document.getElementById(‘aiComment’).value.trim();
+const scheduled = document.getElementById(‘cmtScheduled’).value;
+if(!body) { showStatus(‘aiCommentStatus’,‘댓글 내용을 입력하세요’,‘error’); return; }
+const btn=document.getElementById(‘btnPubCmt’);
+btn.disabled=true; btn.innerHTML=’<span class="spinner"></span> 게시 중’;
+showStatus(‘aiCommentStatus’,‘게시 중…’,‘info’);
+try {
+const payload={post_id:selectedPostId, system_user_id:selectedChar.id, body};
+if(scheduled) payload.scheduled_at=new Date(scheduled).toISOString();
+const r=await adminFetch(’/admin/system-comment’, {
+method:‘POST’, body:JSON.stringify(payload),
+});
+const d=await r.json();
+if(d.ok) {
+document.getElementById(‘aiComment’).value=’’;
+document.getElementById(‘cmtScheduled’).value=’’;
+const msg = scheduled ? `✅ 댓글 예약 완료 (${new Date(scheduled).toLocaleString('ko-KR')})` : ‘✅ 댓글 게시 완료’;
+showStatus(‘aiCommentStatus’,msg,‘success’);
+await loadFeed(); renderPostPicker(); loadManagePosts();
+} else { showStatus(‘aiCommentStatus’,’❌ ’+(d.error||‘실패’),‘error’); }
+} catch(e) { showStatus(‘aiCommentStatus’,’❌ ’+e.message,‘error’); }
+btn.disabled=false; btn.innerHTML=‘📤 댓글 게시’;
+}
 
-  // ── 공지 미디어 (통합) ────────────────────────────
-  let noticeMediaUrl = null; // 최종 저장될 URL
+// ── 댓글 관리 (7번 - 댓글 보기/삭제)
+async function loadSelectedPostComments() {
+const wrap=document.getElementById(‘cmtManageWrap’);
+if(!selectedPostId) { wrap.innerHTML=’<div style="color:var(--sub);font-size:13px;margin-top:8px;">게시글을 먼저 선택해주세요</div>’; return; }
+wrap.innerHTML=’<div style="color:var(--sub);font-size:13px;margin-top:8px;">로딩 중…</div>’;
+try {
+const r=await fetch(API+`/posts/${selectedPostId}/comments?limit=100`);
+const d=await r.json();
+const cmts=d.comments||[];
+if(!cmts.length) { wrap.innerHTML=’<div class="cmt-wrap"><div style="color:var(--sub);font-size:13px;">댓글이 없어요</div></div>’; return; }
+wrap.innerHTML=`<div class="cmt-wrap">${cmts.map(cm=>{ const nick=cm.system_users?.display_name||cm.nickname||'익명'; const badge=cm.author_type==='system'?'🐾':'🗣️'; return `<div class="cmt-item">
+<div style="flex:1;">
+<div class="cmt-body">${badge} <strong>${esc(nick)}</strong>: ${esc(cm.body)}</div>
+<div class="cmt-meta">${relTime(cm.created_at)} · ID:${cm.id}</div>
+</div>
+<button class="manage-del" onclick="deleteComment(${cm.id})">삭제</button>
+</div>`; }).join('')}</div>`;
+} catch(e) { wrap.innerHTML=`<div style="color:var(--red);font-size:13px;margin-top:8px;">불러오기 실패: ${e.message}</div>`; }
+}
 
-  // 파일 타입 감지 (MIME 타입 기반)
-  function detectFileType(file) {
-    const t = file.type || '';
-    if (t.startsWith('image/')) return 'image';
-    if (t.startsWith('video/')) return 'video';
-    if (t.startsWith('audio/')) return 'audio';
-    return 'file';
-  }
+async function deleteComment(cmtId) {
+if(!confirm(‘이 댓글을 삭제할까요?’)) return;
+try {
+// admin 삭제 endpoint 없으면 일반 삭제 시도
+const r=await adminFetch(`/comments/${cmtId}`, {method:‘DELETE’});
+const d=await r.json();
+if(d.ok) { toast(‘🗑 댓글 삭제 완료’); loadSelectedPostComments(); }
+else { toast(d.error||‘삭제 실패’,true); }
+} catch(e) { toast(e.message,true); }
+}
 
-  // URL 타입 감지 (확장자 기반)
-  function detectUrlType(url) {
-    if (!url) return null;
-    const u = url.toLowerCase().split('?')[0];
-    if (/\.(jpg|jpeg|png|gif|webp|avif|svg)$/.test(u)) return 'image';
-    if (/\.(mp4|webm|mov|avi|mkv)$/.test(u)) return 'video';
-    if (/\.(mp3|wav|ogg|m4a|aac|flac)$/.test(u)) return 'audio';
-    if (/youtube\.com|youtu\.be/.test(url)) return 'youtube';
-    return 'link';
-  }
+// ── 게시글 관리 (7번 - 실제 데이터 로드)
+async function loadManagePosts() {
+const wrap   = document.getElementById(‘managePosts’);
+const filter = document.getElementById(‘mgmtFilter’).value;
+wrap.innerHTML=’<div class="skel" style="height:48px;margin-bottom:6px;"></div>’.repeat(3);
+try {
+const params=new URLSearchParams({limit:40, sort:‘latest’});
+if(filter!==‘all’) params.set(‘author_type’,filter);
+// timeline 사용 (관리자 token 없이도 가져올 수 있음)
+const r=await fetch(API+`/timeline?${params}`);
+const d=await r.json();
+const posts=d.posts||[];
+if(!posts.length) { wrap.innerHTML=’<div style="color:var(--sub);font-size:13px;">글이 없어요</div>’; return; }
+wrap.innerHTML=posts.map(p=>{
+const name=p.author_type===‘system’?(p.character_name||‘캐릭터’):(p.nickname||‘익명’);
+const em  =p.character_emoji||p.author_emoji||‘👤’;
+return `<div class="manage-item" id="mp-${p.id}"> <div class="manage-em">${esc(em)}</div> <div class="manage-info"> <div class="manage-title">${esc(p.title||p.body?.slice(0,40)||'제목없음')}</div> <div class="manage-meta">${esc(name)} · ID:${p.id} · 야르 ${p.yar_count||0} · 댓글 ${p.comment_count||0} · ${relTime(p.created_at)}</div> </div> <button class="manage-del" onclick="deletePost(${p.id})">삭제</button> </div>`;
+}).join(’’);
+cachedFeed=posts;
+} catch(e) {
+wrap.innerHTML=`<div style="color:var(--sub);font-size:13px;">불러오기 실패: ${e.message}</div>`;
+}
+}
 
-  function renderAdminPreview(type, url) {
-    if (type === 'image')   return `<img src="${esc(url)}" style="max-width:100%;max-height:200px;border-radius:10px;display:block;">`;
-    if (type === 'video')   return `<video src="${esc(url)}" controls style="max-width:100%;max-height:200px;border-radius:10px;display:block;"></video>`;
-    if (type === 'audio')   return `<audio src="${esc(url)}" controls style="width:100%;border-radius:8px;"></audio>`;
-    if (type === 'youtube') {
-      const m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-      if (m) return `<div style="position:relative;padding-top:56.25%;border-radius:10px;overflow:hidden;"><iframe src="https://www.youtube.com/embed/${m[1]}" style="position:absolute;inset:0;width:100%;height:100%;border:none;" allowfullscreen></iframe></div>`;
-    }
-    return `<a href="${esc(url)}" target="_blank" rel="noopener" style="font-size:13px;color:#007aff;">🔗 ${esc(url)}</a>`;
-  }
+async function deletePost(postId) {
+if(!confirm(‘이 게시글을 삭제할까요?’)) return;
+try {
+const r=await adminFetch(`/admin/posts/${postId}`, {method:‘DELETE’});
+const d=await r.json();
+if(d.ok) {
+document.getElementById(`mp-${postId}`)?.remove();
+cachedFeed=cachedFeed.filter(p=>p.id!==postId);
+if(selectedChar) renderPostPicker();
+showStatus(‘manageStatus’,‘✅ 삭제 완료’,‘success’);
+} else { showStatus(‘manageStatus’,’❌ ’+(d.error||‘실패’),‘error’); }
+} catch(e) { showStatus(‘manageStatus’,’❌ ’+e.message,‘error’); }
+}
 
-  // 파일 업로드
-  async function uploadNoticeMedia() {
-    const file = document.getElementById('noticeMediaFile').files[0];
-    if (!file) return;
-    if (file.size > 50 * 1024 * 1024) {
-      document.getElementById('noticeMediaStatus').textContent = '❌ 50MB 이하 파일만 가능합니다';
-      document.getElementById('noticeMediaFile').value = '';
-      return;
-    }
-    const ftype = detectFileType(file);
-    // 로컬 미리보기 즉시 표시
-    const localUrl = URL.createObjectURL(file);
-    document.getElementById('noticeMediaPreview').innerHTML = renderAdminPreview(ftype, localUrl);
-    document.getElementById('noticeMediaStatus').textContent = '⏳ 업로드 중...';
-    document.getElementById('noticeMediaUrl').value = '';
-    noticeMediaUrl = null;
+// ── 공지 관리
+async function loadManageNotices() {
+const wrap=document.getElementById(‘manageNotices’);
+wrap.innerHTML=’<div class="skel" style="height:48px;margin-bottom:6px;"></div>’.repeat(2);
+try {
+const r=await adminFetch(’/admin/notices?limit=20’);
+const d=await r.json();
+const notices=d.notices||[];
+if(!notices.length) { wrap.innerHTML=’<div style="color:var(--sub);font-size:13px;">공지가 없어요</div>’; return; }
+wrap.innerHTML=notices.map(n=>` <div class="manage-item" id="mn-${n.id}"> <div class="manage-em">📌</div> <div class="manage-info"> <div class="manage-title">${esc(n.title||'제목없음')}</div> <div class="manage-meta">${relTime(n.created_at)}</div> </div> <button class="manage-del" onclick="deleteNotice(${n.id})">삭제</button> </div>`).join(’’);
+} catch(e) { wrap.innerHTML=`<div style="color:var(--sub);font-size:13px;">불러오기 실패</div>`; }
+}
 
-    try {
-      const form = new FormData();
-      form.append('file', file);
-      form.append('type', ftype);
-      const r = await adminFetch('/admin/upload-media', { method: 'POST', body: form });
-      const d = await r.json();
-      if (d.ok) {
-        noticeMediaUrl = d.url;
-        document.getElementById('noticeMediaUrl').value = d.url;
-        document.getElementById('noticeMediaStatus').textContent = '✅ 업로드 완료';
-        document.getElementById('noticeMediaPreview').innerHTML = renderAdminPreview(ftype, d.url);
-      } else {
-        document.getElementById('noticeMediaStatus').textContent = `❌ 업로드 실패: ${d.error}`;
-        noticeMediaUrl = null;
-      }
-    } catch (e) {
-      document.getElementById('noticeMediaStatus').textContent = `❌ ${e.message}`;
-      noticeMediaUrl = null;
-    }
-    document.getElementById('noticeMediaFile').value = '';
-  }
+async function deleteNotice(id) {
+if(!confirm(‘이 공지를 삭제할까요?’)) return;
+try {
+const r=await adminFetch(`/admin/notices/${id}`, {method:‘DELETE’});
+const d=await r.json();
+if(d.ok) { document.getElementById(`mn-${id}`)?.remove(); showStatus(‘noticeManageStatus’,‘✅ 삭제됐어요’,‘success’); }
+else { showStatus(‘noticeManageStatus’,’❌ ’+(d.error||‘실패’),‘error’); }
+} catch(e) { showStatus(‘noticeManageStatus’,’❌ ’+e.message,‘error’); }
+}
 
-  // URL 직접 입력 시 미리보기
-  function onNoticeUrlInput() {
-    const url = document.getElementById('noticeMediaUrl').value.trim();
-    if (!url) { clearNoticeMedia(); return; }
-    const utype = detectUrlType(url);
-    noticeMediaUrl = url;
-    document.getElementById('noticeMediaStatus').textContent = `📎 ${utype === 'youtube' ? 'YouTube' : utype} 링크`;
-    document.getElementById('noticeMediaPreview').innerHTML = renderAdminPreview(utype, url);
-  }
+// ── 공지 작성
+async function publishNotice() {
+const title    = document.getElementById(‘noticeTitle’).value.trim();
+const body     = document.getElementById(‘noticeBody’).value.trim();
+const mediaUrl = document.getElementById(‘noticeMediaUrl’).value.trim();
+if(!title||!body) { showStatus(‘noticeStatus’,‘제목과 내용을 입력하세요’,‘error’); return; }
+const btn=document.getElementById(‘noticeSendBtn’);
+btn.disabled=true; btn.innerHTML=’<span class="spinner"></span> 게시 중’;
+showStatus(‘noticeStatus’,‘게시 중…’,‘info’);
+try {
+const r=await adminFetch(’/admin/notices’, {
+method:‘POST’, body:JSON.stringify({title, body, media_url:mediaUrl||null}),
+});
+const d=await r.json();
+if(d.ok) {
+showStatus(‘noticeStatus’,‘✅ 공지가 게시됐어요’,‘success’);
+document.getElementById(‘noticeTitle’).value=’’;
+document.getElementById(‘noticeBody’).value=’’;
+document.getElementById(‘noticeMediaUrl’).value=’’;
+loadManageNotices();
+} else { showStatus(‘noticeStatus’,’❌ ’+(d.error||‘실패’),‘error’); }
+} catch(e) { showStatus(‘noticeStatus’,’❌ ’+e.message,‘error’); }
+btn.disabled=false; btn.textContent=‘📌 공지 게시’;
+}
 
-  // 미디어 제거
-  function clearNoticeMedia() {
-    noticeMediaUrl = null;
-    document.getElementById('noticeMediaUrl').value = '';
-    document.getElementById('noticeMediaFile').value = '';
-    document.getElementById('noticeMediaPreview').innerHTML = '';
-    document.getElementById('noticeMediaStatus').textContent = '';
-  }
+// ── 캐릭터 추가 (비번 없음, 이미지 인라인, 8번)
+function toggleAddChar() {
+const body=document.getElementById(‘addCharBody’);
+const arrow=document.getElementById(‘addCharArrow’);
+const hidden=body.classList.toggle(‘hidden’);
+arrow.textContent=hidden?‘▶’:‘▼’;
+}
 
-  // ── 공지사항 작성 ────────────────────────────────
-  async function publishNotice() {
-    const title = document.getElementById('noticeTitle').value.trim();
-    const body  = document.getElementById('noticeBody').value.trim();
-    if (!title) { showStatus('noticeStatus', '제목을 입력하세요', 'error'); return; }
-    if (!body)  { showStatus('noticeStatus', '내용을 입력하세요', 'error'); return; }
-    const teacher = characters.find(c => c.group_type === 'teacher');
-    if (!teacher) { showStatus('noticeStatus', '❌ 선생님 캐릭터를 찾을 수 없어요', 'error'); return; }
+async function addCharacter() {
+const name=document.getElementById(‘acName’).value.trim();
+if(!name) { showStatus(‘acStatus’,‘이름을 입력하세요’,‘error’); return; }
+const btn=document.getElementById(‘acAddBtn’);
+btn.disabled=true; btn.innerHTML=’<span class="spinner"></span> 등록 중’;
+showStatus(‘acStatus’,‘등록 중…’,‘info’);
+const payload={
+display_name: name,
+emoji:        document.getElementById(‘acEmoji’).value.trim()||‘🐾’,
+group_type:   document.getElementById(‘acGroup’).value,
+animal_type:  document.getElementById(‘acAnimal’).value.trim(),
+gender:       getGender(‘ac’),
+mbti:         document.getElementById(‘acMbti’).value.trim(),
+likes:        document.getElementById(‘acLikes’).value.trim(),
+hobby:        document.getElementById(‘acHobby’).value.trim(),
+speech_style: document.getElementById(‘acSpeech’).value.trim(),
+image_url:    document.getElementById(‘acImgUrl’).value.trim()||null,
+};
+try {
+const r=await adminFetch(’/admin/characters’, {method:‘POST’, body:JSON.stringify(payload)});
+const d=await r.json();
+if(d.ok) {
+showStatus(‘acStatus’,`✅ ${name} 등록 완료!`,‘success’);
+[‘acName’,‘acEmoji’,‘acAnimal’,‘acMbti’,‘acLikes’,‘acHobby’,‘acSpeech’,‘acImgUrl’].forEach(id=>{
+const el=document.getElementById(id); if(el) el.value=’’;
+});
+document.getElementById(‘acThumb’).textContent=‘🐾’;
+document.getElementById(‘acGenderOther’).classList.add(‘hidden’);
+document.querySelectorAll(‘input[name=“acGR”]’).forEach(r=>{ r.checked=r.value===‘female’; });
+await loadCharacters();
+} else { showStatus(‘acStatus’,’❌ ’+(d.error||‘실패’),‘error’); }
+} catch(e) { showStatus(‘acStatus’,’❌ ’+e.message,‘error’); }
+btn.disabled=false; btn.textContent=‘➕ 캐릭터 등록’;
+}
 
-    // URL 입력란과 업로드 결과 모두 확인
-    const mediaUrl = noticeMediaUrl || document.getElementById('noticeMediaUrl').value.trim() || null;
-
-    showStatus('noticeStatus', '등록 중...', 'info');
-    try {
-      const r = await adminFetch('/system/posts', {
-        method: 'POST',
-        body: JSON.stringify({
-          system_user_id: teacher.id, title, body, is_notice: true,
-          media_url: mediaUrl,
-        }),
-      });
-      const d = await r.json();
-      if (d.ok) {
-        document.getElementById('noticeTitle').value = '';
-        document.getElementById('noticeBody').value  = '';
-        clearNoticeMedia();
-        showStatus('noticeStatus', '✅ 공지 등록 완료!', 'success');
-        loadManageNotices();
-      } else { showStatus('noticeStatus', `❌ ${d.error}`, 'error'); }
-    } catch (e) { showStatus('noticeStatus', `❌ ${e.message}`, 'error'); }
-  }
-
-  // ── 게시글 관리 ──────────────────────────────────
-  async function loadManagePosts() {
-    const wrap = document.getElementById('manageList');
-    wrap.innerHTML = '<div style="color:var(--sub);font-size:13px;">로딩 중...</div>';
-    await loadFeed(30);
-    if (!cachedFeed.length) {
-      wrap.innerHTML = '<div style="color:var(--sub);font-size:13px;">게시글이 없습니다</div>';
-      return;
-    }
-    wrap.innerHTML = cachedFeed.map(p => `
-      <div class="manage-item" id="mpost-${p.id}">
-        <div class="manage-emoji">${esc(p.character_emoji || '👤')}</div>
-        <div class="manage-info">
-          <div class="manage-title">${esc(p.title || p.body?.slice(0, 40) || '제목없음')}</div>
-          <div class="manage-meta">${esc(p.character_name || '익명')} · 야르 ${p.yar_count || 0} · 댓글 ${p.comment_count || 0} · ${relTime(p.created_at)}</div>
-        </div>
-        <button class="manage-del" onclick="deletePost(${p.id})">삭제</button>
-      </div>`).join('');
-  }
-
-  async function deletePost(postId) {
-    if (!confirm('이 게시글을 삭제할까요?')) return;
-    try {
-      const r = await adminFetch(`/admin/posts/${postId}`, { method: 'DELETE' });
-      const d = await r.json();
-      if (d.ok) {
-        document.getElementById(`mpost-${postId}`)?.remove();
-        cachedFeed = cachedFeed.filter(p => p.id !== postId);
-        if (selectedChar) renderPostPicker();
-        showStatus('manageStatus', '✅ 삭제 완료', 'success');
-      } else { showStatus('manageStatus', `❌ ${d.error}`, 'error'); }
-    } catch (e) { showStatus('manageStatus', `❌ ${e.message}`, 'error'); }
-  }
-
-  // ── 공지 관리 (삭제) ─────────────────────────────
-  async function loadManageNotices() {
-    const wrap = document.getElementById('manageNotices');
-    wrap.innerHTML = '<div style="color:var(--sub);font-size:13px;">로딩 중...</div>';
-    try {
-      const r = await adminFetch('/admin/notices?limit=20');
-      const d = await r.json();
-      if (!d.notices?.length) {
-        wrap.innerHTML = '<div style="color:var(--sub);font-size:13px;">공지가 없습니다</div>';
-        return;
-      }
-      wrap.innerHTML = d.notices.map(n => `
-        <div class="manage-item" id="mnotice-${n.id}">
-          <div class="manage-emoji">📌</div>
-          <div class="manage-info">
-            <div class="manage-title">${esc(n.title || '제목없음')}</div>
-            <div class="manage-meta">${esc(n.system_users?.display_name || '')} · ${relTime(n.created_at)}</div>
-          </div>
-          <button class="manage-del" onclick="deleteNotice(${n.id})">삭제</button>
-        </div>`).join('');
-    } catch (e) {
-      wrap.innerHTML = `<div style="color:var(--sub);font-size:13px;">불러오기 실패: ${e.message}</div>`;
-    }
-  }
-
-  async function deleteNotice(postId) {
-    if (!confirm('이 공지를 삭제할까요?')) return;
-    try {
-      const r = await adminFetch(`/admin/posts/${postId}`, { method: 'DELETE' });
-      const d = await r.json();
-      if (d.ok) {
-        document.getElementById(`mnotice-${postId}`)?.remove();
-        showStatus('noticeManageStatus', '✅ 공지 삭제 완료', 'success');
-      } else { showStatus('noticeManageStatus', `❌ ${d.error}`, 'error'); }
-    } catch (e) { showStatus('noticeManageStatus', `❌ ${e.message}`, 'error'); }
-  }
-
-  // ── AI 게시글 ────────────────────────────────────
-  function clearPost() {
-    document.getElementById('aiTitle').value = '';
-    document.getElementById('aiBody').value  = '';
-  }
-
-  async function generatePost() {
-    if (!selectedChar) { alert('캐릭터를 선택해주세요'); return; }
-    const btn = document.getElementById('btnGenPost');
-    btn.disabled = true; btn.innerHTML = '<span class="spin"></span> 생성중';
-    showStatus('aiPostStatus', `${selectedChar.display_name} 글 생성 중...`, 'info');
-    try {
-      const r = await adminFetch('/admin/generate-post', {
-        method: 'POST', body: JSON.stringify({ character_id: selectedChar.id }),
-      });
-      const d = await r.json();
-      if (d.ok) {
-        document.getElementById('aiTitle').value = d.title || '';
-        document.getElementById('aiBody').value  = d.body  || '';
-        showStatus('aiPostStatus', '✅ AI 제안 완료! 자유롭게 수정 후 게시하세요 ✏️', 'success');
-      } else {
-        // [Fix] 실제 Gemini 에러 메시지 표시
-        showStatus('aiPostStatus', `❌ ${d.error}`, 'error');
-      }
-    } catch (e) { showStatus('aiPostStatus', `❌ ${e.message}`, 'error'); }
-    btn.disabled = false; btn.innerHTML = '✨ 생성';
-  }
-
-  async function publishPost() {
-    if (!selectedChar) { alert('캐릭터를 선택해주세요'); return; }
-    const title = document.getElementById('aiTitle').value.trim();
-    const body  = document.getElementById('aiBody').value.trim();
-    if (!title) { showStatus('aiPostStatus', '제목을 입력하세요', 'error'); return; }
-    if (!body)  { showStatus('aiPostStatus', '내용을 입력하세요', 'error'); return; }
-    const btn = document.getElementById('btnPubPost');
-    btn.disabled = true; btn.innerHTML = '<span class="spin"></span> 게시중';
-    showStatus('aiPostStatus', '게시 중...', 'info');
-    try {
-      const r = await adminFetch('/system/posts', {
-        method: 'POST', body: JSON.stringify({ system_user_id: selectedChar.id, title, body }),
-      });
-      const d = await r.json();
-      if (d.ok) {
-        showStatus('aiPostStatus', '✅ 게시 완료', 'success');
-        clearPost();
-        await loadFeed(30); renderPostPicker(); loadManagePosts();
-      } else { showStatus('aiPostStatus', `❌ ${d.error}`, 'error'); }
-    } catch (e) { showStatus('aiPostStatus', `❌ ${e.message}`, 'error'); }
-    btn.disabled = false; btn.innerHTML = '📤 게시';
-  }
-
-  // ── 게시글 피커 ──────────────────────────────────
-  function renderPostPicker() {
-    const wrap = document.getElementById('postPicker');
-    if (!cachedFeed.length) {
-      wrap.innerHTML = '<div style="color:var(--sub);font-size:13px;">게시글이 없습니다</div>';
-      return;
-    }
-    wrap.innerHTML = cachedFeed.map(p => `
-      <div class="postitem ${String(selectedPostId) === String(p.id) ? 'selected' : ''}" onclick="selectPost(${p.id})">
-        <div class="postitem-title">${esc((p.character_emoji || '👤') + ' ' + (p.title || p.body?.slice(0, 30) || '제목없음'))}</div>
-        <div class="postitem-meta">${esc(p.character_name || '익명')} · 댓글 ${p.comment_count || 0}</div>
-      </div>`).join('');
-  }
-
-  function selectPost(id) { selectedPostId = id; renderPostPicker(); }
-
-  // ── AI 댓글 ──────────────────────────────────────
-  async function generateComment() {
-    if (!selectedChar)   { showStatus('aiCommentStatus', '캐릭터를 선택해주세요', 'error');  return; }
-    if (!selectedPostId) { showStatus('aiCommentStatus', '게시글을 선택해주세요', 'error'); return; }
-    const btn = document.getElementById('btnGenComment');
-    btn.disabled = true; btn.innerHTML = '<span class="spin"></span> 생성중';
-    showStatus('aiCommentStatus', '댓글 생성 중...', 'info');
-    try {
-      const r = await adminFetch('/admin/generate-comment', {
-        method: 'POST', body: JSON.stringify({ post_id: selectedPostId, character_id: selectedChar.id }),
-      });
-      const d = await r.json();
-      if (d.ok) {
-        document.getElementById('aiComment').value = d.comment || '';
-        showStatus('aiCommentStatus', '✅ AI 제안 완료! 수정 후 게시하세요 ✏️', 'success');
-      } else {
-        // [Fix] 실제 Gemini 에러 메시지 표시
-        showStatus('aiCommentStatus', `❌ ${d.error}`, 'error');
-      }
-    } catch (e) { showStatus('aiCommentStatus', `❌ ${e.message}`, 'error'); }
-    btn.disabled = false; btn.innerHTML = '✨ 댓글 생성';
-  }
-
-  async function publishComment() {
-    if (!selectedChar)   { showStatus('aiCommentStatus', '캐릭터를 선택해주세요', 'error');  return; }
-    if (!selectedPostId) { showStatus('aiCommentStatus', '게시글을 선택해주세요', 'error'); return; }
-    const body = document.getElementById('aiComment').value.trim();
-    if (!body) { showStatus('aiCommentStatus', '댓글 내용을 입력하세요', 'error'); return; }
-    const btn = document.getElementById('btnPubComment');
-    btn.disabled = true; btn.innerHTML = '<span class="spin"></span> 게시중';
-    showStatus('aiCommentStatus', '게시 중...', 'info');
-    try {
-      const r = await adminFetch('/admin/system-comment', {
-        method: 'POST', body: JSON.stringify({ post_id: selectedPostId, system_user_id: selectedChar.id, body }),
-      });
-      const d = await r.json();
-      if (d.ok) {
-        document.getElementById('aiComment').value = '';
-        showStatus('aiCommentStatus', '✅ 댓글 게시 완료', 'success');
-        await loadFeed(30); renderPostPicker(); loadManagePosts();
-      } else { showStatus('aiCommentStatus', `❌ ${d.error}`, 'error'); }
-    } catch (e) { showStatus('aiCommentStatus', `❌ ${e.message}`, 'error'); }
-    btn.disabled = false; btn.innerHTML = '📤 댓글 게시';
-  }
-
-  async function loadPostComments(postId, container) {
-    container.innerHTML = '<div style="color:var(--sub);font-size:13px;padding:8px 0;">댓글 불러오는 중...</div>';
-    container.classList.remove('hidden');
-    try {
-      const r = await fetch(`${API}/posts/${postId}/comments?limit=100`);
-      const d = await r.json();
-      const comments = d.comments || [];
-      if (!comments.length) {
-        container.innerHTML = '<div class="comment-expand"><div style="color:var(--sub);font-size:13px;">댓글이 없어요</div></div>';
-        return;
-      }
-      container.innerHTML = `<div class="comment-expand">
-        ${comments.map(cm => {
-          const nick = cm.system_users?.display_name || cm.nickname || '익명';
-          const type = cm.author_type === 'system' ? '🐾' : '🗣️';
-          return `<div class="comment-expand-item">
-            <div style="flex:1;">
-              <div class="comment-expand-body">${type} <strong>${esc(nick)}</strong>: ${esc(cm.body)}</div>
-              <div class="comment-expand-meta">${relTime(cm.created_at)} · ID:${cm.id}</div>
-            </div>
-            <button class="btn btn-red btn-sm" onclick="deleteComment(${cm.id},${postId})">🗑</button>
-          </div>`;
-        }).join('')}
-      </div>`;
-    } catch { container.innerHTML = '<div style="color:var(--accent);font-size:13px;padding:8px 0;">댓글 불러오기 실패</div>'; }
-  }
-
-  async function toggleComments(postId) {
-    const el = document.getElementById(`comments-${postId}`);
-    if (!el) return;
-    if (!el.classList.contains('hidden')) { el.classList.add('hidden'); return; }
-    await loadPostComments(postId, el);
-  }
-
-  // ══ 캐릭터 추가 ══
-  async function submitAddCharacter() {
-    const btn  = document.getElementById('addCharBtn');
-    const name = document.getElementById('addName').value.trim();
-    if (!name) { showToast('이름을 입력해주세요', true); return; }
-    btn.disabled = true; btn.innerHTML = '<div class="spinner-sm"></div> 등록 중...';
-    const payload = {
-      display_name:  name,
-      emoji:         document.getElementById('addEmoji').value.trim() || '🐾',
-      group_type:    document.getElementById('addGroup').value,
-      animal_type:   document.getElementById('addAnimal').value.trim(),
-      gender:        getGenderValue('add'),
-      mbti:          document.getElementById('addMbti').value.trim(),
-      likes:         document.getElementById('addLikes').value.trim(),
-      hobby:         document.getElementById('addHobby').value.trim(),
-      image_url:     document.getElementById('addImageUrl').value.trim() || null,
-      system_prompt: document.getElementById('addSystemPrompt').value.trim() || null,
-    };
-    try {
-      const r = await fetch(`${API}/admin/characters`, {
-        method:'POST', headers:{'Content-Type':'application/json','X-Admin-Key': adminToken},
-        body: JSON.stringify(payload),
-      });
-      const d = await r.json();
-      if (d.ok) {
-        showToast(`✅ ${name} 캐릭터가 추가되었어요!`);
-        ['addName','addEmoji','addAnimal','addMbti','addLikes','addHobby','addImageUrl','addSystemPrompt'].forEach(id => {
-          const el = document.getElementById(id); if (el) el.value = '';
-        });
-        document.getElementById('addGender').value = 'female';
-        document.getElementById('addGenderCustom').classList.add('hidden');
-        document.getElementById('addGroup').value = 'kindergarten';
-        document.getElementById('addImgThumb').textContent = '🐾';
-        await loadCharacters();
-        switchMainTab('characters');
-      } else { showToast(d.error || '등록 실패', true); }
-    } catch { showToast('오류가 발생했어요', true); }
-    btn.disabled = false; btn.textContent = '➕ 캐릭터 등록';
-  }
-
-  // ── 초기 포커스
-  document.getElementById('loginInput').focus();
 </script>
-
 </body>
 </html>
