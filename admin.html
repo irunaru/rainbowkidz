@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -13,229 +14,182 @@
       --accent:#ff6b6b; --blue:#007aff; --green:#34c759; --yar:#ff9f0a; --purple:#af52de;
       --radius-card:16px; --radius-btn:12px;
     }
-    html, body { height:100%; }
-    body { font-family:'Noto Sans KR',-apple-system,sans-serif; background:var(--bg); color:var(--text); min-height:100dvh; }
+    body { font-family:'Noto Sans KR',-apple-system,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
     .hidden { display:none !important; }
     @keyframes spin    { to { transform:rotate(360deg); } }
     @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
     .skel { border-radius:12px; background:linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%); background-size:200% 100%; animation:shimmer 1.3s ease-in-out infinite; }
     .spinner-sm { width:16px; height:16px; border:2px solid rgba(255,255,255,.4); border-top-color:#fff; border-radius:50%; animation:spin .6s linear infinite; display:inline-block; }
 
-    /* 로그인 화면 (키보드 대응: 가운데 고정 X, 스크롤 가능) */
-    #loginScreen{
-      position:fixed; inset:0; background:var(--bg);
-      display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
-      z-index:9000;
-      padding:calc(24px + env(safe-area-inset-top,0)) 24px calc(24px + env(safe-area-inset-bottom,0));
-      overflow:auto;
-      -webkit-overflow-scrolling:touch;
-    }
-    #loginScreen.hidden { display:none; }
-    .login-box {
-      background:var(--card); border-radius:20px; padding:26px 22px; width:100%; max-width:360px;
-      text-align:center; box-shadow:0 4px 20px rgba(0,0,0,.1);
-      margin-top:56px;
-    }
-    .login-emoji { font-size:48px; margin-bottom:10px; }
-    .login-title { font-size:20px; font-weight:900; margin-bottom:4px; }
-    .login-sub   { font-size:13px; color:var(--sub); margin-bottom:18px; }
+```
+/* 로그인 화면 – 상단 정렬(모바일 키보드 대응) */
+#loginScreen { position:fixed; inset:0; background:var(--bg); display:flex; flex-direction:column; align-items:center; justify-content:flex-start; z-index:9000; padding:60px 24px 24px; overflow-y:auto; }
+#loginScreen.hidden { display:none; }
+.login-box { background:var(--card); border-radius:20px; padding:28px 24px; width:100%; max-width:360px; text-align:center; box-shadow:0 4px 20px rgba(0,0,0,.1); }
+.login-emoji { font-size:48px; margin-bottom:10px; }
+.login-title { font-size:20px; font-weight:900; margin-bottom:4px; }
+.login-sub   { font-size:13px; color:var(--sub); margin-bottom:20px; }
+.login-input { width:100%; padding:14px; border:1.5px solid var(--border); border-radius:var(--radius-btn); font-size:16px; font-family:inherit; text-align:center; margin-bottom:10px; letter-spacing:2px; }
+.login-input:focus { outline:none; border-color:var(--text); }
+.login-remember { display:flex; align-items:center; justify-content:center; gap:8px; font-size:13px; color:var(--sub); margin-bottom:14px; cursor:pointer; }
+.login-remember input { width:17px; height:17px; cursor:pointer; accent-color:var(--text); }
+.login-btn { width:100%; padding:14px; background:var(--text); color:#fff; border:none; border-radius:var(--radius-btn); font-size:15px; font-weight:700; cursor:pointer; font-family:inherit; }
+.login-btn:disabled { opacity:.5; }
+.login-error { font-size:12px; color:var(--accent); margin-top:8px; min-height:16px; }
 
-    .login-input-wrap{ position:relative; }
-    .login-input {
-      width:100%; padding:14px 44px 14px 14px; border:1.5px solid var(--border);
-      border-radius:var(--radius-btn); font-size:16px; font-family:inherit;
-      text-align:center; letter-spacing:2px; min-height:48px;
-    }
-    .login-input:focus { outline:none; border-color:var(--text); }
-    .pw-toggle{
-      position:absolute; right:10px; top:50%; transform:translateY(-50%);
-      width:34px; height:34px; border-radius:10px; border:1px solid var(--border);
-      background:var(--bg); cursor:pointer; display:flex; align-items:center; justify-content:center;
-      font-size:14px; color:var(--sub);
-    }
+/* 헤더 */
+.header { background:var(--card); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:100; }
+.header-inner { max-width:800px; margin:0 auto; padding:10px 16px; display:flex; align-items:center; justify-content:space-between; }
+.header-left  { display:flex; align-items:center; gap:8px; }
+.header-logo  { font-size:22px; }
+.header-title { font-size:17px; font-weight:900; }
+.header-badge { background:var(--accent); color:#fff; font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px; }
+.logout-btn   { padding:6px 14px; border:1px solid var(--border); border-radius:20px; background:var(--bg); font-size:12px; cursor:pointer; font-family:inherit; color:var(--sub); }
 
-    .login-options{
-      margin:12px 0 12px;
-      display:flex; flex-direction:column; gap:8px; align-items:flex-start;
-      font-size:13px; color:var(--sub);
-      text-align:left;
-    }
-    .opt-row{ display:flex; align-items:center; gap:8px; }
-    .opt-row input{ width:18px; height:18px; }
-    .opt-hint{ font-size:11px; color:var(--sub); opacity:.9; line-height:1.4; }
+/* 탑 네비 탭 */
+.top-nav { background:var(--card); border-bottom:1.5px solid var(--border); }
+.top-nav-inner { max-width:800px; margin:0 auto; display:flex; overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+.top-nav-inner::-webkit-scrollbar { display:none; }
+.top-nav-btn { flex-shrink:0; padding:12px 20px; font-size:14px; font-weight:700; color:var(--sub); background:none; border:none; cursor:pointer; font-family:inherit; border-bottom:2.5px solid transparent; white-space:nowrap; transition:color .15s,border-color .15s; }
+.top-nav-btn.active { color:var(--text); border-bottom-color:var(--text); }
 
-    .login-btn {
-      width:100%; padding:14px; background:var(--text); color:#fff; border:none;
-      border-radius:var(--radius-btn); font-size:15px; font-weight:700;
-      cursor:pointer; font-family:inherit; min-height:48px;
-    }
-    .login-btn:disabled { opacity:.5; }
-    .login-error { font-size:12px; color:var(--accent); margin-top:8px; min-height:16px; }
+.container { max-width:800px; margin:0 auto; padding:16px 16px 60px; }
 
-    /* 헤더 */
-    .header { background:var(--card); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:100; }
-    .header-inner { max-width:800px; margin:0 auto; padding:10px 16px; display:flex; align-items:center; justify-content:space-between; }
-    .header-left  { display:flex; align-items:center; gap:8px; }
-    .header-logo  { font-size:22px; }
-    .header-title { font-size:17px; font-weight:900; }
-    .header-badge { background:var(--accent); color:#fff; font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px; }
-    .logout-btn   { padding:6px 14px; border:1px solid var(--border); border-radius:20px; background:var(--bg); font-size:12px; cursor:pointer; font-family:inherit; color:var(--sub); }
+/* 섹션 헤더 */
+.section-title { font-size:18px; font-weight:900; margin-bottom:4px; }
+.section-sub   { font-size:13px; color:var(--sub); margin-bottom:16px; }
 
-    /* 탑 네비 탭 */
-    .top-nav { background:var(--card); border-bottom:1.5px solid var(--border); }
-    .top-nav-inner { max-width:800px; margin:0 auto; display:flex; overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
-    .top-nav-inner::-webkit-scrollbar { display:none; }
-    .top-nav-btn { flex-shrink:0; padding:12px 20px; font-size:14px; font-weight:700; color:var(--sub); background:none; border:none; cursor:pointer; font-family:inherit; border-bottom:2.5px solid transparent; white-space:nowrap; transition:color .15s,border-color .15s; }
-    .top-nav-btn.active { color:var(--text); border-bottom-color:var(--text); }
+/* 공통 카드 */
+.card { background:var(--card); border-radius:var(--radius-card); padding:20px; margin-bottom:16px; box-shadow:0 1px 4px rgba(0,0,0,.06); }
 
-    .container { max-width:800px; margin:0 auto; padding:16px 16px 60px; }
+/* 폼 */
+.form-label   { font-size:12px; font-weight:700; color:var(--sub); margin-bottom:6px; display:block; }
+.form-input   { width:100%; padding:11px 14px; border:1.5px solid var(--border); border-radius:var(--radius-btn); font-size:14px; font-family:inherit; margin-bottom:12px; }
+.form-input:focus   { outline:none; border-color:var(--text); }
+.form-textarea { width:100%; padding:11px 14px; border:1.5px solid var(--border); border-radius:var(--radius-btn); font-size:14px; font-family:inherit; min-height:100px; resize:vertical; margin-bottom:12px; }
+.form-textarea:focus { outline:none; border-color:var(--text); }
+.form-select  { width:100%; padding:11px 14px; border:1.5px solid var(--border); border-radius:var(--radius-btn); font-size:14px; font-family:inherit; margin-bottom:12px; background:var(--card); }
+.form-select:focus  { outline:none; border-color:var(--text); }
+.form-row { display:flex; gap:10px; }
+.form-row > * { flex:1; }
 
-    /* 섹션 헤더 */
-    .section-title { font-size:18px; font-weight:900; margin-bottom:4px; }
-    .section-sub   { font-size:13px; color:var(--sub); margin-bottom:16px; }
+/* 버튼 */
+.btn { padding:11px 20px; border-radius:var(--radius-btn); font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; border:none; display:inline-flex; align-items:center; gap:6px; }
+.btn:disabled { opacity:.5; cursor:not-allowed; }
+.btn-primary  { background:var(--text); color:#fff; }
+.btn-blue     { background:var(--blue); color:#fff; }
+.btn-green    { background:var(--green); color:#fff; }
+.btn-red      { background:var(--accent); color:#fff; }
+.btn-outline  { background:var(--bg); color:var(--text); border:1.5px solid var(--border); }
+.btn-sm       { padding:6px 12px; font-size:12px; border-radius:8px; }
+.btn-full     { width:100%; justify-content:center; }
+.btn-group    { display:flex; gap:8px; flex-wrap:wrap; }
 
-    /* 공통 카드 */
-    .card { background:var(--card); border-radius:var(--radius-card); padding:20px; margin-bottom:16px; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+/* 캐릭터 그리드 */
+.char-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:10px; }
+.char-card { background:var(--bg); border-radius:14px; padding:12px 8px; text-align:center; cursor:pointer; border:2px solid transparent; transition:border-color .15s,transform .1s; }
+.char-card:active { transform:scale(.95); }
+.char-card.selected { border-color:var(--blue); background:#e8f0fe; }
+.char-card-avatar { width:60px; height:60px; border-radius:12px; background:var(--card); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:28px; margin:0 auto 6px; overflow:hidden; }
+.char-card-avatar img { width:100%; height:100%; object-fit:cover; }
+.char-card-name { font-size:12px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.char-card-type { font-size:10px; color:var(--sub); margin-top:2px; }
 
-    /* 폼 */
-    .form-label   { font-size:12px; font-weight:700; color:var(--sub); margin-bottom:6px; display:block; }
-    .form-input   { width:100%; padding:11px 14px; border:1.5px solid var(--border); border-radius:var(--radius-btn); font-size:14px; font-family:inherit; margin-bottom:12px; min-height:44px; }
-    .form-input:focus   { outline:none; border-color:var(--text); }
-    .form-textarea { width:100%; padding:11px 14px; border:1.5px solid var(--border); border-radius:var(--radius-btn); font-size:14px; font-family:inherit; min-height:100px; resize:vertical; margin-bottom:12px; }
-    .form-textarea:focus { outline:none; border-color:var(--text); }
-    .form-select  { width:100%; padding:11px 14px; border:1.5px solid var(--border); border-radius:var(--radius-btn); font-size:14px; font-family:inherit; margin-bottom:12px; background:var(--card); min-height:44px; }
-    .form-select:focus  { outline:none; border-color:var(--text); }
-    .form-row { display:flex; gap:10px; }
-    .form-row > * { flex:1; }
+/* 캐릭터 패널 (사이드) */
+.char-panel-overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:2000; display:flex; align-items:flex-end; justify-content:center; }
+.char-panel-overlay.hidden { display:none; }
+.char-panel { width:100%; max-width:640px; background:var(--card); border-radius:20px 20px 0 0; max-height:92vh; display:flex; flex-direction:column; }
+.char-panel-handle { width:36px; height:4px; background:var(--border); border-radius:2px; margin:10px auto; flex-shrink:0; }
+.char-panel-head { padding:0 16px 12px; border-bottom:1px solid var(--border); flex-shrink:0; display:flex; align-items:center; gap:10px; }
+.char-panel-avatar { width:44px; height:44px; border-radius:10px; background:var(--bg); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:24px; overflow:hidden; flex-shrink:0; }
+.char-panel-avatar img { width:100%; height:100%; object-fit:cover; }
+.char-panel-name { font-size:17px; font-weight:900; }
+.char-panel-sub  { font-size:12px; color:var(--sub); }
+.char-panel-close { margin-left:auto; padding:8px; border:1px solid var(--border); background:var(--bg); border-radius:50%; cursor:pointer; font-size:14px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; }
+.char-panel-body { flex:1; overflow-y:auto; padding:16px; }
+.char-panel-tabs { display:flex; gap:0; border-bottom:1.5px solid var(--border); margin-bottom:14px; }
+.char-panel-tab  { flex:1; padding:8px 0; font-size:13px; font-weight:700; color:var(--sub); background:none; border:none; cursor:pointer; font-family:inherit; border-bottom:2px solid transparent; margin-bottom:-1.5px; }
+.char-panel-tab.active { color:var(--text); border-bottom-color:var(--text); }
+.char-post-item { background:var(--bg); border-radius:10px; padding:10px 12px; margin-bottom:8px; }
+.char-post-title { font-size:13px; font-weight:700; margin-bottom:4px; }
+.char-post-body  { font-size:12px; color:var(--sub); line-height:1.4; margin-bottom:6px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.char-post-meta  { font-size:11px; color:var(--sub); display:flex; gap:8px; }
+.char-post-btns  { display:flex; gap:6px; margin-top:6px; }
 
-    /* 버튼 */
-    .btn { padding:11px 20px; border-radius:var(--radius-btn); font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; border:none; display:inline-flex; align-items:center; gap:6px; }
-    .btn:disabled { opacity:.5; cursor:not-allowed; }
-    .btn-primary  { background:var(--text); color:#fff; }
-    .btn-blue     { background:var(--blue); color:#fff; }
-    .btn-green    { background:var(--green); color:#fff; }
-    .btn-red      { background:var(--accent); color:#fff; }
-    .btn-outline  { background:var(--bg); color:var(--text); border:1.5px solid var(--border); }
-    .btn-sm       { padding:6px 12px; font-size:12px; border-radius:8px; }
-    .btn-full     { width:100%; justify-content:center; }
-    .btn-group    { display:flex; gap:8px; flex-wrap:wrap; }
+/* 글 편집 모달 */
+.edit-overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:flex-end; justify-content:center; z-index:3000; }
+.edit-overlay.hidden { display:none; }
+.edit-panel { width:100%; max-width:640px; background:var(--card); border-radius:20px 20px 0 0; padding-bottom:env(safe-area-inset-bottom,0); }
+.edit-handle { width:36px; height:4px; background:var(--border); border-radius:2px; margin:10px auto; }
+.edit-head { padding:0 16px 12px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border); }
+.edit-head-title { font-size:16px; font-weight:900; }
+.edit-body { padding:16px; max-height:60vh; overflow-y:auto; }
+.edit-footer { padding:12px 16px; border-top:1px solid var(--border); display:flex; gap:8px; }
 
-    /* 캐릭터 그리드 */
-    .char-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:10px; }
-    .char-card { background:var(--bg); border-radius:14px; padding:12px 8px; text-align:center; cursor:pointer; border:2px solid transparent; transition:border-color .15s,transform .1s; }
-    .char-card:active { transform:scale(.95); }
-    .char-card.selected { border-color:var(--blue); background:#e8f0fe; }
-    .char-card-avatar { width:60px; height:60px; border-radius:12px; background:var(--card); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:28px; margin:0 auto 6px; overflow:hidden; }
-    .char-card-avatar img { width:100%; height:100%; object-fit:cover; }
-    .char-card-name { font-size:12px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .char-card-type { font-size:10px; color:var(--sub); margin-top:2px; }
+/* AI 생성 */
+.ai-char-select-wrap { background:var(--bg); border-radius:12px; padding:14px; margin-bottom:14px; }
+.ai-char-select-label { font-size:13px; font-weight:700; margin-bottom:10px; color:var(--sub); }
+.ai-char-mini-grid { display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+.ai-char-mini-grid::-webkit-scrollbar { display:none; }
+.ai-char-mini { flex-shrink:0; width:64px; text-align:center; cursor:pointer; }
+.ai-char-mini-av { width:48px; height:48px; border-radius:10px; background:var(--card); border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:22px; margin:0 auto 4px; overflow:hidden; transition:border-color .15s; }
+.ai-char-mini-av img { width:100%; height:100%; object-fit:cover; }
+.ai-char-mini.selected .ai-char-mini-av { border-color:var(--blue); background:#e8f0fe; }
+.ai-char-mini-name { font-size:10px; font-weight:700; color:var(--sub); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.ai-generated-preview { background:var(--bg); border-radius:12px; padding:14px; margin-top:12px; }
+.ai-gen-label { font-size:12px; font-weight:700; color:var(--sub); margin-bottom:8px; }
+.ai-gen-title { font-size:15px; font-weight:700; margin-bottom:6px; }
+.ai-gen-body  { font-size:13px; line-height:1.6; color:var(--text); white-space:pre-wrap; }
+.ai-gen-actions { display:flex; gap:8px; margin-top:12px; }
 
-    /* 캐릭터 패널 */
-    .char-panel-overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:2000; display:flex; align-items:flex-end; justify-content:center; }
-    .char-panel-overlay.hidden { display:none; }
-    .char-panel { width:100%; max-width:640px; background:var(--card); border-radius:20px 20px 0 0; max-height:92vh; display:flex; flex-direction:column; }
-    .char-panel-handle { width:36px; height:4px; background:var(--border); border-radius:2px; margin:10px auto; flex-shrink:0; }
-    .char-panel-head { padding:0 16px 12px; border-bottom:1px solid var(--border); flex-shrink:0; display:flex; align-items:center; gap:10px; }
-    .char-panel-avatar { width:44px; height:44px; border-radius:10px; background:var(--bg); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:24px; overflow:hidden; flex-shrink:0; }
-    .char-panel-avatar img { width:100%; height:100%; object-fit:cover; }
-    .char-panel-name { font-size:17px; font-weight:900; }
-    .char-panel-sub  { font-size:12px; color:var(--sub); }
-    .char-panel-close { margin-left:auto; padding:8px; border:1px solid var(--border); background:var(--bg); border-radius:50%; cursor:pointer; font-size:14px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; }
-    .char-panel-body { flex:1; overflow-y:auto; padding:16px; }
-    .char-panel-tabs { display:flex; gap:0; border-bottom:1.5px solid var(--border); margin-bottom:14px; }
-    .char-panel-tab  { flex:1; padding:8px 0; font-size:13px; font-weight:700; color:var(--sub); background:none; border:none; cursor:pointer; font-family:inherit; border-bottom:2px solid transparent; margin-bottom:-1.5px; }
-    .char-panel-tab.active { color:var(--text); border-bottom-color:var(--text); }
-    .char-post-item { background:var(--bg); border-radius:10px; padding:10px 12px; margin-bottom:8px; }
-    .char-post-title { font-size:13px; font-weight:700; margin-bottom:4px; }
-    .char-post-body  { font-size:12px; color:var(--sub); line-height:1.4; margin-bottom:6px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
-    .char-post-meta  { font-size:11px; color:var(--sub); display:flex; gap:8px; }
-    .char-post-btns  { display:flex; gap:6px; margin-top:6px; }
+/* 관리 목록 */
+.mgmt-item { background:var(--card); border-radius:var(--radius-card); padding:14px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+.mgmt-item-head { display:flex; align-items:flex-start; gap:10px; }
+.mgmt-item-info { flex:1; min-width:0; }
+.mgmt-item-title { font-size:14px; font-weight:700; margin-bottom:2px; }
+.mgmt-item-meta  { font-size:12px; color:var(--sub); }
+.mgmt-item-btns  { display:flex; gap:6px; flex-shrink:0; }
+.mgmt-type-badge { display:inline-block; font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px; margin-bottom:4px; }
+.badge-char    { background:#e8f0fe; color:var(--blue); }
+.badge-guest   { background:#f0fbe8; color:var(--green); }
+.badge-notice  { background:#feede8; color:var(--accent); }
+.badge-system-user { background:#f3e8fe; color:var(--purple); }
 
-    /* 글 편집 모달 */
-    .edit-overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:flex-end; justify-content:center; z-index:3000; }
-    .edit-overlay.hidden { display:none; }
-    .edit-panel { width:100%; max-width:640px; background:var(--card); border-radius:20px 20px 0 0; padding-bottom:env(safe-area-inset-bottom,0); }
-    .edit-handle { width:36px; height:4px; background:var(--border); border-radius:2px; margin:10px auto; }
-    .edit-head { padding:0 16px 12px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border); }
-    .edit-head-title { font-size:16px; font-weight:900; }
-    .edit-body { padding:16px; max-height:60vh; overflow-y:auto; }
-    .edit-footer { padding:12px 16px; border-top:1px solid var(--border); display:flex; gap:8px; }
+/* 공지 미디어 첨부 */
+.media-preview { margin-top:10px; }
+.media-preview img { max-width:100%; border-radius:10px; max-height:200px; object-fit:cover; }
+.media-preview-url { font-size:12px; color:var(--blue); word-break:break-all; }
 
-    /* AI 생성 */
-    .ai-char-select-wrap { background:var(--bg); border-radius:12px; padding:14px; margin-bottom:14px; }
-    .ai-char-select-label { font-size:13px; font-weight:700; margin-bottom:10px; color:var(--sub); }
-    .ai-char-mini-grid { display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
-    .ai-char-mini-grid::-webkit-scrollbar { display:none; }
-    .ai-char-mini { flex-shrink:0; width:64px; text-align:center; cursor:pointer; }
-    .ai-char-mini-av { width:48px; height:48px; border-radius:10px; background:var(--card); border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:22px; margin:0 auto 4px; overflow:hidden; transition:border-color .15s; }
-    .ai-char-mini-av img { width:100%; height:100%; object-fit:cover; }
-    .ai-char-mini.selected .ai-char-mini-av { border-color:var(--blue); background:#e8f0fe; }
-    .ai-char-mini-name { font-size:10px; font-weight:700; color:var(--sub); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .ai-generated-preview { background:var(--bg); border-radius:12px; padding:14px; margin-top:12px; }
-    .ai-gen-label { font-size:12px; font-weight:700; color:var(--sub); margin-bottom:8px; }
-    .ai-gen-title { font-size:15px; font-weight:700; margin-bottom:6px; }
-    .ai-gen-body  { font-size:13px; line-height:1.6; color:var(--text); white-space:pre-wrap; }
-    .ai-gen-actions { display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
+/* 알림 토스트 */
+.toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:#1c1c1e; color:#fff; padding:10px 20px; border-radius:20px; font-size:13px; font-weight:600; z-index:9999; opacity:0; transition:opacity .25s; pointer-events:none; white-space:nowrap; max-width:90vw; text-align:center; }
+.toast.show { opacity:1; }
+.toast.error { background:var(--accent); }
+```
 
-    /* 관리 목록 */
-    .mgmt-item { background:var(--card); border-radius:var(--radius-card); padding:14px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,.06); }
-    .mgmt-item-head { display:flex; align-items:flex-start; gap:10px; }
-    .mgmt-item-info { flex:1; min-width:0; }
-    .mgmt-item-title { font-size:14px; font-weight:700; margin-bottom:2px; }
-    .mgmt-item-meta  { font-size:12px; color:var(--sub); }
-    .mgmt-item-btns  { display:flex; gap:6px; flex-shrink:0; }
-    .mgmt-type-badge { display:inline-block; font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px; margin-bottom:4px; }
-    .badge-char    { background:#e8f0fe; color:var(--blue); }
-    .badge-guest   { background:#f0fbe8; color:var(--green); }
-    .badge-notice  { background:#feede8; color:var(--accent); }
-    .badge-system-user { background:#f3e8fe; color:var(--purple); }
-
-    /* 공지 미디어 첨부 */
-    .media-preview { margin-top:10px; }
-    .media-preview img { max-width:100%; border-radius:10px; max-height:200px; object-fit:cover; }
-    .media-preview-url { font-size:12px; color:var(--blue); word-break:break-all; }
-
-    /* 알림 토스트 */
-    .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:#1c1c1e; color:#fff; padding:10px 20px; border-radius:20px; font-size:13px; font-weight:600; z-index:9999; opacity:0; transition:opacity .25s; pointer-events:none; white-space:nowrap; max-width:90vw; text-align:center; }
-    .toast.show { opacity:1; }
-    .toast.error { background:var(--accent); }
   </style>
 </head>
 <body>
 
 <!-- 로그인 -->
+
 <div id="loginScreen">
   <div class="login-box">
     <div class="login-emoji">🔐</div>
     <div class="login-title">관리자 패널</div>
     <div class="login-sub">무지개 유치원 & 어린이집</div>
-
-    <div class="login-input-wrap">
-      <input class="login-input" type="password" id="loginInput" placeholder="••••••••" autocomplete="current-password" inputmode="text">
-      <button class="pw-toggle" id="pwToggleBtn" type="button" onclick="togglePw()">👁</button>
-    </div>
-
-    <div class="login-options">
-      <label class="opt-row">
-        <input type="checkbox" id="rememberLogin">
-        <span>로그인 유지</span>
-      </label>
-      <label class="opt-row">
-        <input type="checkbox" id="rememberPw">
-        <span>비밀번호 기억</span>
-      </label>
-      <div class="opt-hint">※ 공용 기기에서는 ‘비밀번호 기억’을 끄세요.</div>
-    </div>
-
+    <input class="login-input" type="password" id="loginInput" placeholder="••••••••" autocomplete="current-password">
+    <label class="login-remember"><input type="checkbox" id="rememberMe"> 이 기기에서 기억하기</label>
     <button class="login-btn" id="loginBtn" onclick="doLogin()">입장하기</button>
     <div class="login-error" id="loginError"></div>
   </div>
 </div>
 
 <!-- 토스트 -->
+
 <div class="toast" id="toast"></div>
 
 <!-- 헤더 -->
+
 <div class="header hidden" id="mainHeader">
   <div class="header-inner">
     <div class="header-left">
@@ -251,6 +205,7 @@
 </div>
 
 <!-- 탑 네비 -->
+
 <div class="top-nav hidden" id="topNav">
   <div class="top-nav-inner">
     <button class="top-nav-btn active" onclick="switchMainTab('characters')" id="mnChars">🐾 캐릭터</button>
@@ -264,7 +219,8 @@
 
 <div class="container hidden" id="mainContent">
 
-  <!-- 탭: 캐릭터 -->
+  <!-- ──────────────── 탭: 캐릭터 ──────────────── -->
+
   <div id="tabCharacters">
     <div class="section-title">🐾 캐릭터</div>
     <div class="section-sub">캐릭터를 탭하면 상세 정보와 글 목록을 볼 수 있어요</div>
@@ -278,61 +234,68 @@
     </div>
   </div>
 
-  <!-- 탭: 글쓰기 -->
+  <!-- ──────────────── 탭: 글쓰기 ──────────────── -->
+
   <div id="tabWrite" class="hidden">
     <div class="section-title">✏️ 글쓰기</div>
     <div class="section-sub">AI 자동 생성 또는 직접 작성하세요</div>
 
-    <div class="card">
-      <div style="font-size:15px;font-weight:700;margin-bottom:14px;">🤖 AI 자동 생성</div>
-      <div class="ai-char-select-wrap">
-        <div class="ai-char-select-label">캐릭터 선택</div>
-        <div class="ai-char-mini-grid" id="aiCharGrid"></div>
-      </div>
-      <label class="form-label">주제 / 키워드 (선택)</label>
-      <input class="form-input" id="aiPrompt" placeholder="예: 오늘 간식, 운동회 연습, 낮잠 거부...">
-      <label class="form-label">어조</label>
-      <select class="form-select" id="aiTone">
-        <option value="cute">귀여움 (기본)</option>
-        <option value="funny">유머러스</option>
-        <option value="emotional">감성적</option>
-        <option value="serious">진지하게</option>
-      </select>
-      <div class="btn-group">
-        <button class="btn btn-blue" id="aiGenBtn" onclick="generateAIPost()">✨ AI 글 생성</button>
-        <button class="btn btn-outline" onclick="clearAIPreview()">지우기</button>
-      </div>
-      <div class="ai-generated-preview hidden" id="aiPreview">
-        <div class="ai-gen-label">✨ 생성된 글 미리보기</div>
-        <div class="ai-gen-title" id="aiGenTitle"></div>
-        <div class="ai-gen-body"  id="aiGenBody"></div>
-        <input class="form-input" id="aiMediaUrl" placeholder="미디어 URL (선택, 이미지/동영상/유튜브)" style="margin-top:12px;margin-bottom:0;">
-        <div class="ai-gen-actions">
-          <button class="btn btn-green" id="aiPostBtn" onclick="postAIGenerated()">📤 이 글 게시</button>
-          <button class="btn btn-outline btn-sm" onclick="generateAIPost()">🔄 다시 생성</button>
-          <button class="btn btn-outline btn-sm" onclick="editAIGenerated()">✏️ 수정 후 게시</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div style="font-size:15px;font-weight:700;margin-bottom:14px;">📝 직접 작성</div>
-      <label class="form-label">캐릭터</label>
-      <select class="form-select" id="writeCharSelect"></select>
-      <label class="form-label">제목</label>
-      <input class="form-input" id="writeTitle2" placeholder="제목을 입력하세요" maxlength="80">
-      <label class="form-label">내용</label>
-      <textarea class="form-textarea" id="writeBody2" placeholder="내용을 입력하세요..." maxlength="5000" style="min-height:140px;"></textarea>
-      <label class="form-label">미디어 URL (선택)</label>
-      <input class="form-input" id="writeMediaUrl" placeholder="이미지, 동영상, 유튜브 링크 등">
-      <div style="margin-bottom:12px;">
-        <div class="media-preview hidden" id="writeMediaPreview"></div>
-      </div>
-      <button class="btn btn-primary btn-full" id="writeSubmitBtn" onclick="submitManualPost()">📤 게시하기</button>
+```
+<!-- AI 생성 -->
+<div class="card">
+  <div style="font-size:15px;font-weight:700;margin-bottom:14px;">🤖 AI 자동 생성</div>
+  <div class="ai-char-select-wrap">
+    <div class="ai-char-select-label">캐릭터 선택</div>
+    <div class="ai-char-mini-grid" id="aiCharGrid"></div>
+  </div>
+  <label class="form-label">주제 / 키워드 (선택)</label>
+  <input class="form-input" id="aiPrompt" placeholder="예: 오늘 간식, 운동회 연습, 낮잠 거부...">
+  <label class="form-label">어조</label>
+  <select class="form-select" id="aiTone">
+    <option value="cute">귀여움 (기본)</option>
+    <option value="funny">유머러스</option>
+    <option value="emotional">감성적</option>
+    <option value="serious">진지하게</option>
+  </select>
+  <div class="btn-group">
+    <button class="btn btn-blue" id="aiGenBtn" onclick="generateAIPost()">✨ AI 글 생성</button>
+    <button class="btn btn-outline" onclick="clearAIPreview()">지우기</button>
+  </div>
+  <div class="ai-generated-preview hidden" id="aiPreview">
+    <div class="ai-gen-label">✨ 생성된 글 미리보기</div>
+    <div class="ai-gen-title" id="aiGenTitle"></div>
+    <div class="ai-gen-body"  id="aiGenBody"></div>
+    <input class="form-input" id="aiMediaUrl" placeholder="미디어 URL (선택, 이미지/동영상/유튜브)" style="margin-top:12px;margin-bottom:0;">
+    <div class="ai-gen-actions">
+      <button class="btn btn-green" id="aiPostBtn" onclick="postAIGenerated()">📤 이 글 게시</button>
+      <button class="btn btn-outline btn-sm" onclick="generateAIPost()">🔄 다시 생성</button>
+      <button class="btn btn-outline btn-sm" onclick="editAIGenerated()">✏️ 수정 후 게시</button>
     </div>
   </div>
+</div>
 
-  <!-- 탭: 공지 -->
+<!-- 직접 작성 -->
+<div class="card">
+  <div style="font-size:15px;font-weight:700;margin-bottom:14px;">📝 직접 작성</div>
+  <label class="form-label">캐릭터</label>
+  <select class="form-select" id="writeCharSelect"></select>
+  <label class="form-label">제목</label>
+  <input class="form-input" id="writeTitle2" placeholder="제목을 입력하세요" maxlength="80">
+  <label class="form-label">내용</label>
+  <textarea class="form-textarea" id="writeBody2" placeholder="내용을 입력하세요..." maxlength="5000" style="min-height:140px;"></textarea>
+  <label class="form-label">미디어 URL (선택)</label>
+  <input class="form-input" id="writeMediaUrl" placeholder="이미지, 동영상, 유튜브 링크 등">
+  <div style="margin-bottom:12px;">
+    <div class="media-preview hidden" id="writeMediaPreview"></div>
+  </div>
+  <button class="btn btn-primary btn-full" id="writeSubmitBtn" onclick="submitManualPost()">📤 게시하기</button>
+</div>
+```
+
+  </div>
+
+  <!-- ──────────────── 탭: 공지 ──────────────── -->
+
   <div id="tabNotice" class="hidden">
     <div class="section-title">📌 공지 작성</div>
     <div class="section-sub">공지사항은 홈 상단에 고정 표시됩니다</div>
@@ -347,38 +310,47 @@
       <button class="btn btn-primary btn-full" id="noticeSubmitBtn" onclick="submitNotice()" style="margin-top:4px;">📌 공지 게시</button>
     </div>
 
-    <div class="section-title" style="margin-top:8px;">📋 공지 목록</div>
-    <div id="noticeList">
-      <div class="skel" style="height:70px;margin-bottom:8px;"></div>
-      <div class="skel" style="height:70px;margin-bottom:8px;"></div>
-    </div>
+```
+<div class="section-title" style="margin-top:8px;">📋 공지 목록</div>
+<div id="noticeList">
+  <div class="skel" style="height:70px;margin-bottom:8px;"></div>
+  <div class="skel" style="height:70px;margin-bottom:8px;"></div>
+</div>
+```
+
   </div>
 
-  <!-- 탭: 관리 -->
+  <!-- ──────────────── 탭: 관리 ──────────────── -->
+
   <div id="tabManage" class="hidden">
     <div class="section-title">🔧 게시글 관리</div>
     <div class="section-sub">캐릭터 글과 게스트 글을 관리합니다</div>
 
-    <div class="card" style="padding:14px;">
-      <div class="form-row" style="margin-bottom:0;">
-        <select class="form-select" id="mgmtFilter" onchange="loadManagePosts(true)" style="margin-bottom:0;">
-          <option value="all">전체 글</option>
-          <option value="system">캐릭터 글</option>
-          <option value="guest">게스트 글</option>
-        </select>
-        <button class="btn btn-outline" onclick="loadManagePosts(true)" style="white-space:nowrap;">🔄 새로고침</button>
-      </div>
-    </div>
+```
+<!-- 필터 -->
+<div class="card" style="padding:14px;">
+  <div class="form-row" style="margin-bottom:0;">
+    <select class="form-select" id="mgmtFilter" onchange="loadManagePosts(true)" style="margin-bottom:0;">
+      <option value="all">전체 글</option>
+      <option value="system">캐릭터 글</option>
+      <option value="guest">게스트 글</option>
+    </select>
+    <button class="btn btn-outline" onclick="loadManagePosts(true)" style="white-space:nowrap;">🔄 새로고침</button>
+  </div>
+</div>
 
-    <div id="managePostList">
-      <div class="skel" style="height:80px;margin-bottom:8px;"></div>
-      <div class="skel" style="height:80px;margin-bottom:8px;"></div>
-      <div class="skel" style="height:80px;margin-bottom:8px;"></div>
-    </div>
-    <button class="btn btn-outline btn-full hidden" id="mgmtLoadMoreBtn" onclick="loadManagePosts(false)">더 보기</button>
+<div id="managePostList">
+  <div class="skel" style="height:80px;margin-bottom:8px;"></div>
+  <div class="skel" style="height:80px;margin-bottom:8px;"></div>
+  <div class="skel" style="height:80px;margin-bottom:8px;"></div>
+</div>
+<button class="btn btn-outline btn-full hidden" id="mgmtLoadMoreBtn" onclick="loadManagePosts(false)">더 보기</button>
+```
+
   </div>
 
-  <!-- 탭: 캐릭터 추가 -->
+  <!-- ──────────────── 탭: 캐릭터 추가 ──────────────── -->
+
   <div id="tabAddChar" class="hidden">
     <div class="section-title">➕ 캐릭터 추가</div>
     <div class="section-sub">새 캐릭터를 등록합니다</div>
@@ -437,7 +409,8 @@
     </div>
   </div>
 
-  <!-- 탭: 시스템 유저 -->
+  <!-- ──────────────── 탭: 시스템 유저 ──────────────── -->
+
   <div id="tabSysUser" class="hidden">
     <div class="section-title">👤 시스템 유저</div>
     <div class="section-sub">캐릭터 대신 댓글을 달 수 있는 유저를 관리합니다</div>
@@ -469,6 +442,7 @@
 </div>
 
 <!-- 캐릭터 상세 패널 -->
+
 <div class="char-panel-overlay hidden" id="charPanelOverlay" onclick="handleCharPanelOverlay(event)">
   <div class="char-panel" onclick="event.stopPropagation()">
     <div class="char-panel-handle"></div>
@@ -485,7 +459,9 @@
         <button class="char-panel-tab active" onclick="switchCharPanelTab('posts',this)" id="cpTabPosts">글 목록</button>
         <button class="char-panel-tab"        onclick="switchCharPanelTab('edit',this)"  id="cpTabEdit">캐릭터 수정</button>
       </div>
+      <!-- 글 목록 -->
       <div id="cpPosts"><div style="color:var(--sub);font-size:14px;">로딩 중...</div></div>
+      <!-- 수정 폼 -->
       <div id="cpEditForm" class="hidden">
         <div class="form-row">
           <div><label class="form-label">이름</label><input class="form-input" id="editName" placeholder="표시 이름" maxlength="30"></div>
@@ -521,6 +497,7 @@
 </div>
 
 <!-- 글 편집 모달 -->
+
 <div class="edit-overlay hidden" id="editOverlay" onclick="handleEditOverlay(event)">
   <div class="edit-panel" onclick="event.stopPropagation()">
     <div class="edit-handle"></div>
@@ -545,16 +522,9 @@
 
 <script>
   const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
-
-  // 저장 키
-  const KEY_TOKEN_LOCAL  = 'rkAdminTokenLocal';
-  const KEY_PW_LOCAL     = 'rkAdminPwLocal';
-  const KEY_REMEMBER     = 'rkAdminRememberLogin';
-  const KEY_REMEMBER_PW  = 'rkAdminRememberPw';
-  const KEY_TOKEN_SESSION = 'rkAdminToken';
-
   let adminToken    = null;
   let characters    = [];
+  let selectedCharId = null;
   let currentChar   = null;
   let editingPostId = null;
   let managePosts   = [];
@@ -582,113 +552,68 @@
     t._tid = setTimeout(() => { t.className = 'toast'; }, 3000);
   }
 
-  function togglePw(){
-    const inp = document.getElementById('loginInput');
-    const btn = document.getElementById('pwToggleBtn');
-    const isPw = inp.type === 'password';
-    inp.type = isPw ? 'text' : 'password';
-    btn.textContent = isPw ? '🙈' : '👁';
-  }
-
-  // ── 로그인
+  // ── 로그인 (worker는 X-Admin-Key 헤더로 인증, /admin/login 엔드포인트 없음)
   document.getElementById('loginInput').addEventListener('keypress', e => { if (e.key === 'Enter') doLogin(); });
-  // iOS 키보드 대응: 포커스 시 입력창이 가려지지 않도록 스크롤
-  document.getElementById('loginInput').addEventListener('focus', () => {
-    setTimeout(() => { try { document.getElementById('loginInput').scrollIntoView({ block:'center' }); } catch {} }, 80);
-  });
-
-  // 비밀번호 기억
-  (function restorePw(){
-    try {
-      const saved = localStorage.getItem('rkAdminPw');
-      const cb = document.getElementById('rememberPw');
-      if (saved) {
-        const v = atob(saved);
-        document.getElementById('loginInput').value = v;
-        if (cb) cb.checked = true;
-      } else {
-        if (cb) cb.checked = false;
-      }
-    } catch {}
-  })();
-
 
   async function doLogin() {
-    const pwRaw = document.getElementById('loginInput').value;
-    const pw = (pwRaw || '').trim(); // 공백 방지
+    const pw  = document.getElementById('loginInput').value.trim();
     const btn = document.getElementById('loginBtn');
     const err = document.getElementById('loginError');
-
     if (!pw) { err.textContent = '비밀번호를 입력해주세요'; return; }
-
     btn.disabled = true; btn.textContent = '확인 중...';
     err.textContent = '';
-
-    // remember 옵션
-    const rememberLogin = document.getElementById('rememberLogin').checked;
-    const rememberPw    = document.getElementById('rememberPw').checked;
-
     try {
-      const r = await fetch(`${API}/admin/login`, {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ password: pw }),
-      });
-
-      let d = null;
-      try { d = await r.json(); } catch { d = null; }
-
-      if (d && d.ok && d.token) {
-        adminToken = d.token;
-
-        // 토큰 저장
-        sessionStorage.setItem(KEY_TOKEN_SESSION, adminToken);
-        if (rememberLogin) localStorage.setItem(KEY_TOKEN_LOCAL, adminToken);
-        else localStorage.removeItem(KEY_TOKEN_LOCAL);
-
-        // 옵션 저장
-        localStorage.setItem(KEY_REMEMBER, rememberLogin ? '1' : '0');
-
-        // 비번 저장
-        if (rememberPw) localStorage.setItem(KEY_PW_LOCAL, pw);
-        else localStorage.removeItem(KEY_PW_LOCAL);
-        localStorage.setItem(KEY_REMEMBER_PW, rememberPw ? '1' : '0');
-
+      const r = await fetch(`${API}/admin/notices`, { headers: { 'X-Admin-Key': pw } });
+      if (r.status === 200 || r.status === 201) {
+        adminToken = pw;
+        sessionStorage.setItem('rkAdminToken', pw);
+        if (document.getElementById('rememberMe').checked) {
+          localStorage.setItem('rkAdminKey', pw);
+        }
         showMainPanel();
+      } else if (r.status === 401) {
+        err.textContent = '비밀번호가 틀렸어요';
       } else {
-        err.textContent = d.error ? `비밀번호 오류: ${d.error}` : '비밀번호가 틀렸어요';
+        err.textContent = '서버 오류가 발생했어요 (' + r.status + ')';
       }
-    } catch {
-      err.textContent = '서버 오류가 발생했어요';
-    }
-
+    } catch { err.textContent = '네트워크 오류가 발생했어요'; }
     btn.disabled = false; btn.textContent = '입장하기';
   }
 
   function doLogout() {
     adminToken = null;
-    sessionStorage.removeItem(KEY_TOKEN_SESSION);
-    localStorage.removeItem(KEY_TOKEN_LOCAL);
-
-    // 비번/옵션은 유지 (원하면 여기서 같이 삭제 가능)
+    sessionStorage.removeItem('rkAdminToken');
+    localStorage.removeItem('rkAdminKey');
     document.getElementById('loginScreen').classList.remove('hidden');
     document.getElementById('mainHeader').classList.add('hidden');
     document.getElementById('topNav').classList.add('hidden');
     document.getElementById('mainContent').classList.add('hidden');
-
-    document.getElementById('loginError').textContent = '';
-    document.getElementById('loginBtn').disabled = false;
-    document.getElementById('loginBtn').textContent = '입장하기';
-    document.getElementById('loginInput').focus();
-  setTimeout(() => { try { document.getElementById('loginInput').scrollIntoView({ block:'center' }); } catch {} }, 120);
+    document.getElementById('loginInput').value = '';
+    document.getElementById('rememberMe').checked = false;
   }
+
+  // 저장된 키 자동 복원
+  (async function autoLogin() {
+    const saved = localStorage.getItem('rkAdminKey') || sessionStorage.getItem('rkAdminToken');
+    if (!saved) return;
+    try {
+      const r = await fetch(`${API}/admin/notices`, { headers: { 'X-Admin-Key': saved } });
+      if (r.status === 200 || r.status === 201) {
+        adminToken = saved;
+        if (localStorage.getItem('rkAdminKey')) document.getElementById('rememberMe').checked = true;
+        showMainPanel();
+      } else {
+        localStorage.removeItem('rkAdminKey');
+        sessionStorage.removeItem('rkAdminToken');
+      }
+    } catch {}
+  })();
 
   function showMainPanel() {
     document.getElementById('loginScreen').classList.add('hidden');
     document.getElementById('mainHeader').classList.remove('hidden');
     document.getElementById('topNav').classList.remove('hidden');
     document.getElementById('mainContent').classList.remove('hidden');
-
     loadCharacters();
     switchMainTab('characters');
   }
@@ -717,9 +642,8 @@
   // ── 캐릭터 로드
   async function loadCharacters() {
     try {
-      const r = await fetch(`${API}/characters`, { headers:{'Authorization': `Bearer ${adminToken}`} });
+      const r = await fetch(`${API}/characters`, { headers:{'X-Admin-Key': adminToken} });
       if (r.ok) { const d = await r.json(); characters = d.characters || []; }
-      else if (r.status === 401) { showToast('세션이 만료되었어요. 다시 로그인 해주세요.', true); doLogout(); return; }
     } catch {}
     renderCharGrid();
     renderAICharGrid();
@@ -744,7 +668,6 @@
   function renderAICharGrid() {
     const grid = document.getElementById('aiCharGrid');
     if (!grid) return;
-
     grid.innerHTML = characters.map(c => {
       const imgHtml = c.image_url
         ? `<img src="${esc(c.image_url)}" alt="${esc(c.display_name)}" onerror="this.parentElement.textContent='${esc(c.emoji||'🐾')}';">`
@@ -755,11 +678,7 @@
         <div class="ai-char-mini-name">${esc(name)}</div>
       </div>`;
     }).join('');
-
-    if (!aiSelectedCharId && characters.length) {
-      aiSelectedCharId = characters[0].id;
-      renderAICharGrid();
-    }
+    if (!aiSelectedCharId && characters.length) { aiSelectedCharId = characters[0].id; renderAICharGrid(); }
   }
 
   function selectAIChar(id) {
@@ -780,18 +699,14 @@
     const c = characters.find(x => x.id == charId);
     if (!c) return;
     currentChar = c;
-
     const av = document.getElementById('cpAvatar');
     if (c.image_url) {
       av.innerHTML = `<img src="${esc(c.image_url)}" alt="${esc(c.display_name)}" data-emoji="${esc(c.emoji||'🐾')}" onerror="this.parentElement.removeChild(this);this.parentElement.textContent=this.dataset.emoji">`;
     } else { av.textContent = c.emoji || '🐾'; }
-
     document.getElementById('cpName').textContent = c.display_name;
     document.getElementById('cpSub').textContent  = `${groupLabel(c.group_type)} · ${c.animal_type||''} · ${c.mbti||''}`;
-
     switchCharPanelTab('posts');
     fillCharEditForm(c);
-
     document.getElementById('charPanelOverlay').classList.remove('hidden');
     loadCharPosts(charId);
   }
@@ -810,27 +725,23 @@
     const wrap = document.getElementById('cpPosts');
     wrap.innerHTML = '<div style="color:var(--sub);font-size:14px;">로딩 중...</div>';
     try {
-      const r = await fetch(`${API}/characters/${charId}/posts?limit=20`, { headers:{'Authorization':`Bearer ${adminToken}`} });
-      if (r.status === 401) { showToast('세션이 만료되었어요. 다시 로그인 해주세요.', true); doLogout(); return; }
+      const r = await fetch(`${API}/characters/${charId}/posts?limit=20`, { headers:{'X-Admin-Key': adminToken} });
       const d = await r.json();
       if (!d.posts?.length) { wrap.innerHTML = '<div style="color:var(--sub);font-size:14px;">글이 없어요</div>'; return; }
-
-      wrap.innerHTML = d.posts.map(p => `
-        <div class="char-post-item">
-          <div class="char-post-title">${esc(p.title||'(제목 없음)')}</div>
-          <div class="char-post-body">${esc(p.body||'')}</div>
-          <div class="char-post-meta">
-            <span>💬 ${p.comment_count||0}</span>
-            <span>🌟 ${p.yar_count||0}</span>
-            <span>👁 ${p.view_count||0}</span>
-            <span>${relTime(p.created_at)}</span>
-          </div>
-          <div class="char-post-btns">
-            <button class="btn btn-outline btn-sm" onclick='openEditPostModal(${p.id}, ${JSON.stringify(p.title||"")}, ${JSON.stringify(p.body||"")}, ${JSON.stringify(p.media_url||"")})'>✏️ 수정</button>
-            <button class="btn btn-red btn-sm" onclick="deletePost(${p.id})">🗑 삭제</button>
-          </div>
+      wrap.innerHTML = d.posts.map(p => `<div class="char-post-item">
+        <div class="char-post-title">${esc(p.title||'(제목 없음)')}</div>
+        <div class="char-post-body">${esc(p.body||'')}</div>
+        <div class="char-post-meta">
+          <span>💬 ${p.comment_count||0}</span>
+          <span>🌟 ${p.yar_count||0}</span>
+          <span>👁 ${p.view_count||0}</span>
+          <span>${relTime(p.created_at)}</span>
         </div>
-      `).join('');
+        <div class="char-post-btns">
+          <button class="btn btn-outline btn-sm" onclick="openEditPostModal(${p.id},'${esc(p.title||'')}',${JSON.stringify(esc(p.body||''))},${JSON.stringify(esc(p.media_url||''))})">✏️ 수정</button>
+          <button class="btn btn-red btn-sm" onclick="deletePost(${p.id})">🗑 삭제</button>
+        </div>
+      </div>`).join('');
     } catch { wrap.innerHTML = '<div style="color:var(--sub);">불러오기 실패</div>'; }
   }
 
@@ -851,7 +762,6 @@
     if (!currentChar) return;
     const btn = document.getElementById('cpSaveBtn');
     btn.disabled = true; btn.textContent = '저장 중...';
-
     const payload = {
       display_name:  document.getElementById('editName').value.trim(),
       emoji:         document.getElementById('editEmoji').value.trim(),
@@ -864,14 +774,11 @@
       image_url:     document.getElementById('editImageUrl').value.trim(),
       system_prompt: document.getElementById('editSystemPrompt').value.trim(),
     };
-
     try {
       const r = await fetch(`${API}/admin/characters/${currentChar.id}`, {
-        method:'PATCH',
-        headers:{'Content-Type':'application/json','Authorization':`Bearer ${adminToken}`},
+        method:'PATCH', headers:{'Content-Type':'application/json','X-Admin-Key': adminToken},
         body: JSON.stringify(payload),
       });
-      if (r.status === 401) { showToast('세션이 만료되었어요. 다시 로그인 해주세요.', true); doLogout(); return; }
       const d = await r.json();
       if (d.ok) {
         showToast('✅ 캐릭터가 수정되었어요');
@@ -880,7 +787,6 @@
         if (updated) { currentChar = updated; fillCharEditForm(updated); }
       } else { showToast(d.error || '수정 실패', true); }
     } catch { showToast('오류가 발생했어요', true); }
-
     btn.disabled = false; btn.textContent = '💾 저장';
   }
 
@@ -899,29 +805,24 @@
     if (!editingPostId) return;
     const btn = document.getElementById('editSaveBtn');
     btn.disabled = true; btn.textContent = '저장 중...';
-
     const payload = {
       title:     document.getElementById('editPostTitle').value.trim(),
       body:      document.getElementById('editPostBody').value.trim(),
       media_url: document.getElementById('editPostMedia').value.trim() || null,
     };
-
     try {
       const r = await fetch(`${API}/admin/posts/${editingPostId}`, {
-        method:'PATCH',
-        headers:{'Content-Type':'application/json','Authorization':`Bearer ${adminToken}`},
+        method:'PATCH', headers:{'Content-Type':'application/json','X-Admin-Key': adminToken},
         body: JSON.stringify(payload),
       });
-      if (r.status === 401) { showToast('세션이 만료되었어요. 다시 로그인 해주세요.', true); doLogout(); return; }
       const d = await r.json();
       if (d.ok) {
         showToast('✅ 글이 수정되었어요');
         closeEditModal();
         if (currentChar) loadCharPosts(currentChar.id);
-        if (!document.getElementById('tabManage').classList.contains('hidden')) loadManagePosts(true);
+        if (document.getElementById('tabManage').classList.contains('hidden') === false) loadManagePosts(true);
       } else { showToast(d.error || '수정 실패', true); }
     } catch { showToast('오류가 발생했어요', true); }
-
     btn.disabled = false; btn.textContent = '💾 저장';
   }
 
@@ -929,8 +830,9 @@
   async function deletePost(postId) {
     if (!confirm('이 글을 삭제할까요?')) return;
     try {
-      const r = await fetch(`${API}/admin/posts/${postId}`, { method:'DELETE', headers:{'Authorization':`Bearer ${adminToken}`} });
-      if (r.status === 401) { showToast('세션이 만료되었어요. 다시 로그인 해주세요.', true); doLogout(); return; }
+      const r = await fetch(`${API}/admin/posts/${postId}`, {
+        method:'DELETE', headers:{'X-Admin-Key': adminToken},
+      });
       const d = await r.json();
       if (d.ok) {
         showToast('🗑 글이 삭제되었어요');
@@ -947,17 +849,14 @@
     const btn = document.getElementById('aiGenBtn');
     btn.disabled = true; btn.innerHTML = '<div class="spinner-sm"></div> 생성 중...';
     document.getElementById('aiPreview').classList.add('hidden');
-
+    const c       = characters.find(x => x.id === aiSelectedCharId);
     const prompt  = document.getElementById('aiPrompt').value.trim();
     const tone    = document.getElementById('aiTone').value;
-
     try {
       const r = await fetch(`${API}/admin/generate-post`, {
-        method:'POST',
-        headers:{'Content-Type':'application/json','Authorization':`Bearer ${adminToken}`},
+        method:'POST', headers:{'Content-Type':'application/json','X-Admin-Key': adminToken},
         body: JSON.stringify({ character_id: aiSelectedCharId, prompt, tone }),
       });
-      if (r.status === 401) { showToast('세션이 만료되었어요. 다시 로그인 해주세요.', true); doLogout(); return; }
       const d = await r.json();
       if (d.ok) {
         aiGeneratedPost = d.post;
@@ -967,7 +866,6 @@
         document.getElementById('aiPreview').classList.remove('hidden');
       } else { showToast(d.error || 'AI 생성 실패', true); }
     } catch { showToast('AI 생성 오류', true); }
-
     btn.disabled = false; btn.innerHTML = '✨ AI 글 생성';
   }
 
@@ -981,13 +879,10 @@
     if (!aiGeneratedPost || !aiSelectedCharId) return;
     const btn = document.getElementById('aiPostBtn');
     btn.disabled = true; btn.innerHTML = '<div class="spinner-sm"></div> 게시 중...';
-
     const mediaUrl = document.getElementById('aiMediaUrl').value.trim();
-
     try {
       const r = await fetch(`${API}/admin/posts`, {
-        method:'POST',
-        headers:{'Content-Type':'application/json','Authorization':`Bearer ${adminToken}`},
+        method:'POST', headers:{'Content-Type':'application/json','X-Admin-Key': adminToken},
         body: JSON.stringify({
           character_id: aiSelectedCharId,
           title: aiGeneratedPost.title,
@@ -995,12 +890,12 @@
           media_url: mediaUrl || null,
         }),
       });
-      if (r.status === 401) { showToast('세션이 만료되었어요. 다시 로그인 해주세요.', true); doLogout(); return; }
       const d = await r.json();
-      if (d.ok) { showToast('✅ 글이 게시되었어요!'); clearAIPreview(); }
-      else { showToast(d.error || '게시 실패', true); }
+      if (d.ok) {
+        showToast('✅ 글이 게시되었어요!');
+        clearAIPreview();
+      } else { showToast(d.error || '게시 실패', true); }
     } catch { showToast('오류가 발생했어요', true); }
-
     btn.disabled = false; btn.innerHTML = '📤 이 글 게시';
   }
 
@@ -1014,7 +909,7 @@
     switchMainTab('write');
   }
 
-  // ── 직접 작성 (미디어 프리뷰)
+  // ── 직접 작성
   document.getElementById('writeMediaUrl')?.addEventListener('input', function() {
     const preview = document.getElementById('writeMediaPreview');
     const url = this.value.trim();
@@ -1022,30 +917,22 @@
     if (/\.(jpg|jpeg|png|gif|webp)$/i.test(url)) {
       preview.innerHTML = `<img src="${esc(url)}" alt="미리보기" onerror="this.parentElement.classList.add('hidden')">`;
       preview.classList.remove('hidden');
-    } else {
-      preview.innerHTML = `<div class="media-preview-url">🔗 ${esc(url)}</div>`;
-      preview.classList.remove('hidden');
-    }
+    } else { preview.innerHTML = `<div class="media-preview-url">🔗 ${esc(url)}</div>`; preview.classList.remove('hidden'); }
   });
 
   async function submitManualPost() {
-    const charId   = parseInt(document.getElementById('writeCharSelect').value, 10);
+    const charId   = document.getElementById('writeCharSelect').value;
     const title    = document.getElementById('writeTitle2').value.trim();
     const body     = document.getElementById('writeBody2').value.trim();
     const mediaUrl = document.getElementById('writeMediaUrl').value.trim();
     const btn      = document.getElementById('writeSubmitBtn');
-
     if (!title || !body) { showToast('제목과 내용을 입력해주세요', true); return; }
-
     btn.disabled = true; btn.innerHTML = '<div class="spinner-sm"></div> 게시 중...';
-
     try {
       const r = await fetch(`${API}/admin/posts`, {
-        method:'POST',
-        headers:{'Content-Type':'application/json','Authorization':`Bearer ${adminToken}`},
-        body: JSON.stringify({ character_id: charId, title, body, media_url: mediaUrl || null }),
+        method:'POST', headers:{'Content-Type':'application/json','X-Admin-Key': adminToken},
+        body: JSON.stringify({ character_id: parseInt(charId), title, body, media_url: mediaUrl || null }),
       });
-      if (r.status === 401) { showToast('세션이 만료되었어요. 다시 로그인 해주세요.', true); doLogout(); return; }
       const d = await r.json();
       if (d.ok) {
         showToast('✅ 글이 게시되었어요!');
@@ -1055,7 +942,6 @@
         document.getElementById('writeMediaPreview').classList.add('hidden');
       } else { showToast(d.error || '게시 실패', true); }
     } catch { showToast('오류가 발생했어요', true); }
-
     btn.disabled = false; btn.textContent = '📤 게시하기';
   }
 
@@ -1067,10 +953,7 @@
     if (/\.(jpg|jpeg|png|gif|webp)$/i.test(url)) {
       preview.innerHTML = `<img src="${esc(url)}" alt="미리보기" onerror="this.parentElement.classList.add('hidden')">`;
       preview.classList.remove('hidden');
-    } else {
-      preview.innerHTML = `<div class="media-preview-url">🔗 ${esc(url)}</div>`;
-      preview.classList.remove('hidden');
-    }
+    } else { preview.innerHTML = `<div class="media-preview-url">🔗 ${esc(url)}</div>`; preview.classList.remove('hidden'); }
   }
 
   async function submitNotice() {
@@ -1079,16 +962,12 @@
     const mediaUrl = document.getElementById('noticeMediaUrl').value.trim();
     const btn      = document.getElementById('noticeSubmitBtn');
     if (!title || !body) { showToast('제목과 내용을 입력해주세요', true); return; }
-
     btn.disabled = true; btn.innerHTML = '<div class="spinner-sm"></div> 게시 중...';
-
     try {
       const r = await fetch(`${API}/admin/notices`, {
-        method:'POST',
-        headers:{'Content-Type':'application/json','Authorization':`Bearer ${adminToken}`},
+        method:'POST', headers:{'Content-Type':'application/json','X-Admin-Key': adminToken},
         body: JSON.stringify({ title, body, media_url: mediaUrl || null }),
       });
-      if (r.status === 401) { showToast('세션이 만료되었어요. 다시 로그인 해주세요.', true); doLogout(); return; }
       const d = await r.json();
       if (d.ok) {
         showToast('📌 공지가 게시되었어요!');
@@ -1099,7 +978,6 @@
         loadNoticeList();
       } else { showToast(d.error || '게시 실패', true); }
     } catch { showToast('오류가 발생했어요', true); }
-
     btn.disabled = false; btn.textContent = '📌 공지 게시';
   }
 
@@ -1107,60 +985,53 @@
     const list = document.getElementById('noticeList');
     list.innerHTML = '<div class="skel" style="height:60px;margin-bottom:8px;"></div>'.repeat(2);
     try {
-      const r = await fetch(`${API}/notices?limit=20`, { headers:{'Authorization':`Bearer ${adminToken}`} });
-      if (r.status === 401) { showToast('세션이 만료되었어요. 다시 로그인 해주세요.', true); doLogout(); return; }
+      const r = await fetch(`${API}/notices?limit=20`, { headers:{'X-Admin-Key': adminToken} });
       const d = await r.json();
       const notices = d.notices || [];
       if (!notices.length) { list.innerHTML = '<div style="color:var(--sub);font-size:14px;padding:12px 0;">공지가 없어요</div>'; return; }
-      list.innerHTML = notices.map(n => `
-        <div class="mgmt-item">
-          <div class="mgmt-item-head">
-            <div class="mgmt-item-info">
-              <span class="mgmt-type-badge badge-notice">📌 공지</span>
-              <div class="mgmt-item-title">${esc(n.title)}</div>
-              <div class="mgmt-item-meta">${relTime(n.created_at)}</div>
-            </div>
-            <div class="mgmt-item-btns">
-              <button class="btn btn-red btn-sm" onclick="deleteNotice(${n.id})">🗑 삭제</button>
-            </div>
+      list.innerHTML = notices.map(n => `<div class="mgmt-item">
+        <div class="mgmt-item-head">
+          <div class="mgmt-item-info">
+            <span class="mgmt-type-badge badge-notice">📌 공지</span>
+            <div class="mgmt-item-title">${esc(n.title)}</div>
+            <div class="mgmt-item-meta">${relTime(n.created_at)}</div>
+          </div>
+          <div class="mgmt-item-btns">
+            <button class="btn btn-red btn-sm" onclick="deleteNotice(${n.id})">🗑 삭제</button>
           </div>
         </div>
-      `).join('');
+      </div>`).join('');
     } catch { list.innerHTML = '<div style="color:var(--sub);">불러오기 실패</div>'; }
   }
 
   async function deleteNotice(id) {
     if (!confirm('공지를 삭제할까요?')) return;
     try {
-      const r = await fetch(`${API}/admin/notices/${id}`, { method:'DELETE', headers:{'Authorization':`Bearer ${adminToken}`} });
-      if (r.status === 401) { showToast('세션이 만료되었어요. 다시 로그인 해주세요.', true); doLogout(); return; }
+      const r = await fetch(`${API}/admin/notices/${id}`, {
+        method:'DELETE', headers:{'X-Admin-Key': adminToken},
+      });
       const d = await r.json();
       if (d.ok) { showToast('🗑 공지가 삭제되었어요'); loadNoticeList(); }
       else { showToast(d.error || '삭제 실패', true); }
     } catch { showToast('오류가 발생했어요', true); }
   }
 
-  // ── 관리 (전체 글)
+  // ── 관리 (전체 글 목록)
   async function loadManagePosts(reset = false) {
     if (reset) { managePosts = []; mgmtOffset = 0; }
     const filter = document.getElementById('mgmtFilter').value;
     const list   = document.getElementById('managePostList');
     if (reset) list.innerHTML = '<div class="skel" style="height:80px;margin-bottom:8px;"></div>'.repeat(3);
-
     try {
       const params = new URLSearchParams({ limit: MGMT_LIMIT, offset: mgmtOffset, sort:'latest' });
       if (filter !== 'all') params.set('author_type', filter);
-
-      const r = await fetch(`${API}/admin/posts?${params}`, { headers:{'Authorization':`Bearer ${adminToken}`} });
-      if (r.status === 401) { showToast('세션이 만료되었어요. 다시 로그인 해주세요.', true); doLogout(); return; }
+      const r = await fetch(`${API}/admin/posts?${params}`, { headers:{'X-Admin-Key': adminToken} });
       const d = await r.json();
       const newPosts = d.posts || [];
       managePosts = reset ? newPosts : [...managePosts, ...newPosts];
       mgmtOffset += newPosts.length;
-
       const hasMore = mgmtOffset < (d.total || 0);
       document.getElementById('mgmtLoadMoreBtn').classList.toggle('hidden', !hasMore);
-
       renderManagePosts();
     } catch { list.innerHTML = '<div style="color:var(--sub);">불러오기 실패</div>'; }
   }
@@ -1168,28 +1039,24 @@
   function renderManagePosts() {
     const list = document.getElementById('managePostList');
     if (!managePosts.length) { list.innerHTML = '<div style="color:var(--sub);padding:12px 0;">글이 없어요</div>'; return; }
-
     list.innerHTML = managePosts.map(p => {
       const isSystem = p.author_type === 'system';
       const authorName = isSystem ? (p.character_name||'캐릭터') : (p.nickname||'익명');
       const badgeClass = isSystem ? 'badge-char' : 'badge-guest';
       const badgeText  = isSystem ? '🐾 캐릭터' : '🗣️ 게스트';
-
-      return `
-        <div class="mgmt-item">
-          <div class="mgmt-item-head">
-            <div class="mgmt-item-info">
-              <span class="mgmt-type-badge ${badgeClass}">${badgeText}</span>
-              <div class="mgmt-item-title">${esc(p.title||p.body?.slice(0,40)||'')}</div>
-              <div class="mgmt-item-meta">${esc(authorName)} · ${relTime(p.created_at)} · 💬 ${p.comment_count||0} 🌟 ${p.yar_count||0} 👁 ${p.view_count||0}</div>
-            </div>
-            <div class="mgmt-item-btns">
-              ${isSystem ? `<button class="btn btn-outline btn-sm" onclick='openEditPostModal(${p.id}, ${JSON.stringify(p.title||"")}, ${JSON.stringify(p.body||"")}, ${JSON.stringify(p.media_url||"")})'>✏️</button>` : ''}
-              <button class="btn btn-red btn-sm" onclick="deletePost(${p.id})">🗑</button>
-            </div>
+      return `<div class="mgmt-item">
+        <div class="mgmt-item-head">
+          <div class="mgmt-item-info">
+            <span class="mgmt-type-badge ${badgeClass}">${badgeText}</span>
+            <div class="mgmt-item-title">${esc(p.title||p.body?.slice(0,40)||'')}</div>
+            <div class="mgmt-item-meta">${esc(authorName)} · ${relTime(p.created_at)} · 💬 ${p.comment_count||0} 🌟 ${p.yar_count||0} 👁 ${p.view_count||0}</div>
+          </div>
+          <div class="mgmt-item-btns">
+            ${isSystem ? `<button class="btn btn-outline btn-sm" onclick="openEditPostModal(${p.id},'${esc(p.title||'')}',${JSON.stringify(esc(p.body||''))},${JSON.stringify(esc(p.media_url||''))})">✏️</button>` : ''}
+            <button class="btn btn-red btn-sm" onclick="deletePost(${p.id})">🗑</button>
           </div>
         </div>
-      `;
+      </div>`;
     }).join('');
   }
 
@@ -1198,9 +1065,7 @@
     const btn = document.getElementById('addCharBtn');
     const name = document.getElementById('addName').value.trim();
     if (!name) { showToast('이름을 입력해주세요', true); return; }
-
     btn.disabled = true; btn.innerHTML = '<div class="spinner-sm"></div> 등록 중...';
-
     const payload = {
       display_name:  name,
       emoji:         document.getElementById('addEmoji').value.trim() || '🐾',
@@ -1214,25 +1079,19 @@
       password:      document.getElementById('addPassword').value || null,
       system_prompt: document.getElementById('addSystemPrompt').value.trim() || null,
     };
-
     try {
       const r = await fetch(`${API}/admin/characters`, {
-        method:'POST',
-        headers:{'Content-Type':'application/json','Authorization':`Bearer ${adminToken}`},
+        method:'POST', headers:{'Content-Type':'application/json','X-Admin-Key': adminToken},
         body: JSON.stringify(payload),
       });
-      if (r.status === 401) { showToast('세션이 만료되었어요. 다시 로그인 해주세요.', true); doLogout(); return; }
       const d = await r.json();
       if (d.ok) {
         showToast(`✅ ${name} 캐릭터가 추가되었어요!`);
-        ['addName','addEmoji','addAnimal','addGender','addMbti','addLikes','addHobby','addImageUrl','addPassword','addSystemPrompt'].forEach(id => {
-          const el = document.getElementById(id); if (el) el.value='';
-        });
+        ['addName','addEmoji','addAnimal','addGender','addMbti','addLikes','addHobby','addImageUrl','addPassword','addSystemPrompt'].forEach(id => { const el = document.getElementById(id); if (el) el.value=''; });
         document.getElementById('addGroup').value = 'kindergarten';
         await loadCharacters();
       } else { showToast(d.error || '등록 실패', true); }
     } catch { showToast('오류가 발생했어요', true); }
-
     btn.disabled = false; btn.textContent = '➕ 캐릭터 등록';
   }
 
@@ -1241,30 +1100,26 @@
     const list = document.getElementById('sysUserList');
     list.innerHTML = '<div class="skel" style="height:60px;margin-bottom:8px;"></div>'.repeat(2);
     try {
-      const r = await fetch(`${API}/admin/system-users`, { headers:{'Authorization':`Bearer ${adminToken}`} });
-      if (r.status === 401) { showToast('세션이 만료되었어요. 다시 로그인 해주세요.', true); doLogout(); return; }
+      const r = await fetch(`${API}/admin/system-users`, { headers:{'X-Admin-Key': adminToken} });
       const d = await r.json();
       const users = d.users || [];
       if (!users.length) { list.innerHTML = '<div style="color:var(--sub);font-size:14px;padding:12px 0;">시스템 유저가 없어요</div>'; return; }
-
       list.innerHTML = users.map(u => {
         const imgHtml = u.image_url
           ? `<img src="${esc(u.image_url)}" alt="${esc(u.display_name)}" style="width:36px;height:36px;border-radius:8px;object-fit:cover;border:1px solid var(--border);" onerror="this.style.display='none'">`
           : `<span style="font-size:22px;">${esc(u.emoji||'👤')}</span>`;
-        return `
-          <div class="mgmt-item">
-            <div class="mgmt-item-head">
-              <div style="margin-right:8px;">${imgHtml}</div>
-              <div class="mgmt-item-info">
-                <span class="mgmt-type-badge badge-system-user">👤 시스템 유저</span>
-                <div class="mgmt-item-title">${esc(u.display_name)} ${esc(u.emoji||'')}</div>
-              </div>
-              <div class="mgmt-item-btns">
-                <button class="btn btn-red btn-sm" onclick="deleteSysUser(${u.id})">🗑</button>
-              </div>
+        return `<div class="mgmt-item">
+          <div class="mgmt-item-head">
+            <div style="margin-right:8px;">${imgHtml}</div>
+            <div class="mgmt-item-info">
+              <span class="mgmt-type-badge badge-system-user">👤 시스템 유저</span>
+              <div class="mgmt-item-title">${esc(u.display_name)} ${esc(u.emoji||'')}</div>
+            </div>
+            <div class="mgmt-item-btns">
+              <button class="btn btn-red btn-sm" onclick="deleteSysUser(${u.id})">🗑</button>
             </div>
           </div>
-        `;
+        </div>`;
       }).join('');
     } catch { list.innerHTML = '<div style="color:var(--sub);">불러오기 실패</div>'; }
   }
@@ -1274,23 +1129,18 @@
     const name = document.getElementById('suName').value.trim();
     const pw   = document.getElementById('suPassword').value;
     if (!name || !pw) { showToast('이름과 비밀번호를 입력해주세요', true); return; }
-
     btn.disabled = true; btn.innerHTML = '<div class="spinner-sm"></div> 추가 중...';
-
     const payload = {
       display_name: name,
       emoji:        document.getElementById('suEmoji').value.trim() || '👤',
       image_url:    document.getElementById('suImageUrl').value.trim() || null,
       password:     pw,
     };
-
     try {
       const r = await fetch(`${API}/admin/system-users`, {
-        method:'POST',
-        headers:{'Content-Type':'application/json','Authorization':`Bearer ${adminToken}`},
+        method:'POST', headers:{'Content-Type':'application/json','X-Admin-Key': adminToken},
         body: JSON.stringify(payload),
       });
-      if (r.status === 401) { showToast('세션이 만료되었어요. 다시 로그인 해주세요.', true); doLogout(); return; }
       const d = await r.json();
       if (d.ok) {
         showToast(`✅ ${name} 시스템 유저가 추가되었어요`);
@@ -1298,82 +1148,24 @@
         loadSysUsers();
       } else { showToast(d.error || '추가 실패', true); }
     } catch { showToast('오류가 발생했어요', true); }
-
     btn.disabled = false; btn.textContent = '➕ 추가';
   }
 
   async function deleteSysUser(id) {
     if (!confirm('이 시스템 유저를 삭제할까요?')) return;
     try {
-      const r = await fetch(`${API}/admin/system-users/${id}`, { method:'DELETE', headers:{'Authorization':`Bearer ${adminToken}`} });
-      if (r.status === 401) { showToast('세션이 만료되었어요. 다시 로그인 해주세요.', true); doLogout(); return; }
+      const r = await fetch(`${API}/admin/system-users/${id}`, {
+        method:'DELETE', headers:{'X-Admin-Key': adminToken},
+      });
       const d = await r.json();
       if (d.ok) { showToast('🗑 삭제되었어요'); loadSysUsers(); }
       else { showToast(d.error || '삭제 실패', true); }
     } catch { showToast('오류가 발생했어요', true); }
   }
 
-  // ── 초기화: 옵션/저장값 복구 + 자동 로그인 시도
-  function restoreLoginPrefs(){
-    const rememberLogin = localStorage.getItem(KEY_REMEMBER) === '1';
-    const rememberPw    = localStorage.getItem(KEY_REMEMBER_PW) === '1';
-    document.getElementById('rememberLogin').checked = rememberLogin;
-    document.getElementById('rememberPw').checked = rememberPw;
-
-    if (rememberPw) {
-      const savedPw = localStorage.getItem(KEY_PW_LOCAL);
-      if (savedPw) document.getElementById('loginInput').value = savedPw;
-    }
-
-    // UX: 로그인 유지 ON이면 비번 기억도 같이 ON을 추천 (자동 변경은 안함)
-  }
-
-  async function tryAutoLogin(){
-    // 우선순위: local token(로그인 유지) -> session token(탭 유지)
-    const tokenLocal = localStorage.getItem(KEY_TOKEN_LOCAL);
-    const tokenSess  = sessionStorage.getItem(KEY_TOKEN_SESSION);
-    const token = tokenLocal || tokenSess;
-
-    if (!token) return;
-
-    adminToken = token;
-
-    // 토큰 유효성 체크: 캐릭터 목록 한번 호출
-    try {
-      const r = await fetch(`${API}/characters`, { headers:{'Authorization': `Bearer ${adminToken}`} });
-      if (r.ok) {
-        // 저장소 정리: local 토큰이 있으면 session에도 넣어두기
-        sessionStorage.setItem(KEY_TOKEN_SESSION, adminToken);
-        showMainPanel();
-      } else {
-        // invalid
-        adminToken = null;
-        sessionStorage.removeItem(KEY_TOKEN_SESSION);
-        localStorage.removeItem(KEY_TOKEN_LOCAL);
-      }
-    } catch {
-      // 네트워크 오류면 일단 토큰 유지한 채 로그인 화면 (사용자가 직접 시도 가능)
-      adminToken = null;
-    }
-  }
-
-  // remember 토글 UX: 로그인 유지 해제하면 로컬 토큰 제거
-  document.getElementById('rememberLogin').addEventListener('change', (e)=>{
-    const on = e.target.checked;
-    localStorage.setItem(KEY_REMEMBER, on ? '1' : '0');
-    if (!on) localStorage.removeItem(KEY_TOKEN_LOCAL);
-  });
-  document.getElementById('rememberPw').addEventListener('change', (e)=>{
-    const on = e.target.checked;
-    localStorage.setItem(KEY_REMEMBER_PW, on ? '1' : '0');
-    if (!on) localStorage.removeItem(KEY_PW_LOCAL);
-  });
-
-  // boot
-  restoreLoginPrefs();
-  tryAutoLogin();
+  // 세션 복구는 autoLogin() IIFE 가 처리함
   document.getElementById('loginInput').focus();
-  setTimeout(() => { try { document.getElementById('loginInput').scrollIntoView({ block:'center' }); } catch {} }, 120);
 </script>
+
 </body>
 </html>
