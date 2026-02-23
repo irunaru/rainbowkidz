@@ -173,7 +173,7 @@
     <div class="pw-logo">🌈</div>
     <div class="pw-title">관리자 로그인</div>
     <div class="pw-sub">무지개 유치원 & 어린이집</div>
-    <input type="password" class="pw-input" id="pwInput" placeholder="비밀번호 입력" autocomplete="current-password">
+    <input type="password" class="pw-input" id="pwInput" placeholder="관리자 키 입력" autocomplete="current-password">
     <button class="pw-btn" id="pwBtn" onclick="checkPw()">입장하기</button>
     <label class="pw-save"><input type="checkbox" id="pwSave"> 이 기기에서 기억하기</label>
     <div class="pw-error" id="pwError"></div>
@@ -425,8 +425,7 @@
 </div>
 <script>
   var API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
-  var ADMIN_PW = ''; // DEPRECATED: do not hardcode admin key in frontend
-
+  // 관리자 키는 Worker의 env.ADMIN_KEY로 검증합니다.
   var adminKey      = '';
   var characters    = [];
   var cachedFeed    = [];
@@ -469,25 +468,23 @@
 
   // ── 로그인 (단순 로컬 비교)
   async function checkPw() {
-    var pw  = document.getElementById('pwInput').value.trim();
-    var err = document.getElementById('pwError');
-    err.textContent = '';
-    if (!pw) { err.textContent = '비밀번호를 입력해주세요'; return; }
+  var pw  = document.getElementById('pwInput').value.trim();
+  var err = document.getElementById('pwError');
+  var btn = document.getElementById('pwBtn');
+  err.textContent = '';
+  if (!pw) { err.textContent = '관리자 키를 입력해주세요'; return; }
 
-    // 입력값을 그대로 Admin Key 로 사용하고, 서버로 검증합니다.
-    adminKey = pw;
+  adminKey = pw;
+  btn.disabled = true;
+  btn.textContent = '확인 중...';
 
-    try {
-      // 가장 가벼운 Admin 엔드포인트로 검증 (401이면 키가 틀린 것)
-      var r = await adminFetch('/admin/notices', { method: 'GET' });
-      if (!r.ok) {
-        adminKey = '';
-        err.textContent = (r.status === 401) ? '비밀번호가 틀렸어요' : ('서버 오류 ('+r.status+')');
-        return;
-      }
-    } catch(e) {
+  try {
+    // 서버에서 관리자 키를 실제로 검증
+    const r = await adminFetch('/admin/notices?limit=1', { method: 'GET' });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok || !d.ok) {
       adminKey = '';
-      err.textContent = '서버 연결 실패: ' + e.message;
+      err.textContent = '관리자 키가 올바르지 않습니다';
       return;
     }
 
@@ -496,8 +493,17 @@
       else localStorage.removeItem('rkAdminKey');
       sessionStorage.setItem('rkAdminKey', pw);
     } catch(e) {}
+
     enterAdmin();
+  } catch(e) {
+    adminKey = '';
+    err.textContent = '검증 실패: ' + (e && e.message ? e.message : e);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '입장하기';
   }
+}
+
 
   function enterAdmin() {
     document.getElementById('pwGate').style.display = 'none';
@@ -522,30 +528,26 @@
   });
 
   // ── 자동 로그인 (저장된 키)
-  (async function() {
-    try {
-      var saved = localStorage.getItem('rkAdminKey') || sessionStorage.getItem('rkAdminKey');
-      if (saved) {
-        adminKey = saved;
-        if (localStorage.getItem('rkAdminKey')) document.getElementById('pwSave').checked = true;
+(async function() {
+  try {
+    var saved = localStorage.getItem('rkAdminKey') || sessionStorage.getItem('rkAdminKey');
+    if (saved) {
+      adminKey = saved;
+      if (localStorage.getItem('rkAdminKey')) document.getElementById('pwSave').checked = true;
 
-        // 저장된 키가 유효한지 서버로 검증
-        var r = await adminFetch('/admin/notices', { method: 'GET' });
-        if (r.ok) {
-          enterAdmin();
-          return;
-        }
+      const r = await adminFetch('/admin/notices?limit=1', { method: 'GET' });
+      const d = await r.json().catch(() => ({}));
+      if (r.ok && d.ok) { enterAdmin(); return; }
 
-        // 유효하지 않으면 저장값 제거
-        adminKey = '';
-        try { localStorage.removeItem('rkAdminKey'); } catch(e) {}
-        try { sessionStorage.removeItem('rkAdminKey'); } catch(e) {}
-      }
-    } catch(e) {}
-    document.getElementById('pwInput').focus();
-  })();
+      // 저장된 키가 틀리면 제거
+      adminKey = '';
+      try { sessionStorage.removeItem('rkAdminKey'); localStorage.removeItem('rkAdminKey'); } catch(e) {}
+    }
+  } catch(e) {}
+  document.getElementById('pwInput').focus();
+})();
 
-  // ── 초기화
+// ── 초기화
   async function init() {
     await Promise.all([loadCharacters(), loadManagePosts(), loadManageNotices()]);
     await loadFeed();
@@ -738,53 +740,53 @@
   }
 
   async function generatePost() {
-    if(!selectedChar) { toast('캐릭터를 선택하세요',true); return; }
-    const btn=document.getElementById('btnGenPost');
-    btn.disabled=true; btn.innerHTML='<span class="spinner"></span> 생성 중';
-    showStatus('aiPostStatus','생성 중...','info');
-    try {
-      const r=await adminFetch('/admin/generate-post', {
-        method:'POST', body:JSON.stringify({character_id:selectedChar.id}),
-      });
-      const d=await r.json();
-      // 서버 응답 포맷 호환:
-      // - 신규(권장): { ok:true, post:{title,body} }
-      // - 기존(worker.js): { ok:true, title, body }
-      const post = d.post || { title: d.title, body: d.body };
-      if(d.ok && (post?.title || post?.body)) {
-        document.getElementById('aiTitle').value = post.title || '';
-        document.getElementById('aiBody').value  = post.body  || '';
-        showStatus('aiPostStatus','✅ AI 제안 완료! 수정 후 게시하세요','success');
-      } else {
-        showStatus('aiPostStatus','❌ '+(d.error || '생성 실패'),'error');
-      }
-    } catch(e) { showStatus('aiPostStatus','❌ '+e.message,'error'); }
-    btn.disabled=false; btn.innerHTML='🤖 AI 제안';
-  }
+  if(!selectedChar) { toast('캐릭터를 선택하세요',true); return; }
+  const btn=document.getElementById('btnGenPost');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> 생성 중';
+  showStatus('aiPostStatus','생성 중...','info');
+  try {
+    const r=await adminFetch('/admin/generate-post', {
+      method:'POST', body:JSON.stringify({character_id:selectedChar.id}),
+    });
+    const d=await r.json().catch(()=>({}));
+    const post = d.post || { title: d.title, body: d.body };
+    if(r.ok && d.ok && (post.title || post.body)) {
+      document.getElementById('aiTitle').value = post.title || '';
+      document.getElementById('aiBody').value  = post.body  || '';
+      showStatus('aiPostStatus','✅ AI 제안 완료! 수정 후 게시하세요','success');
+    } else {
+      showStatus('aiPostStatus','❌ '+(d.error || ('HTTP_'+r.status) || '생성 실패'),'error');
+    }
+  } catch(e) { showStatus('aiPostStatus','❌ '+e.message,'error'); }
+  btn.disabled=false; btn.innerHTML='🤖 AI 제안';
+}
 
   async function publishPost() {
-    if(!selectedChar) { toast('캐릭터를 선택하세요',true); return; }
-    const title    = document.getElementById('aiTitle').value.trim();
-    const body     = document.getElementById('aiBody').value.trim();
-    const mediaUrl = document.getElementById('aiMediaUrl').value.trim();
-    if(!title||!body) { showStatus('aiPostStatus','제목과 내용을 입력하세요','error'); return; }
-    const btn=document.getElementById('btnPubPost');
-    btn.disabled=true; btn.innerHTML='<span class="spinner"></span> 게시 중';
-    showStatus('aiPostStatus','게시 중...','info');
-    try {
-      const r=await adminFetch('/admin/posts', {
-        method:'POST', body:JSON.stringify({
-          character_id:selectedChar.id, title, body, media_url:mediaUrl||null,
-        }),
-      });
-      const d=await r.json();
-      if(d.ok) {
-        showStatus('aiPostStatus','✅ 게시 완료','success');
-        clearPost(); await loadFeed(); renderPostPicker(); loadManagePosts();
-      } else { showStatus('aiPostStatus','❌ '+(d.error||'실패'),'error'); }
-    } catch(e) { showStatus('aiPostStatus','❌ '+e.message,'error'); }
-    btn.disabled=false; btn.innerHTML='📤 게시';
-  }
+  if(!selectedChar) { toast('캐릭터를 선택하세요',true); return; }
+  const title    = document.getElementById('aiTitle').value.trim();
+  const body     = document.getElementById('aiBody').value.trim();
+  const mediaUrl = document.getElementById('aiMediaUrl').value.trim();
+  if(!title||!body) { showStatus('aiPostStatus','제목과 내용을 입력하세요','error'); return; }
+  const btn=document.getElementById('btnPubPost');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> 게시 중';
+  showStatus('aiPostStatus','게시 중...','info');
+  try {
+    const r=await adminFetch('/system/posts', {
+      method:'POST', body:JSON.stringify({
+        system_user_id: selectedChar.id,
+        title, body,
+        is_notice: false,
+        media_url: mediaUrl||null,
+      }),
+    });
+    const d=await r.json().catch(()=>({}));
+    if(r.ok && d.ok) {
+      showStatus('aiPostStatus','✅ 게시 완료','success');
+      clearPost(); await loadFeed(); renderPostPicker(); loadManagePosts();
+    } else { showStatus('aiPostStatus','❌ '+(d.error||('HTTP_'+r.status)||'실패'),'error'); }
+  } catch(e) { showStatus('aiPostStatus','❌ '+e.message,'error'); }
+  btn.disabled=false; btn.innerHTML='📤 게시';
+}
 
   // ── 게시글 피커
   function renderPostPicker() {
@@ -958,28 +960,38 @@
 
   // ── 공지 작성
   async function publishNotice() {
-    const title    = document.getElementById('noticeTitle').value.trim();
-    const body     = document.getElementById('noticeBody').value.trim();
-    const mediaUrl = document.getElementById('noticeMediaUrl').value.trim();
-    if(!title||!body) { showStatus('noticeStatus','제목과 내용을 입력하세요','error'); return; }
-    const btn=document.getElementById('noticeSendBtn');
-    btn.disabled=true; btn.innerHTML='<span class="spinner"></span> 게시 중';
-    showStatus('noticeStatus','게시 중...','info');
-    try {
-      const r=await adminFetch('/admin/notices', {
-        method:'POST', body:JSON.stringify({title, body, media_url:mediaUrl||null}),
-      });
-      const d=await r.json();
-      if(d.ok) {
-        showStatus('noticeStatus','✅ 공지가 게시됐어요','success');
-        document.getElementById('noticeTitle').value='';
-        document.getElementById('noticeBody').value='';
-        document.getElementById('noticeMediaUrl').value='';
-        loadManageNotices();
-      } else { showStatus('noticeStatus','❌ '+(d.error||'실패'),'error'); }
-    } catch(e) { showStatus('noticeStatus','❌ '+e.message,'error'); }
-    btn.disabled=false; btn.textContent='📌 공지 게시';
-  }
+  const title    = document.getElementById('noticeTitle').value.trim();
+  const body     = document.getElementById('noticeBody').value.trim();
+  const mediaUrl = document.getElementById('noticeMediaUrl').value.trim();
+  if(!title||!body) { showStatus('noticeStatus','제목과 내용을 입력하세요','error'); return; }
+
+  // 공지는 system_posts로만 생성 가능(Worker: /api/v1/system/posts)
+  const sysId = (selectedChar && selectedChar.id) ? selectedChar.id : (characters[0] ? characters[0].id : null);
+  if(!sysId) { showStatus('noticeStatus','캐릭터가 없습니다. 먼저 캐릭터를 생성/로드하세요','error'); return; }
+
+  const btn=document.getElementById('noticeSendBtn');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> 게시 중';
+  showStatus('noticeStatus','게시 중...','info');
+  try {
+    const r=await adminFetch('/system/posts', {
+      method:'POST', body:JSON.stringify({
+        system_user_id: sysId,
+        title, body,
+        is_notice: true,
+        media_url: mediaUrl||null,
+      }),
+    });
+    const d=await r.json().catch(()=>({}));
+    if(r.ok && d.ok) {
+      showStatus('noticeStatus','✅ 공지가 게시됐어요','success');
+      document.getElementById('noticeTitle').value='';
+      document.getElementById('noticeBody').value='';
+      document.getElementById('noticeMediaUrl').value='';
+      loadManageNotices();
+    } else { showStatus('noticeStatus','❌ '+(d.error||('HTTP_'+r.status)||'실패'),'error'); }
+  } catch(e) { showStatus('noticeStatus','❌ '+e.message,'error'); }
+  btn.disabled=false; btn.textContent='📌 공지 게시';
+}
 
   // ── 캐릭터 추가 (비번 없음, 이미지 인라인, 8번)
   function toggleAddChar() {
