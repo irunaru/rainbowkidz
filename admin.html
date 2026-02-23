@@ -187,7 +187,7 @@
 
 <!-- ── 헤더 -->
 
-<div class="header hidden" id="mainHeader">
+<div class="header" id="mainHeader" style="display:none">
   <div class="header-inner">
     <div class="logo">
       <span class="logo-icon">🌈</span>
@@ -201,7 +201,7 @@
   </div>
 </div>
 
-<div class="container hidden" id="mainContent">
+<div class="container" id="mainContent" style="display:none">
 
   <!-- ── 상단 도구 영역 -->
 
@@ -439,14 +439,14 @@
   </div>
 </div>
 <script>
-  'use strict';
-  const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
+  var API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
+  var ADMIN_PW = 'yimkim1221';
 
-let adminKey     = ‘’;
-let characters   = [];
-let cachedFeed   = [];
-let selectedChar = null;
-let selectedPostId = null;
+var adminKey      = ‘’;
+var characters    = [];
+var cachedFeed    = [];
+var selectedChar  = null;
+var selectedPostId = null;
 
 // ── 유틸
 const esc = s => String(s ?? ‘’).replace(/&/g,’&’).replace(/</g,’<’).replace(/>/g,’>’).replace(/”/g,’"’);
@@ -472,56 +472,65 @@ function hideStatus(id) {
 const el=document.getElementById(id); if(el) el.className=‘status’;
 }
 
-// ── API fetch 공통 (X-Admin-Key 헤더 자동 첨부)
-function adminFetch(path, opts={}) {
-const headers = { ‘X-Admin-Key’: adminKey, …(opts.body ? {‘Content-Type’:‘application/json’} : {}), …opts.headers };
-return fetch(API+path, { …opts, headers });
+// ── API fetch 공통
+function adminFetch(path, opts) {
+opts = opts || {};
+var headers = {‘X-Admin-Key’: adminKey};
+if (opts.body && typeof opts.body === ‘string’) {
+headers[‘Content-Type’] = ‘application/json’;
+}
+return fetch(API + path, Object.assign({}, opts, {headers: headers}));
 }
 
-// ── 로그인
-const ADMIN_PW = ‘yimkim1221’;  // 관리자 비밀번호
-
-document.getElementById(‘pwInput’).addEventListener(‘keypress’, e => { if(e.key===‘Enter’) checkPw(); });
-
+// ── 로그인 (단순 로컬 비교)
 function checkPw() {
-const pw  = document.getElementById(‘pwInput’).value.trim();
-const err = document.getElementById(‘pwError’);
-if(!pw) { err.textContent=‘비밀번호를 입력해주세요’; return; }
-if(pw !== ADMIN_PW) { err.textContent=‘비밀번호가 틀렸어요’; return; }
+var pw  = document.getElementById(‘pwInput’).value.trim();
+var err = document.getElementById(‘pwError’);
+err.textContent = ‘’;
+if (!pw) { err.textContent = ‘비밀번호를 입력해주세요’; return; }
+if (pw !== ADMIN_PW) { err.textContent = ‘비밀번호가 틀렸어요’; return; }
 adminKey = ADMIN_PW;
-if(document.getElementById(‘pwSave’).checked) localStorage.setItem(‘rkAdminKey’, ADMIN_PW);
+try {
+if (document.getElementById(‘pwSave’).checked) localStorage.setItem(‘rkAdminKey’, ADMIN_PW);
 sessionStorage.setItem(‘rkAdminKey’, ADMIN_PW);
+} catch(e) {}
 enterAdmin();
-}
-
-function logout() {
-adminKey=’’;
-sessionStorage.removeItem(‘rkAdminKey’); localStorage.removeItem(‘rkAdminKey’);
-document.getElementById(‘pwGate’).classList.remove(‘hidden’);
-document.getElementById(‘mainHeader’).classList.add(‘hidden’);
-document.getElementById(‘mainContent’).classList.add(‘hidden’);
-document.getElementById(‘pwInput’).value=’’;
-document.getElementById(‘pwSave’).checked=false;
 }
 
 function enterAdmin() {
-document.getElementById(‘pwGate’).classList.add(‘hidden’);
-document.getElementById(‘mainHeader’).classList.remove(‘hidden’);
-document.getElementById(‘mainContent’).classList.remove(‘hidden’);
+document.getElementById(‘pwGate’).style.display = ‘none’;
+document.getElementById(‘mainHeader’).style.display = ‘’;
+document.getElementById(‘mainContent’).style.display = ‘’;
 init();
 }
 
-// 자동 로그인 (저장된 키 복원)
-(function() {
-const saved = localStorage.getItem(‘rkAdminKey’) || sessionStorage.getItem(‘rkAdminKey’);
-if(saved && saved === ADMIN_PW) {
-adminKey=saved;
-if(localStorage.getItem(‘rkAdminKey’)) document.getElementById(‘pwSave’).checked=true;
-enterAdmin();
-} else {
-localStorage.removeItem(‘rkAdminKey’); sessionStorage.removeItem(‘rkAdminKey’);
-document.getElementById(‘pwInput’).focus();
+function logout() {
+adminKey = ‘’;
+try { sessionStorage.removeItem(‘rkAdminKey’); localStorage.removeItem(‘rkAdminKey’); } catch(e) {}
+document.getElementById(‘pwGate’).style.display = ‘’;
+document.getElementById(‘mainHeader’).style.display = ‘none’;
+document.getElementById(‘mainContent’).style.display = ‘none’;
+document.getElementById(‘pwInput’).value = ‘’;
+document.getElementById(‘pwSave’).checked = false;
 }
+
+// ── 엔터키 로그인
+document.getElementById(‘pwInput’).addEventListener(‘keypress’, function(e) {
+if (e.key === ‘Enter’) checkPw();
+});
+
+// ── 자동 로그인 (저장된 키)
+(function() {
+try {
+var saved = localStorage.getItem(‘rkAdminKey’) || sessionStorage.getItem(‘rkAdminKey’);
+if (saved && saved === ADMIN_PW) {
+adminKey = saved;
+if (localStorage.getItem(‘rkAdminKey’)) document.getElementById(‘pwSave’).checked = true;
+enterAdmin();
+return;
+}
+} catch(e) {}
+document.getElementById(‘pwInput’).focus();
 })();
 
 // ── 초기화
