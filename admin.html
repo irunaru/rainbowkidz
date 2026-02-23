@@ -425,7 +425,7 @@
 </div>
 <script>
   var API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
-  var ADMIN_PW = ''; // (옵션) 하드코딩 비번은 비워두는 것을 권장
+  var ADMIN_PW = ''; // DEPRECATED: do not hardcode admin key in frontend
 
   var adminKey      = '';
   var characters    = [];
@@ -460,64 +460,43 @@
   // ── API fetch 공통
   function adminFetch(path, opts) {
     opts = opts || {};
-    var baseHeaders = {'X-Admin-Key': adminKey};
-    // opts.headers가 있으면 병합
-    var extra = opts.headers || {};
-    var headers = Object.assign({}, baseHeaders, extra);
-
-    // JSON string body일 때만 Content-Type 지정 (FormData는 브라우저가 boundary 포함 자동 지정)
+    var headers = {'X-Admin-Key': adminKey};
     if (opts.body && typeof opts.body === 'string') {
       headers['Content-Type'] = 'application/json';
     }
-
-    return fetch(API + path, Object.assign({}, opts, {
-      headers: headers,
-      credentials: 'include',
-    }));
+    return fetch(API + path, Object.assign({}, opts, {headers: headers}));
   }
 
-  // ── 로그인 (서버 검증: Worker의 ADMIN_KEY와 동일해야 함)
+  // ── 로그인 (단순 로컬 비교)
   async function checkPw() {
-    var pwInput = document.getElementById('pwInput');
-    var pwBtn   = document.getElementById('pwBtn');
-    var err     = document.getElementById('pwError');
-
-    var pw = (pwInput.value || '').trim();
+    var pw  = document.getElementById('pwInput').value.trim();
+    var err = document.getElementById('pwError');
     err.textContent = '';
     if (!pw) { err.textContent = '비밀번호를 입력해주세요'; return; }
 
-    // (옵션) 하드코딩 비번이 설정돼 있으면 1차 로컬 체크
-    if (ADMIN_PW && pw !== ADMIN_PW) { err.textContent = '비밀번호가 틀렸어요'; return; }
-
-    // 서버에서 실제 관리자 키인지 확인 (unauthorized면 입장 막기)
-    pwBtn.disabled = true;
-    pwBtn.innerHTML = '<span class="spinner"></span> 확인 중';
-
+    // 입력값을 그대로 Admin Key 로 사용하고, 서버로 검증합니다.
     adminKey = pw;
-    try {
-      const r = await adminFetch('/admin/notices?limit=1', { method: 'GET' });
-      const d = await r.json().catch(() => null);
 
-      if (r.ok && d && d.ok) {
-        try {
-          if (document.getElementById('pwSave').checked) localStorage.setItem('rkAdminKey', pw);
-          sessionStorage.setItem('rkAdminKey', pw);
-        } catch (e) {}
-        enterAdmin();
+    try {
+      // 가장 가벼운 Admin 엔드포인트로 검증 (401이면 키가 틀린 것)
+      var r = await adminFetch('/admin/notices', { method: 'GET' });
+      if (!r.ok) {
+        adminKey = '';
+        err.textContent = (r.status === 401) ? '비밀번호가 틀렸어요' : ('서버 오류 ('+r.status+')');
         return;
       }
-
-      // 인증 실패
+    } catch(e) {
       adminKey = '';
-      try { sessionStorage.removeItem('rkAdminKey'); } catch(e) {}
-      err.textContent = (d && d.error === 'unauthorized') ? '비밀번호가 틀렸어요' : ('접속 오류: ' + (d?.error || r.status));
-    } catch (e) {
-      adminKey = '';
-      err.textContent = '서버 연결 실패: ' + (e && e.message ? e.message : 'unknown');
-    } finally {
-      pwBtn.disabled = false;
-      pwBtn.textContent = '입장하기';
+      err.textContent = '서버 연결 실패: ' + e.message;
+      return;
     }
+
+    try {
+      if (document.getElementById('pwSave').checked) localStorage.setItem('rkAdminKey', pw);
+      else localStorage.removeItem('rkAdminKey');
+      sessionStorage.setItem('rkAdminKey', pw);
+    } catch(e) {}
+    enterAdmin();
   }
 
   function enterAdmin() {
@@ -535,47 +514,35 @@
     document.getElementById('mainContent').style.display = 'none';
     document.getElementById('pwInput').value = '';
     document.getElementById('pwSave').checked = false;
-    document.getElementById('pwError').textContent = '';
-    try { document.getElementById('pwInput').focus(); } catch(e) {}
   }
 
-  // ── 엔터키 로그인 (모바일 Safari 호환: keydown 사용)
-  document.getElementById('pwInput').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      checkPw();
-    }
+  // ── 엔터키 로그인
+  document.getElementById('pwInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') checkPw();
   });
 
-  // ── 자동 로그인 (저장된 키가 있으면 서버 검증 후 입장)
-  (function() {
-    var saved = '';
+  // ── 자동 로그인 (저장된 키)
+  (async function() {
     try {
-      saved = localStorage.getItem('rkAdminKey') || sessionStorage.getItem('rkAdminKey') || '';
-    } catch(e) {}
+      var saved = localStorage.getItem('rkAdminKey') || sessionStorage.getItem('rkAdminKey');
+      if (saved) {
+        adminKey = saved;
+        if (localStorage.getItem('rkAdminKey')) document.getElementById('pwSave').checked = true;
 
-    if (!saved) {
-      try { document.getElementById('pwInput').focus(); } catch(e) {}
-      return;
-    }
-
-    // 저장된 키로 서버 검증 (실패하면 저장값 정리)
-    (async function() {
-      adminKey = saved;
-      try {
-        const r = await adminFetch('/admin/notices?limit=1', { method: 'GET' });
-        const d = await r.json().catch(() => null);
-        if (r.ok && d && d.ok) {
-          if (localStorage.getItem('rkAdminKey')) document.getElementById('pwSave').checked = true;
+        // 저장된 키가 유효한지 서버로 검증
+        var r = await adminFetch('/admin/notices', { method: 'GET' });
+        if (r.ok) {
           enterAdmin();
           return;
         }
-      } catch(e) {}
-      // 실패 → 저장값 제거 후 로그인 화면 유지
-      adminKey = '';
-      try { sessionStorage.removeItem('rkAdminKey'); localStorage.removeItem('rkAdminKey'); } catch(e) {}
-      try { document.getElementById('pwInput').focus(); } catch(e) {}
-    })();
+
+        // 유효하지 않으면 저장값 제거
+        adminKey = '';
+        try { localStorage.removeItem('rkAdminKey'); } catch(e) {}
+        try { sessionStorage.removeItem('rkAdminKey'); } catch(e) {}
+      }
+    } catch(e) {}
+    document.getElementById('pwInput').focus();
   })();
 
   // ── 초기화
@@ -780,11 +747,17 @@
         method:'POST', body:JSON.stringify({character_id:selectedChar.id}),
       });
       const d=await r.json();
-      if(d.ok && d.post) {
-        document.getElementById('aiTitle').value=d.post.title||'';
-        document.getElementById('aiBody').value =d.post.body ||'';
+      // 서버 응답 포맷 호환:
+      // - 신규(권장): { ok:true, post:{title,body} }
+      // - 기존(worker.js): { ok:true, title, body }
+      const post = d.post || { title: d.title, body: d.body };
+      if(d.ok && (post?.title || post?.body)) {
+        document.getElementById('aiTitle').value = post.title || '';
+        document.getElementById('aiBody').value  = post.body  || '';
         showStatus('aiPostStatus','✅ AI 제안 완료! 수정 후 게시하세요','success');
-      } else { showStatus('aiPostStatus','❌ '+(d.error||'생성 실패'),'error'); }
+      } else {
+        showStatus('aiPostStatus','❌ '+(d.error || '생성 실패'),'error');
+      }
     } catch(e) { showStatus('aiPostStatus','❌ '+e.message,'error'); }
     btn.disabled=false; btn.innerHTML='🤖 AI 제안';
   }
