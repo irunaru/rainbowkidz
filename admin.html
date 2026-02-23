@@ -161,7 +161,129 @@
     .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:#1c1c1e; color:#fff; padding:10px 20px; border-radius:20px; font-size:13px; font-weight:600; z-index:9999; opacity:0; transition:opacity .25s; pointer-events:none; white-space:nowrap; max-width:90vw; text-align:center; }
     .toast.show  { opacity:1; }
     .toast.err   { background:var(--red); }
-  </style>
+  
+
+/* ===============================
+   iOS Edition Overrides (Modern)
+   =============================== */
+:root{
+  --bg:#f2f2f7;
+  --card:#ffffff;
+  --text:#1c1c1e;
+  --sub:#8e8e93;
+  --border:rgba(0,0,0,0.06);
+  --accent:#ff6b6b;
+  --blue:#007aff;
+  --green:#34c759;
+  --red:#ff3b30;
+  --radius-card:22px;
+  --shadow-card:0 8px 20px rgba(0,0,0,0.04);
+}
+
+body{
+  background:var(--bg) !important;
+  color:var(--text) !important;
+  font-family:'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  line-height:1.5;
+}
+
+.header{
+  position:sticky;
+  top:0;
+  z-index:50;
+  background:var(--bg);
+  padding:52px 18px 14px !important;
+  border-bottom:0.5px solid rgba(0,0,0,0.04);
+}
+
+.header .title, .header h1, .header .h1{
+  font-size:32px !important;
+  font-weight:900 !important;
+  letter-spacing:-1px;
+}
+
+.header .sub, .header p, .header .subtitle{
+  color:var(--sub) !important;
+  font-size:14px !important;
+  margin-top:4px;
+}
+
+.card, .tool-card, .activity-card, .feed-card, .panel{
+  background:var(--card) !important;
+  border-radius:var(--radius-card) !important;
+  border:1px solid var(--border) !important;
+  box-shadow:var(--shadow-card) !important;
+}
+
+button, .btn{
+  border-radius:16px !important;
+}
+
+.bottom-nav{
+  background:rgba(255,255,255,0.78) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top:0.5px solid rgba(0,0,0,0.08) !important;
+}
+
+.nav-item{
+  color:var(--sub) !important;
+}
+
+.nav-item.active{
+  color:var(--blue) !important;
+}
+
+
+/* ---- Admin specific ---- */
+body{ padding-bottom: 90px; }
+.sec-title{
+  color:var(--sub) !important;
+  letter-spacing:-0.2px;
+}
+.sec{
+  margin: 10px 12px 18px !important;
+  padding: 18px !important;
+  border-radius:var(--radius-card) !important;
+  border:1px solid var(--border) !important;
+  background:var(--card) !important;
+  box-shadow:var(--shadow-card) !important;
+}
+.tool-card{
+  margin: 10px 12px 18px !important;
+  padding: 18px !important;
+}
+.inp, .sel, .txa{
+  border-radius:14px !important;
+  border:1px solid rgba(0,0,0,0.08) !important;
+  background:#f9f9fb !important;
+}
+.inp:focus, .sel:focus, .txa:focus{
+  outline:none !important;
+  border-color: rgba(0,122,255,0.45) !important;
+  box-shadow: 0 0 0 4px rgba(0,122,255,0.12) !important;
+  background:#fff !important;
+}
+.btn{
+  border:1px solid var(--border) !important;
+  background:rgba(255,255,255,0.8) !important;
+}
+.btn.btn-green{
+  background: var(--blue) !important;
+  color:#fff !important;
+  border-color: rgba(0,0,0,0.04) !important;
+}
+.btn.btn-red{
+  background: var(--red) !important;
+  color:#fff !important;
+  border-color: rgba(0,0,0,0.04) !important;
+}
+
+
+html, body { overflow-x: hidden; }
+
+.bottom-nav{ z-index:1000 !important; }
+</style>
 </head>
 <body>
 
@@ -173,7 +295,7 @@
     <div class="pw-logo">🌈</div>
     <div class="pw-title">관리자 로그인</div>
     <div class="pw-sub">무지개 유치원 & 어린이집</div>
-    <input type="password" class="pw-input" id="pwInput" placeholder="관리자 키 입력" autocomplete="current-password">
+    <input type="password" class="pw-input" id="pwInput" placeholder="비밀번호 입력" autocomplete="current-password">
     <button class="pw-btn" id="pwBtn" onclick="checkPw()">입장하기</button>
     <label class="pw-save"><input type="checkbox" id="pwSave"> 이 기기에서 기억하기</label>
     <div class="pw-error" id="pwError"></div>
@@ -425,7 +547,8 @@
 </div>
 <script>
   var API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
-  // 관리자 키는 Worker의 env.ADMIN_KEY로 검증합니다.
+  var ADMIN_PW = 'yimkim1221';
+
   var adminKey      = '';
   var characters    = [];
   var cachedFeed    = [];
@@ -467,43 +590,19 @@
   }
 
   // ── 로그인 (단순 로컬 비교)
-  async function checkPw() {
-  var pw  = document.getElementById('pwInput').value.trim();
-  var err = document.getElementById('pwError');
-  var btn = document.getElementById('pwBtn');
-  err.textContent = '';
-  if (!pw) { err.textContent = '관리자 키를 입력해주세요'; return; }
-
-  adminKey = pw;
-  btn.disabled = true;
-  btn.textContent = '확인 중...';
-
-  try {
-    // 서버에서 관리자 키를 실제로 검증
-    const r = await adminFetch('/admin/notices?limit=1', { method: 'GET' });
-    const d = await r.json().catch(() => ({}));
-    if (!r.ok || !d.ok) {
-      adminKey = '';
-      err.textContent = '관리자 키가 올바르지 않습니다';
-      return;
-    }
-
+  function checkPw() {
+    var pw  = document.getElementById('pwInput').value.trim();
+    var err = document.getElementById('pwError');
+    err.textContent = '';
+    if (!pw) { err.textContent = '비밀번호를 입력해주세요'; return; }
+    if (pw !== ADMIN_PW) { err.textContent = '비밀번호가 틀렸어요'; return; }
+    adminKey = ADMIN_PW;
     try {
-      if (document.getElementById('pwSave').checked) localStorage.setItem('rkAdminKey', pw);
-      else localStorage.removeItem('rkAdminKey');
-      sessionStorage.setItem('rkAdminKey', pw);
+      if (document.getElementById('pwSave').checked) localStorage.setItem('rkAdminKey', ADMIN_PW);
+      sessionStorage.setItem('rkAdminKey', ADMIN_PW);
     } catch(e) {}
-
     enterAdmin();
-  } catch(e) {
-    adminKey = '';
-    err.textContent = '검증 실패: ' + (e && e.message ? e.message : e);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '입장하기';
   }
-}
-
 
   function enterAdmin() {
     document.getElementById('pwGate').style.display = 'none';
@@ -528,26 +627,20 @@
   });
 
   // ── 자동 로그인 (저장된 키)
-(async function() {
-  try {
-    var saved = localStorage.getItem('rkAdminKey') || sessionStorage.getItem('rkAdminKey');
-    if (saved) {
-      adminKey = saved;
-      if (localStorage.getItem('rkAdminKey')) document.getElementById('pwSave').checked = true;
+  (function() {
+    try {
+      var saved = localStorage.getItem('rkAdminKey') || sessionStorage.getItem('rkAdminKey');
+      if (saved && saved === ADMIN_PW) {
+        adminKey = saved;
+        if (localStorage.getItem('rkAdminKey')) document.getElementById('pwSave').checked = true;
+        enterAdmin();
+        return;
+      }
+    } catch(e) {}
+    document.getElementById('pwInput').focus();
+  })();
 
-      const r = await adminFetch('/admin/notices?limit=1', { method: 'GET' });
-      const d = await r.json().catch(() => ({}));
-      if (r.ok && d.ok) { enterAdmin(); return; }
-
-      // 저장된 키가 틀리면 제거
-      adminKey = '';
-      try { sessionStorage.removeItem('rkAdminKey'); localStorage.removeItem('rkAdminKey'); } catch(e) {}
-    }
-  } catch(e) {}
-  document.getElementById('pwInput').focus();
-})();
-
-// ── 초기화
+  // ── 초기화
   async function init() {
     await Promise.all([loadCharacters(), loadManagePosts(), loadManageNotices()]);
     await loadFeed();
@@ -740,53 +833,47 @@
   }
 
   async function generatePost() {
-  if(!selectedChar) { toast('캐릭터를 선택하세요',true); return; }
-  const btn=document.getElementById('btnGenPost');
-  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> 생성 중';
-  showStatus('aiPostStatus','생성 중...','info');
-  try {
-    const r=await adminFetch('/admin/generate-post', {
-      method:'POST', body:JSON.stringify({character_id:selectedChar.id}),
-    });
-    const d=await r.json().catch(()=>({}));
-    const post = d.post || { title: d.title, body: d.body };
-    if(r.ok && d.ok && (post.title || post.body)) {
-      document.getElementById('aiTitle').value = post.title || '';
-      document.getElementById('aiBody').value  = post.body  || '';
-      showStatus('aiPostStatus','✅ AI 제안 완료! 수정 후 게시하세요','success');
-    } else {
-      showStatus('aiPostStatus','❌ '+(d.error || ('HTTP_'+r.status) || '생성 실패'),'error');
-    }
-  } catch(e) { showStatus('aiPostStatus','❌ '+e.message,'error'); }
-  btn.disabled=false; btn.innerHTML='🤖 AI 제안';
-}
+    if(!selectedChar) { toast('캐릭터를 선택하세요',true); return; }
+    const btn=document.getElementById('btnGenPost');
+    btn.disabled=true; btn.innerHTML='<span class="spinner"></span> 생성 중';
+    showStatus('aiPostStatus','생성 중...','info');
+    try {
+      const r=await adminFetch('/admin/generate-post', {
+        method:'POST', body:JSON.stringify({character_id:selectedChar.id}),
+      });
+      const d=await r.json();
+      if(d.ok && d.post) {
+        document.getElementById('aiTitle').value=d.post.title||'';
+        document.getElementById('aiBody').value =d.post.body ||'';
+        showStatus('aiPostStatus','✅ AI 제안 완료! 수정 후 게시하세요','success');
+      } else { showStatus('aiPostStatus','❌ '+(d.error||'생성 실패'),'error'); }
+    } catch(e) { showStatus('aiPostStatus','❌ '+e.message,'error'); }
+    btn.disabled=false; btn.innerHTML='🤖 AI 제안';
+  }
 
   async function publishPost() {
-  if(!selectedChar) { toast('캐릭터를 선택하세요',true); return; }
-  const title    = document.getElementById('aiTitle').value.trim();
-  const body     = document.getElementById('aiBody').value.trim();
-  const mediaUrl = document.getElementById('aiMediaUrl').value.trim();
-  if(!title||!body) { showStatus('aiPostStatus','제목과 내용을 입력하세요','error'); return; }
-  const btn=document.getElementById('btnPubPost');
-  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> 게시 중';
-  showStatus('aiPostStatus','게시 중...','info');
-  try {
-    const r=await adminFetch('/system/posts', {
-      method:'POST', body:JSON.stringify({
-        system_user_id: selectedChar.id,
-        title, body,
-        is_notice: false,
-        media_url: mediaUrl||null,
-      }),
-    });
-    const d=await r.json().catch(()=>({}));
-    if(r.ok && d.ok) {
-      showStatus('aiPostStatus','✅ 게시 완료','success');
-      clearPost(); await loadFeed(); renderPostPicker(); loadManagePosts();
-    } else { showStatus('aiPostStatus','❌ '+(d.error||('HTTP_'+r.status)||'실패'),'error'); }
-  } catch(e) { showStatus('aiPostStatus','❌ '+e.message,'error'); }
-  btn.disabled=false; btn.innerHTML='📤 게시';
-}
+    if(!selectedChar) { toast('캐릭터를 선택하세요',true); return; }
+    const title    = document.getElementById('aiTitle').value.trim();
+    const body     = document.getElementById('aiBody').value.trim();
+    const mediaUrl = document.getElementById('aiMediaUrl').value.trim();
+    if(!title||!body) { showStatus('aiPostStatus','제목과 내용을 입력하세요','error'); return; }
+    const btn=document.getElementById('btnPubPost');
+    btn.disabled=true; btn.innerHTML='<span class="spinner"></span> 게시 중';
+    showStatus('aiPostStatus','게시 중...','info');
+    try {
+      const r=await adminFetch('/admin/posts', {
+        method:'POST', body:JSON.stringify({
+          character_id:selectedChar.id, title, body, media_url:mediaUrl||null,
+        }),
+      });
+      const d=await r.json();
+      if(d.ok) {
+        showStatus('aiPostStatus','✅ 게시 완료','success');
+        clearPost(); await loadFeed(); renderPostPicker(); loadManagePosts();
+      } else { showStatus('aiPostStatus','❌ '+(d.error||'실패'),'error'); }
+    } catch(e) { showStatus('aiPostStatus','❌ '+e.message,'error'); }
+    btn.disabled=false; btn.innerHTML='📤 게시';
+  }
 
   // ── 게시글 피커
   function renderPostPicker() {
@@ -960,38 +1047,28 @@
 
   // ── 공지 작성
   async function publishNotice() {
-  const title    = document.getElementById('noticeTitle').value.trim();
-  const body     = document.getElementById('noticeBody').value.trim();
-  const mediaUrl = document.getElementById('noticeMediaUrl').value.trim();
-  if(!title||!body) { showStatus('noticeStatus','제목과 내용을 입력하세요','error'); return; }
-
-  // 공지는 system_posts로만 생성 가능(Worker: /api/v1/system/posts)
-  const sysId = (selectedChar && selectedChar.id) ? selectedChar.id : (characters[0] ? characters[0].id : null);
-  if(!sysId) { showStatus('noticeStatus','캐릭터가 없습니다. 먼저 캐릭터를 생성/로드하세요','error'); return; }
-
-  const btn=document.getElementById('noticeSendBtn');
-  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> 게시 중';
-  showStatus('noticeStatus','게시 중...','info');
-  try {
-    const r=await adminFetch('/system/posts', {
-      method:'POST', body:JSON.stringify({
-        system_user_id: sysId,
-        title, body,
-        is_notice: true,
-        media_url: mediaUrl||null,
-      }),
-    });
-    const d=await r.json().catch(()=>({}));
-    if(r.ok && d.ok) {
-      showStatus('noticeStatus','✅ 공지가 게시됐어요','success');
-      document.getElementById('noticeTitle').value='';
-      document.getElementById('noticeBody').value='';
-      document.getElementById('noticeMediaUrl').value='';
-      loadManageNotices();
-    } else { showStatus('noticeStatus','❌ '+(d.error||('HTTP_'+r.status)||'실패'),'error'); }
-  } catch(e) { showStatus('noticeStatus','❌ '+e.message,'error'); }
-  btn.disabled=false; btn.textContent='📌 공지 게시';
-}
+    const title    = document.getElementById('noticeTitle').value.trim();
+    const body     = document.getElementById('noticeBody').value.trim();
+    const mediaUrl = document.getElementById('noticeMediaUrl').value.trim();
+    if(!title||!body) { showStatus('noticeStatus','제목과 내용을 입력하세요','error'); return; }
+    const btn=document.getElementById('noticeSendBtn');
+    btn.disabled=true; btn.innerHTML='<span class="spinner"></span> 게시 중';
+    showStatus('noticeStatus','게시 중...','info');
+    try {
+      const r=await adminFetch('/admin/notices', {
+        method:'POST', body:JSON.stringify({title, body, media_url:mediaUrl||null}),
+      });
+      const d=await r.json();
+      if(d.ok) {
+        showStatus('noticeStatus','✅ 공지가 게시됐어요','success');
+        document.getElementById('noticeTitle').value='';
+        document.getElementById('noticeBody').value='';
+        document.getElementById('noticeMediaUrl').value='';
+        loadManageNotices();
+      } else { showStatus('noticeStatus','❌ '+(d.error||'실패'),'error'); }
+    } catch(e) { showStatus('noticeStatus','❌ '+e.message,'error'); }
+    btn.disabled=false; btn.textContent='📌 공지 게시';
+  }
 
   // ── 캐릭터 추가 (비번 없음, 이미지 인라인, 8번)
   function toggleAddChar() {
