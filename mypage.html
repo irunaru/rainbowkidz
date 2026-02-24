@@ -571,7 +571,7 @@ function makePostCard(p) {
   
 
 /* ── 받은 야르~ 데이터 수집 ── */
-async function loadYarersData() {
+async async function loadYarersData() {
   if (!myPosts.length) { allYarers = []; return; }
   try {
     const results = await Promise.all(
@@ -620,7 +620,7 @@ function renderYarers() {
 }
 
 /* ── 받은 댓글 데이터 수집 ── */
-async function loadReceivedCommentsData() {
+async async function loadReceivedCommentsData() {
   if (!myPosts.length) { receivedComments = []; return; }
   try {
     const results = await Promise.all(
@@ -819,8 +819,7 @@ async function openDetail(postId) {
   $('dComments').innerHTML = '';
   $('cmtInput').value      = '';
   $('detailOverlay').classList.remove('hidden');
-  fetch(apiUrl(`/posts/${postId}/view`), { method:'POST', credentials:'include' }).catch(() => {});
-  try {
+  fetch(apiUrl(`/posts/${postId}/view`), { method:'POST', credentials:'include' }).catch  try {
     const r = await fetch(apiUrl(`/posts/${postId}`), { credentials:'include' });
     const d = await r.json();
     if (!d.ok) { $('dBody').textContent = '불러올 수 없어요'; return; }
