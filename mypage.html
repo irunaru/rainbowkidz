@@ -819,7 +819,8 @@ async function openDetail(postId) {
   $('dComments').innerHTML = '';
   $('cmtInput').value      = '';
   $('detailOverlay').classList.remove('hidden');
-  fetch(apiUrl(`/posts/${postId}/view`), { method:'POST', credentials:'include' }).catch  try {
+  fetch(apiUrl(`/posts/${postId}/view`), { method:'POST', credentials:'include' }).catch(() => {});
+  try {
     const r = await fetch(apiUrl(`/posts/${postId}`), { credentials:'include' });
     const d = await r.json();
     if (!d.ok) { $('dBody').textContent = '불러올 수 없어요'; return; }
