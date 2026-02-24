@@ -568,7 +568,8 @@ function makePostCard(p) {
     const pt = e.target.closest('.post-title');
     if (pt) openDetail(+pt.dataset.postId);
   });
-  
+  return div;
+}
 
 /* ── 받은 야르~ 데이터 수집 ── */
 async function loadYarersData() {
