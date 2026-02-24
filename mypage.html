@@ -16,134 +16,71 @@
     body { font-family:'Noto Sans KR',-apple-system,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
     .hidden { display:none !important; }
 
-    /* 로더 */
     #loader { position:fixed; inset:0; background:rgba(255,255,255,.96); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:9000; gap:14px; }
     .spinner { width:28px; height:28px; border:3px solid var(--border); border-top-color:var(--text); border-radius:50%; animation:spin .8s linear infinite; }
     @keyframes spin    { to{ transform:rotate(360deg); } }
     @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
     .skel { border-radius:var(--radius-card); background:linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%); background-size:200% 100%; animation:shimmer 1.3s ease-in-out infinite; }
 
-    /* 헤더 */
     .header { background:var(--card); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:100; }
     .header-inner { max-width:640px; margin:0 auto; padding:10px 16px; display:flex; align-items:center; }
     .header-title { font-size:17px; font-weight:900; }
 
-    /* 컨테이너 */
     .container { max-width:640px; margin:0 auto; padding:16px 16px 96px; }
 
-    /* ── 프로필 카드 ── */
     .profile-card { background:var(--card); border-radius:var(--radius-card); padding:20px; margin-bottom:12px; box-shadow:var(--shadow); }
-
-    /* 아바타 + 정보 가로 배치 */
     .profile-top { display:flex; align-items:center; gap:16px; margin-bottom:16px; }
-
     .avatar-wrap { position:relative; flex-shrink:0; cursor:pointer; }
-    .avatar-img  {
-      width:72px; height:72px; border-radius:18px;
-      background:var(--bg); border:2px solid var(--border);
-      display:flex; align-items:center; justify-content:center;
-      font-size:36px; overflow:hidden;
-    }
+    .avatar-img { width:72px; height:72px; border-radius:18px; background:var(--bg); border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:36px; overflow:hidden; }
     .avatar-img img { width:100%; height:100%; object-fit:cover; }
-    .avatar-cam {
-      position:absolute; bottom:-5px; right:-5px;
-      width:22px; height:22px; background:var(--text); border-radius:50%;
-      display:flex; align-items:center; justify-content:center;
-      font-size:11px; border:2px solid var(--card); pointer-events:none;
-    }
-
-    /* 닉네임 + 부가 정보 */
+    .avatar-cam { position:absolute; bottom:-5px; right:-5px; width:22px; height:22px; background:var(--text); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; border:2px solid var(--card); pointer-events:none; }
     .profile-info { flex:1; min-width:0; }
     .profile-nick { font-size:20px; font-weight:900; margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .profile-sub  { font-size:12px; color:var(--sub); margin-bottom:10px; }
     .profile-btns { display:flex; gap:7px; flex-wrap:wrap; }
-    .btn-sm {
-      padding:7px 14px; border-radius:var(--radius-pill);
-      font-size:12px; font-weight:700; cursor:pointer;
-      font-family:inherit; min-height:34px;
-      display:inline-flex; align-items:center; gap:4px;
-      white-space:nowrap;
-    }
+    .btn-sm { padding:7px 14px; border-radius:var(--radius-pill); font-size:12px; font-weight:700; cursor:pointer; font-family:inherit; min-height:34px; display:inline-flex; align-items:center; gap:4px; white-space:nowrap; }
     .btn-sm.primary { background:var(--text); color:#fff; border:none; }
     .btn-sm.outline { background:var(--bg); color:var(--text); border:1.5px solid var(--border); }
     .btn-sm:active  { opacity:.75; }
 
-    /* 닉네임 편집 인라인 */
     .nick-edit { background:var(--bg); border-radius:12px; padding:12px; margin-bottom:16px; }
     .nick-edit-hint { font-size:12px; color:var(--sub); margin-bottom:8px; line-height:1.5; }
     .nick-edit-row  { display:flex; gap:8px; }
-    .nick-input {
-      flex:1; padding:10px 14px; border:1.5px solid var(--border);
-      border-radius:10px; font-size:15px; font-family:inherit; min-height:44px;
-    }
+    .nick-input { flex:1; padding:10px 14px; border:1.5px solid var(--border); border-radius:10px; font-size:15px; font-family:inherit; min-height:44px; }
     .nick-input:focus { outline:none; border-color:var(--text); }
-    .nick-save {
-      padding:0 16px; background:var(--text); color:#fff; border:none;
-      border-radius:10px; font-size:13px; font-weight:700;
-      cursor:pointer; font-family:inherit; min-height:44px; white-space:nowrap;
-    }
+    .nick-save { padding:0 16px; background:var(--text); color:#fff; border:none; border-radius:10px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; min-height:44px; white-space:nowrap; }
     .nick-save:disabled { opacity:.5; }
     .nick-msg { font-size:12px; margin-top:6px; min-height:16px; }
     .nick-msg.err  { color:var(--accent); }
     .nick-msg.cool { color:var(--sub); }
 
-    /* 통계 3칸 */
     .stats-row { display:flex; gap:1px; background:var(--border); border-radius:12px; overflow:hidden; }
-    .stat-item {
-      flex:1; text-align:center; padding:12px 4px;
-      background:var(--card); cursor:pointer;
-      display:flex; flex-direction:column; align-items:center; gap:2px;
-      transition:background .15s;
-    }
+    .stat-item { flex:1; text-align:center; padding:12px 4px; background:var(--card); cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:2px; transition:background .15s; }
     .stat-item:active { background:var(--bg); }
     .stat-num   { font-size:18px; font-weight:900; }
     .stat-label { font-size:11px; color:var(--sub); font-weight:600; }
 
-    /* ── 탭 바 ── */
-    .tab-bar {
-      display:flex; background:var(--bg);
-      border-radius:var(--radius-pill); padding:4px;
-      margin-bottom:14px; gap:4px;
-    }
-    .tab-btn {
-      flex:1; padding:9px 0; font-size:13px; font-weight:700;
-      color:var(--sub); background:transparent; border:none;
-      cursor:pointer; font-family:inherit; border-radius:var(--radius-pill);
-      transition:background .15s, color .15s; min-height:42px;
-      display:flex; align-items:center; justify-content:center; gap:4px;
-    }
+    .tab-bar { display:flex; background:var(--bg); border-radius:var(--radius-pill); padding:4px; margin-bottom:14px; gap:4px; }
+    .tab-btn { flex:1; padding:9px 0; font-size:13px; font-weight:700; color:var(--sub); background:transparent; border:none; cursor:pointer; font-family:inherit; border-radius:var(--radius-pill); transition:background .15s, color .15s; min-height:42px; display:flex; align-items:center; justify-content:center; gap:4px; }
     .tab-btn.active { color:var(--text); background:var(--card); box-shadow:0 1px 4px rgba(0,0,0,.1); }
-    .tab-badge {
-      display:inline-flex; align-items:center; justify-content:center;
-      background:var(--accent); color:#fff; border-radius:var(--radius-pill);
-      font-size:10px; font-weight:700; min-width:17px; height:17px; padding:0 4px;
-    }
+    .tab-badge { display:inline-flex; align-items:center; justify-content:center; background:var(--accent); color:#fff; border-radius:var(--radius-pill); font-size:10px; font-weight:700; min-width:17px; height:17px; padding:0 4px; }
 
-    /* ── 글 카드 ── */
     .post-card { background:var(--card); border-radius:var(--radius-card); padding:14px; margin-bottom:10px; box-shadow:var(--shadow); }
     .post-card-head { display:flex; align-items:center; gap:6px; margin-bottom:8px; }
     .post-ts    { font-size:11px; color:var(--sub2); }
-    /* ⋯ 버튼 44×44 */
-    .more-btn   {
-      margin-left:auto; width:44px; height:44px;
-      display:flex; align-items:center; justify-content:center;
-      background:none; border:none; cursor:pointer;
-      font-size:20px; color:var(--sub2); border-radius:50%; flex-shrink:0;
-    }
+    .more-btn   { margin-left:auto; width:44px; height:44px; display:flex; align-items:center; justify-content:center; background:none; border:none; cursor:pointer; font-size:20px; color:var(--sub2); border-radius:50%; flex-shrink:0; }
     .more-btn:active { background:var(--bg); }
     .post-title { font-size:15px; font-weight:700; line-height:1.4; margin-bottom:4px; cursor:pointer; }
     .post-title:active { opacity:.75; }
     .post-body  { font-size:13px; color:var(--sub); line-height:1.5; margin-bottom:8px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
     .post-meta  { display:flex; gap:10px; font-size:12px; color:var(--sub); }
 
-    /* ── 댓글 카드 ── */
     .comment-card { background:var(--card); border-radius:var(--radius-card); padding:14px; margin-bottom:10px; box-shadow:var(--shadow); }
     .comment-card-head { display:flex; align-items:center; gap:6px; margin-bottom:6px; }
     .comment-origin { font-size:12px; color:var(--blue); font-weight:700; cursor:pointer; display:inline-block; margin-bottom:6px; }
     .comment-origin:active { opacity:.75; }
     .comment-body-text { font-size:14px; line-height:1.5; }
 
-    /* ── 받은 야르~ 카드 ── */
     .yar-card { background:var(--card); border-radius:var(--radius-card); padding:4px 14px; margin-bottom:10px; box-shadow:var(--shadow); }
     .yar-item  { display:flex; align-items:center; gap:10px; padding:12px 0; border-bottom:1px solid var(--border); cursor:pointer; min-height:50px; }
     .yar-item:last-child { border-bottom:none; }
@@ -154,19 +91,16 @@
     .yar-post  { font-size:12px; color:var(--sub); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .yar-time  { font-size:11px; color:var(--sub2); flex-shrink:0; white-space:nowrap; }
 
-    /* ── 빈 상태 ── */
     .empty { text-align:center; padding:48px 20px; }
     .empty-icon { font-size:44px; margin-bottom:12px; }
     .empty-text { font-size:15px; font-weight:700; margin-bottom:4px; }
     .empty-sub  { font-size:13px; color:var(--sub); }
 
-    /* ── 바텀 네비 ── */
     .bottom-nav { position:fixed; bottom:0; left:0; right:0; background:var(--card); border-top:1px solid var(--border); display:flex; z-index:100; padding-bottom:env(safe-area-inset-bottom,0); }
     .bottom-nav a { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:8px 0 6px; text-decoration:none; color:var(--sub); font-size:10px; font-weight:600; gap:2px; min-height:50px; }
     .bottom-nav a.active { color:var(--text); }
     .nav-icon { font-size:22px; }
 
-    /* ── 바텀시트 ── */
     .sheet-overlay { position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:4000; display:flex; align-items:flex-end; justify-content:center; }
     .sheet-overlay.hidden { display:none; }
     .sheet-panel   { width:100%; max-width:640px; background:var(--card); border-radius:20px 20px 0 0; padding-bottom:env(safe-area-inset-bottom,12px); overflow:hidden; }
@@ -179,7 +113,6 @@
     .sheet-cancel  { width:100%; padding:0 24px; text-align:center; font-size:16px; font-weight:700; font-family:inherit; background:none; border:none; cursor:pointer; color:var(--sub); min-height:54px; }
     .sheet-cancel:active { background:var(--bg); }
 
-    /* ── 삭제 확인 ── */
     .confirm-overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:5000; display:flex; align-items:center; justify-content:center; padding:24px; }
     .confirm-overlay.hidden { display:none; }
     .confirm-box   { background:var(--card); border-radius:20px; padding:24px; width:100%; max-width:300px; text-align:center; }
@@ -190,7 +123,6 @@
     .confirm-no    { flex:1; padding:13px; border:1.5px solid var(--border); border-radius:12px; font-size:15px; font-weight:700; cursor:pointer; font-family:inherit; background:var(--bg); min-height:48px; }
     .confirm-yes   { flex:1; padding:13px; border:none; border-radius:12px; font-size:15px; font-weight:700; cursor:pointer; font-family:inherit; background:var(--accent); color:#fff; min-height:48px; }
 
-    /* ── 글쓰기 모달 ── */
     .write-overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:flex-end; justify-content:center; z-index:3000; }
     .write-overlay.hidden { display:none; }
     .write-panel   { width:100%; max-width:640px; background:var(--card); border-radius:20px 20px 0 0; }
@@ -208,7 +140,6 @@
     .write-submit  { flex:1; padding:13px; background:var(--text); color:#fff; border:none; border-radius:12px; font-size:15px; font-weight:700; cursor:pointer; font-family:inherit; min-height:48px; }
     .write-submit:disabled { opacity:.5; }
 
-    /* ── 게시글 상세 패널 ── */
     .overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:flex-end; justify-content:center; z-index:2000; }
     .overlay.hidden { display:none; }
     .detail-panel  { width:100%; max-width:640px; background:var(--card); border-radius:20px 20px 0 0; max-height:90vh; display:flex; flex-direction:column; }
@@ -230,33 +161,31 @@
     .detail-yar.on { border-color:var(--yar); color:var(--yar); background:#fff9ee; }
     .detail-close  { padding:7px 14px; border:1px solid var(--border); border-radius:var(--radius-pill); background:var(--bg); font-size:12px; cursor:pointer; font-family:inherit; min-height:44px; }
     .comments-wrap { padding:0 16px 10px; }
-    .ctab          { padding:5px 12px; border-radius:var(--radius-pill); border:1.5px solid var(--border); background:var(--bg); color:var(--sub); font-size:11px; font-weight:700; cursor:pointer; font-family:inherit; min-height:36px; }
-    .ctab.on       { border-color:var(--text); background:var(--text); color:#fff; }
-    .cmt-item      { padding:10px 0; border-bottom:1px solid var(--border); display:flex; gap:8px; }
+    .ctab     { padding:5px 12px; border-radius:var(--radius-pill); border:1.5px solid var(--border); background:var(--bg); color:var(--sub); font-size:11px; font-weight:700; cursor:pointer; font-family:inherit; min-height:36px; }
+    .ctab.on  { border-color:var(--text); background:var(--text); color:#fff; }
+    .cmt-item { padding:10px 0; border-bottom:1px solid var(--border); display:flex; gap:8px; }
     .cmt-item:last-child { border-bottom:none; }
-    .cmt-avatar    { width:30px; height:30px; border-radius:8px; background:var(--bg); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; overflow:hidden; }
+    .cmt-avatar { width:30px; height:30px; border-radius:8px; background:var(--bg); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; overflow:hidden; }
     .cmt-avatar img { width:100%; height:100%; object-fit:cover; }
-    .cmt-right     { flex:1; min-width:0; }
-    .cmt-nick      { font-size:12px; font-weight:700; }
-    .cmt-body      { font-size:13px; line-height:1.5; margin-top:3px; }
-    .cmt-time      { font-size:11px; color:var(--sub2); margin-top:2px; }
-    .cmt-form      { flex-shrink:0; background:var(--card); border-top:1px solid var(--border); padding:10px 16px; display:flex; gap:8px; padding-bottom:calc(10px + env(safe-area-inset-bottom,0)); }
-    .cmt-input     { flex:1; padding:10px 14px; border:1.5px solid var(--border); border-radius:var(--radius-pill); font-size:14px; font-family:inherit; min-height:44px; }
+    .cmt-right  { flex:1; min-width:0; }
+    .cmt-nick   { font-size:12px; font-weight:700; }
+    .cmt-body   { font-size:13px; line-height:1.5; margin-top:3px; }
+    .cmt-time   { font-size:11px; color:var(--sub2); margin-top:2px; }
+    .cmt-form   { flex-shrink:0; background:var(--card); border-top:1px solid var(--border); padding:10px 16px; display:flex; gap:8px; padding-bottom:calc(10px + env(safe-area-inset-bottom,0)); }
+    .cmt-input  { flex:1; padding:10px 14px; border:1.5px solid var(--border); border-radius:var(--radius-pill); font-size:14px; font-family:inherit; min-height:44px; }
     .cmt-input:focus { outline:none; border-color:var(--text); }
-    .cmt-send      { padding:10px 18px; background:var(--text); color:#fff; border:none; border-radius:var(--radius-pill); font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; min-height:44px; }
+    .cmt-send   { padding:10px 18px; background:var(--text); color:#fff; border:none; border-radius:var(--radius-pill); font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; min-height:44px; }
     .cmt-send:disabled { opacity:.5; }
   </style>
 </head>
 <body>
 
-<!-- 로더 -->
 <div id="loader">
   <div style="font-size:52px;">🌈</div>
   <div class="spinner"></div>
   <div style="font-size:14px;color:var(--sub);">불러오는 중...</div>
 </div>
 
-<!-- 헤더 -->
 <div class="header">
   <div class="header-inner">
     <div class="header-title">👤 내 페이지</div>
@@ -264,11 +193,7 @@
 </div>
 
 <div class="container">
-
-  <!-- ── 프로필 카드 ── -->
   <div class="profile-card">
-
-    <!-- 아바타 + 닉네임/정보 -->
     <div class="profile-top">
       <div class="avatar-wrap" id="avatarWrap">
         <div class="avatar-img" id="avatarImg">🗣️</div>
@@ -285,7 +210,6 @@
     </div>
     <input type="file" id="avatarInput" accept="image/*" style="display:none">
 
-    <!-- 닉네임 편집 (토글) -->
     <div class="nick-edit hidden" id="nickEdit">
       <div class="nick-edit-hint">한글, 영문, 숫자 1~10자 · 7일 후 변경 가능</div>
       <div class="nick-edit-row">
@@ -295,49 +219,40 @@
       <div class="nick-msg hidden" id="nickMsg"></div>
     </div>
 
-    <!-- 통계 -->
     <div class="stats-row">
-      <div class="stat-item" id="statTabPosts" onclick="switchTab('posts')">
+      <div class="stat-item" id="statTabPosts">
         <span class="stat-num" id="statPosts">-</span>
         <span class="stat-label">내 글</span>
       </div>
-      <div class="stat-item" id="statTabYars" onclick="switchTab('yars')">
+      <div class="stat-item" id="statTabYars">
         <span class="stat-num" id="statYars">-</span>
         <span class="stat-label">야르~</span>
       </div>
-      <div class="stat-item" id="statTabComments" onclick="switchTab('comments')">
+      <div class="stat-item" id="statTabComments">
         <span class="stat-num" id="statComments">-</span>
         <span class="stat-label">댓글</span>
       </div>
     </div>
   </div>
 
-  <!-- ── 탭 바 ── -->
   <div class="tab-bar">
-    <button class="tab-btn active" id="tabPosts"    onclick="switchTab('posts')">✏️ 내 글</button>
-    <button class="tab-btn"        id="tabYars"     onclick="switchTab('yars')">
+    <button class="tab-btn active" id="tabPosts">✏️ 내 글</button>
+    <button class="tab-btn"        id="tabYars">
       🌟 받은 야르~
       <span class="tab-badge hidden" id="yarBadge">0</span>
     </button>
-    <button class="tab-btn"        id="tabComments" onclick="switchTab('comments')">💬 댓글</button>
+    <button class="tab-btn"        id="tabComments">💬 댓글</button>
   </div>
 
-  <!-- 내 글 -->
   <div id="secPosts">
     <div class="skel" style="height:90px;margin-bottom:10px;"></div>
     <div class="skel" style="height:90px;margin-bottom:10px;"></div>
     <div class="skel" style="height:90px;margin-bottom:10px;"></div>
   </div>
-
-  <!-- 받은 야르~ -->
-  <div id="secYars" class="hidden"></div>
-
-  <!-- 내 댓글 -->
+  <div id="secYars"     class="hidden"></div>
   <div id="secComments" class="hidden"></div>
-
 </div>
 
-<!-- 바텀 네비 -->
 <div class="bottom-nav">
   <a href="index.html"><span class="nav-icon">🏠</span>홈</a>
   <a href="#" id="writeNavBtn">
@@ -382,7 +297,7 @@
       <button class="write-close" id="writeCloseBtn">✕ 닫기</button>
     </div>
     <div class="write-body">
-      <input    class="write-input"    id="writeTitle" placeholder="제목 (2~80자)"             maxlength="80">
+      <input    class="write-input"    id="writeTitle" placeholder="제목 (2~80자)"              maxlength="80">
       <textarea class="write-textarea" id="writeBody"  placeholder="내용을 입력하세요... (5자 이상)" maxlength="5000"></textarea>
     </div>
     <div class="write-error" id="writeError"></div>
@@ -435,23 +350,20 @@
 
 const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
 
-/* ── 전역 상태 ── */
-let guestId      = null;
-let myNickname   = null;
-let myJoinedAt   = null;   // guests.created_at
-let myPosts      = [];
-let myComments   = [];
-let currentTab   = 'posts';
-let yarersLoaded = false;
-let allYarers    = [];
-let currentPost  = null;
+let guestId         = null;
+let myNickname      = null;
+let myJoinedAt      = null;
+let myPosts         = [];
+let myComments      = [];
+let currentTab      = 'posts';
+let allYarers       = [];
+let currentPost     = null;
 let currentComments = [];
-let commentSort  = 'latest';
+let commentSort     = 'latest';
 let pendingDeleteFn = null;
-let sheetType    = null;
-let sheetId      = null;
+let sheetType       = null;
+let sheetId         = null;
 
-/* ── 유틸 ── */
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const relTime = d => {
@@ -497,7 +409,6 @@ async function initGuest() {
       if (guestId) localStorage.setItem('rkGuestId', guestId);
     }
   } catch {}
-
   try {
     const r = await fetch(apiUrl('/me'), { credentials:'include' });
     if (r.ok) {
@@ -526,23 +437,13 @@ function updateProfileUI() {
 
 /* ── 닉네임 편집 ── */
 function toggleNickEdit() {
-  const box = $('nickEdit');
+  const box  = $('nickEdit');
   const open = box.classList.contains('hidden');
   box.classList.toggle('hidden', !open);
-  if (open) {
-    $('nickInput').value = myNickname || '';
-    $('nickInput').focus();
-    clearNickMsg();
-  }
+  if (open) { $('nickInput').value = myNickname || ''; $('nickInput').focus(); clearNickMsg(); }
 }
-function clearNickMsg() {
-  $('nickMsg').textContent = '';
-  $('nickMsg').className   = 'nick-msg hidden';
-}
-function showNickMsg(txt, type) {
-  $('nickMsg').textContent = txt;
-  $('nickMsg').className   = `nick-msg ${type}`;
-}
+function clearNickMsg() { $('nickMsg').textContent = ''; $('nickMsg').className = 'nick-msg hidden'; }
+function showNickMsg(txt, type) { $('nickMsg').textContent = txt; $('nickMsg').className = `nick-msg ${type}`; }
 
 $('nickToggleBtn').addEventListener('click', toggleNickEdit);
 $('nickInput').addEventListener('keypress', e => { if (e.key === 'Enter') saveNick(); });
@@ -551,8 +452,8 @@ $('nickSaveBtn').addEventListener('click', saveNick);
 async function saveNick() {
   const val = $('nickInput').value.trim();
   clearNickMsg();
-  if (!val || val.length > 10)                          { showNickMsg('1~10자로 입력해주세요','err');      return; }
-  if (!/^[가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z0-9]+$/.test(val))    { showNickMsg('한글, 영문, 숫자만 가능해요','err'); return; }
+  if (!val || val.length > 10)                       { showNickMsg('1~10자로 입력해주세요','err'); return; }
+  if (!/^[가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z0-9]+$/.test(val)) { showNickMsg('한글, 영문, 숫자만 가능해요','err'); return; }
   const btn = $('nickSaveBtn');
   btn.disabled = true; btn.textContent = '저장 중...';
   try {
@@ -568,19 +469,15 @@ async function saveNick() {
       $('nickEdit').classList.add('hidden');
       $('nickInput').value = '';
       updateProfileUI();
-    } else if (d.error === 'nickname_cooldown_7days') {
-      showNickMsg('7일이 지나야 변경할 수 있어요','cool');
-    } else if (d.error === 'nickname_taken') {
-      showNickMsg('이미 사용 중인 닉네임이에요','err');
-    } else {
-      showNickMsg(d.error || '오류가 발생했어요','err');
-    }
+    } else if (d.error === 'nickname_cooldown_7days') { showNickMsg('7일이 지나야 변경할 수 있어요','cool');
+    } else if (d.error === 'nickname_taken')          { showNickMsg('이미 사용 중인 닉네임이에요','err');
+    } else                                            { showNickMsg(d.error || '오류가 발생했어요','err'); }
   } catch { showNickMsg('오류가 발생했어요','err'); }
   btn.disabled = false; btn.textContent = '저장';
 }
 
 /* ── 아바타 업로드 ── */
-$('avatarBtn').addEventListener('click', () => $('avatarInput').click());
+$('avatarBtn').addEventListener('click',  () => $('avatarInput').click());
 $('avatarWrap').addEventListener('click', () => $('avatarInput').click());
 $('avatarInput').addEventListener('change', async function() {
   const file = this.files[0];
@@ -591,15 +488,10 @@ $('avatarInput').addEventListener('change', async function() {
   fd.append('image', file);
   if (guestId) fd.append('guest_id', guestId);
   try {
-    // ⚠️ Content-Type 헤더 절대 명시 금지 (fetch가 boundary 자동 설정)
     const r = await fetch(apiUrl('/guest/upload-image'), { method:'POST', credentials:'include', body:fd });
     const d = await r.json();
-    if (d.ok) {
-      $('avatarImg').innerHTML = `<img src="${esc(d.image_url)}?t=${Date.now()}" alt="프로필">`;
-    } else {
-      $('avatarImg').textContent = '🗣️';
-      alert(d.error || '업로드 실패');
-    }
+    if (d.ok) { $('avatarImg').innerHTML = `<img src="${esc(d.image_url)}?t=${Date.now()}" alt="프로필">`; }
+    else       { $('avatarImg').textContent = '🗣️'; alert(d.error || '업로드 실패'); }
   } catch { $('avatarImg').textContent = '🗣️'; alert('업로드 오류가 발생했어요'); }
   this.value = '';
 });
@@ -615,7 +507,6 @@ async function loadAll() {
     myComments = cr.ok ? (await cr.json()).comments || [] : [];
   } catch { myPosts = []; myComments = []; }
 
-  // 통계 업데이트
   const yarTotal = myPosts.reduce((s, p) => s + (p.yar_count || 0), 0);
   $('statPosts').textContent    = myPosts.length;
   $('statYars').textContent     = yarTotal;
@@ -628,10 +519,17 @@ async function loadAll() {
 /* ── 탭 전환 ── */
 function switchTab(tab) {
   currentTab = tab;
-  ['posts','yars','comments'].forEach(t => {
-    $(`tab${t.charAt(0).toUpperCase()+t.slice(1)}`).classList.toggle('active', t === tab);
-    $(`sec${t.charAt(0).toUpperCase()+t.slice(1)}`).classList.toggle('hidden', t !== tab);
-  });
+
+  // 탭 버튼 active
+  $('tabPosts').classList.toggle('active',    tab === 'posts');
+  $('tabYars').classList.toggle('active',     tab === 'yars');
+  $('tabComments').classList.toggle('active', tab === 'comments');
+
+  // 섹션 show/hide
+  $('secPosts').classList.toggle('hidden',    tab !== 'posts');
+  $('secYars').classList.toggle('hidden',     tab !== 'yars');
+  $('secComments').classList.toggle('hidden', tab !== 'comments');
+
   if (tab === 'posts')    renderPosts();
   if (tab === 'yars')     { markYarRead(); loadYarers(); }
   if (tab === 'comments') renderCommentCards();
@@ -674,7 +572,7 @@ function makePostCard(p) {
   return div;
 }
 
-/* ── 받은 야르~ ── */
+/* ── 야르~ 배지 ── */
 function checkYarBadge() {
   const saved = JSON.parse(localStorage.getItem('rkYarCounts') || '{}');
   let n = 0;
@@ -694,6 +592,7 @@ function markYarRead() {
   $('yarBadge').classList.add('hidden');
 }
 
+/* ── 받은 야르~ 로드 ── */
 async function loadYarers() {
   const sec = $('secYars');
   if (!myPosts.length) {
@@ -719,8 +618,6 @@ async function loadYarers() {
       }));
     });
     allYarers.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-
-    // 통계 야르~ = 실제 야르~ 수
     $('statYars').textContent = allYarers.length;
 
     if (!allYarers.length) {
@@ -784,7 +681,7 @@ function makeCommentCard(c) {
 /* ── 바텀시트 ── */
 function openSheet(type, id, label) {
   sheetType = type; sheetId = id;
-  $('sheetLabel').textContent = label ? `"${label}"` : '';
+  $('sheetLabel').textContent     = label ? `"${label}"` : '';
   $('sheetEditBtn').style.display = type === 'post' ? 'flex' : 'none';
   $('sheetOverlay').classList.remove('hidden');
 }
@@ -792,9 +689,9 @@ function closeSheet() {
   $('sheetOverlay').classList.add('hidden');
   sheetType = null; sheetId = null;
 }
-$('sheetOverlay').addEventListener('click', e => { if (e.target === $('sheetOverlay')) closeSheet(); });
+$('sheetOverlay').addEventListener('click',  e => { if (e.target === $('sheetOverlay')) closeSheet(); });
 $('sheetCancelBtn').addEventListener('click', closeSheet);
-$('sheetEditBtn').addEventListener('click', () => { closeSheet(); alert('수정 기능은 준비 중이에요 😊'); });
+$('sheetEditBtn').addEventListener('click',   () => { closeSheet(); alert('수정 기능은 준비 중이에요 😊'); });
 $('sheetDeleteBtn').addEventListener('click', () => {
   const t = sheetType, id = sheetId;
   closeSheet();
@@ -804,7 +701,7 @@ $('sheetDeleteBtn').addEventListener('click', () => {
 
 /* ── 삭제 확인 ── */
 function closeConfirm() { $('confirmOverlay').classList.add('hidden'); pendingDeleteFn = null; }
-$('confirmNo').addEventListener('click', closeConfirm);
+$('confirmNo').addEventListener('click',  closeConfirm);
 $('confirmYes').addEventListener('click', () => { closeConfirm(); if (typeof pendingDeleteFn === 'function') pendingDeleteFn(); });
 
 async function deletePost(postId) {
@@ -843,9 +740,9 @@ function openWrite() {
 }
 function closeWrite() { $('writeOverlay').classList.add('hidden'); }
 
-$('writeNavBtn').addEventListener('click', e => { e.preventDefault(); openWrite(); });
+$('writeNavBtn').addEventListener('click',   e => { e.preventDefault(); openWrite(); });
 $('writeCloseBtn').addEventListener('click', closeWrite);
-$('writeOverlay').addEventListener('click', e => { if (e.target === $('writeOverlay')) closeWrite(); });
+$('writeOverlay').addEventListener('click',  e => { if (e.target === $('writeOverlay')) closeWrite(); });
 $('writeSubmitBtn').addEventListener('click', async () => {
   const title = $('writeTitle').value.trim();
   const body  = $('writeBody').value.trim();
@@ -866,11 +763,8 @@ $('writeSubmitBtn').addEventListener('click', async () => {
       closeWrite();
       await loadAll();
       switchTab('posts');
-    } else if (d.error === 'rate_limit_post') {
-      errEl.textContent = '잠시 후 다시 시도해주세요';
-    } else {
-      errEl.textContent = d.error || '오류가 발생했어요';
-    }
+    } else if (d.error === 'rate_limit_post') { errEl.textContent = '잠시 후 다시 시도해주세요';
+    } else                                    { errEl.textContent = d.error || '오류가 발생했어요'; }
   } catch { errEl.textContent = '오류가 발생했어요'; }
   btn.disabled = false; btn.textContent = '게시하기';
 });
@@ -888,9 +782,7 @@ async function openDetail(postId) {
   $('dComments').innerHTML = '';
   $('cmtInput').value      = '';
   $('detailOverlay').classList.remove('hidden');
-
   fetch(`${API}/posts/${postId}/view`, { method:'POST' }).catch(() => {});
-
   try {
     const r = await fetch(`${API}/posts/${postId}`);
     const d = await r.json();
@@ -938,6 +830,7 @@ function closeDetail() {
   $('detailOverlay').classList.add('hidden');
   currentPost = null; currentComments = [];
 }
+
 $('dCloseBtn').addEventListener('click', closeDetail);
 $('detailOverlay').addEventListener('click', e => { if (e.target === $('detailOverlay')) closeDetail(); });
 
@@ -959,7 +852,7 @@ $('dYarBtn').addEventListener('click', async () => {
       const mp = myPosts.find(p => p.id === pid);
       if (mp) { mp.yar_count = d.yar_count; $('statYars').textContent = myPosts.reduce((s,p)=>s+(p.yar_count||0),0); }
     } else { setYar(pid, was); syncYarBtn(currentPost.yar_count, was); }
-  } catch    { setYar(pid, was); syncYarBtn(currentPost.yar_count, was); }
+  } catch { setYar(pid, was); syncYarBtn(currentPost.yar_count, was); }
 });
 
 /* ── 댓글 탭 ── */
@@ -967,8 +860,8 @@ function syncCmtTabs() {
   $('cLatest').className  = 'ctab' + (commentSort === 'latest'  ? ' on' : '');
   $('cPopular').className = 'ctab' + (commentSort === 'popular' ? ' on' : '');
 }
-$('cLatest').addEventListener('click', () => { commentSort = 'latest';  syncCmtTabs(); renderCmts(currentComments); });
-$('cPopular').addEventListener('click',() => { commentSort = 'popular'; syncCmtTabs(); renderCmts(currentComments); });
+$('cLatest').addEventListener('click',  () => { commentSort = 'latest';  syncCmtTabs(); renderCmts(currentComments); });
+$('cPopular').addEventListener('click', () => { commentSort = 'popular'; syncCmtTabs(); renderCmts(currentComments); });
 
 function renderCmts(cmts) {
   const w = $('dComments');
@@ -1023,7 +916,6 @@ async function sendCmt() {
       currentComments = d2.comments || [];
       renderCmts(currentComments);
       $('dStats').textContent = `💬 댓글 ${d2.comments?.length||0} · 👁 조회 ${d2.post?.view_count||0}`;
-      // 내 글이면 comment_count 동기화
       const mp = myPosts.find(p => p.id === currentPost.id);
       if (mp) mp.comment_count = (mp.comment_count || 0) + 1;
     } else { alert(d.error || '오류가 발생했어요'); }
@@ -1034,10 +926,10 @@ async function sendCmt() {
 /* ── ESC ── */
 document.addEventListener('keydown', e => {
   if (e.key !== 'Escape') return;
-  if (!$('confirmOverlay').classList.contains('hidden')) { closeConfirm();  return; }
-  if (!$('sheetOverlay').classList.contains('hidden'))   { closeSheet();    return; }
-  if (!$('writeOverlay').classList.contains('hidden'))   { closeWrite();    return; }
-  if (!$('detailOverlay').classList.contains('hidden'))  { closeDetail();   return; }
+  if (!$('confirmOverlay').classList.contains('hidden')) { closeConfirm(); return; }
+  if (!$('sheetOverlay').classList.contains('hidden'))   { closeSheet();   return; }
+  if (!$('writeOverlay').classList.contains('hidden'))   { closeWrite();   return; }
+  if (!$('detailOverlay').classList.contains('hidden'))  { closeDetail();  return; }
 });
 
 /* ── 초기화 ── */
@@ -1048,6 +940,14 @@ async function init() {
   $('loader').classList.add('hidden');
 }
 init();
+
+/* ── ✅ 전역 노출 (HTML onclick에서 접근 가능하도록) ── */
+window.switchTab = switchTab;
+window.openDetail = openDetail;
+window.closeDetail = closeDetail;
+window.openWrite = openWrite;
+window.closeWrite = closeWrite;
+window.sendCmt = sendCmt;
 
 })();
 </script>
