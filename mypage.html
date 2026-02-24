@@ -939,6 +939,17 @@ async function init() {
   await loadAll();
   $('loader').classList.add('hidden');
 }
+
+// 탭 버튼 이벤트
+document.getElementById('tabPosts').addEventListener('click', () => switchTab('posts'));
+document.getElementById('tabYars').addEventListener('click', () => switchTab('yars'));
+document.getElementById('tabComments').addEventListener('click', () => switchTab('comments'));
+
+// 통계 클릭 이벤트
+document.getElementById('statTabPosts').addEventListener('click', () => switchTab('posts'));
+document.getElementById('statTabYars').addEventListener('click', () => switchTab('yars'));
+document.getElementById('statTabComments').addEventListener('click', () => switchTab('comments'));
+
 init();
 
 /* ── ✅ 전역 노출 (HTML onclick에서 접근 가능하도록) ── */
