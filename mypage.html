@@ -571,7 +571,7 @@ function makePostCard(p) {
   
 
 /* ── 받은 야르~ 데이터 수집 ── */
-async async function loadYarersData() {
+async function loadYarersData() {
   if (!myPosts.length) { allYarers = []; return; }
   try {
     const results = await Promise.all(
@@ -620,7 +620,7 @@ function renderYarers() {
 }
 
 /* ── 받은 댓글 데이터 수집 ── */
-async async function loadReceivedCommentsData() {
+async function loadReceivedCommentsData() {
   if (!myPosts.length) { receivedComments = []; return; }
   try {
     const results = await Promise.all(
