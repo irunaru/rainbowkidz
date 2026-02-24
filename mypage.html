@@ -80,7 +80,6 @@
     .comment-origin { font-size:12px; color:var(--blue); font-weight:700; cursor:pointer; display:inline-block; margin-bottom:6px; }
     .comment-origin:active { opacity:.75; }
     .comment-body-text { font-size:14px; line-height:1.5; }
-    .comment-author-nick { font-size:13px; font-weight:700; margin-bottom:4px; display:block; color:var(--sub); }
 
     .yar-card { background:var(--card); border-radius:var(--radius-card); padding:4px 14px; margin-bottom:10px; box-shadow:var(--shadow); }
     .yar-item  { display:flex; align-items:center; gap:10px; padding:12px 0; border-bottom:1px solid var(--border); cursor:pointer; min-height:50px; }
@@ -227,7 +226,7 @@
       </div>
       <div class="stat-item" id="statTabYars">
         <span class="stat-num" id="statYars">-</span>
-        <span class="stat-label">받은 야르~</span>
+        <span class="stat-label">야르~</span>
       </div>
       <div class="stat-item" id="statTabComments">
         <span class="stat-num" id="statComments">-</span>
@@ -238,14 +237,8 @@
 
   <div class="tab-bar">
     <button class="tab-btn active" id="tabPosts">✏️ 내 글</button>
-    <button class="tab-btn"        id="tabYars">
-      🌟 받은 야르~
-      <span class="tab-badge hidden" id="yarBadge">0</span>
-    </button>
-    <button class="tab-btn"        id="tabComments">
-      💬 받은 댓글
-      <span class="tab-badge hidden" id="cmtBadge">0</span>
-    </button>
+    <button class="tab-btn" id="tabYars">🌟 받은 야르~ <span class="tab-badge hidden" id="yarBadge">0</span></button>
+    <button class="tab-btn" id="tabComments">💬 받은 댓글 <span class="tab-badge hidden" id="cmtBadge">0</span></button>
   </div>
 
   <div id="secPosts">
@@ -266,6 +259,7 @@
   <a href="mypage.html" class="active"><span class="nav-icon">👤</span>내 페이지</a>
 </div>
 
+<!-- 바텀시트 -->
 <div class="sheet-overlay hidden" id="sheetOverlay">
   <div class="sheet-panel">
     <div class="sheet-handle"></div>
@@ -278,6 +272,7 @@
   </div>
 </div>
 
+<!-- 삭제 확인 -->
 <div class="confirm-overlay hidden" id="confirmOverlay">
   <div class="confirm-box">
     <div class="confirm-icon">🥺</div>
@@ -290,6 +285,7 @@
   </div>
 </div>
 
+<!-- 글쓰기 모달 -->
 <div class="write-overlay hidden" id="writeOverlay">
   <div class="write-panel">
     <div class="write-handle"></div>
@@ -308,6 +304,7 @@
   </div>
 </div>
 
+<!-- 게시글 상세 패널 -->
 <div class="overlay hidden" id="detailOverlay">
   <div class="detail-panel" onclick="event.stopPropagation()">
     <div class="detail-handle"></div>
@@ -354,7 +351,8 @@ let guestId         = null;
 let myNickname      = null;
 let myJoinedAt      = null;
 let myPosts         = [];
-let receivedComments = []; // (SNS 전환) 내 댓글 대신 내 글에 달린 댓글 보관
+let receivedComments = []; // 내 글에 달린 받은 댓글
+
 let currentTab      = 'posts';
 let allYarers       = [];
 let currentPost     = null;
@@ -375,13 +373,10 @@ const relTime = d => {
   return new Date(d).toLocaleDateString('ko-KR',{month:'long',day:'numeric'});
 };
 const joinDate = d => new Date(d).toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'});
-
-// 버그수정 2: apiUrl 헬퍼를 모든 fetch 호출에서 안전하게 사용하도록 설정
 const apiUrl = p => {
   const sep = p.includes('?') ? '&' : '?';
   return guestId ? `${API}${p}${sep}guest_id=${encodeURIComponent(guestId)}` : `${API}${p}`;
 };
-
 const getYar = id => localStorage.getItem(`rkYar_${id}`) === '1';
 const setYar = (id, v) => localStorage.setItem(`rkYar_${id}`, v ? '1' : '0');
 
@@ -412,8 +407,6 @@ async function initGuest() {
       if (guestId) localStorage.setItem('rkGuestId', guestId);
     }
   } catch {}
-  
-  // 버그수정 3: 프로필 이미지 유지를 위해 /me 호출 시 확실하게 인증 정보 전송
   try {
     const r = await fetch(apiUrl('/me'), { credentials:'include' });
     if (r.ok) {
@@ -501,60 +494,17 @@ $('avatarInput').addEventListener('change', async function() {
   this.value = '';
 });
 
-/* ── 통합 데이터 로드 (병렬 비동기 처리 적용) ── */
+/* ── 데이터 로드 ── */
 async function loadAll() {
   try {
     const pr = await fetch(apiUrl('/my/posts?limit=50&offset=0'), { credentials:'include' });
     myPosts = pr.ok ? (await pr.json()).posts || [] : [];
   } catch { myPosts = []; }
 
-  allYarers = [];
-  receivedComments = [];
-
-  if (myPosts.length > 0) {
-    // 버그수정 2: apiUrl 사용 + credentials:'include' 적용하여 권한 문제 해결
-    const yarPromises = myPosts.map(p =>
-      fetch(apiUrl(`/posts/${p.id}/yars`), { credentials:'include' })
-        .then(r => r.ok ? r.json() : { yarers: [] })
-        .then(d => ({ post:p, yarers: d.yarers || [] }))
-        .catch(() => ({ post:p, yarers:[] }))
-    );
-
-    const cmtPromises = myPosts.map(p =>
-      fetch(apiUrl(`/posts/${p.id}`), { credentials:'include' })
-        .then(r => r.ok ? r.json() : { comments: [] })
-        .then(d => ({ post:p, comments: d.comments || [] }))
-        .catch(() => ({ post:p, comments:[] }))
-    );
-
-    const [yarResults, cmtResults] = await Promise.all([
-      Promise.all(yarPromises),
-      Promise.all(cmtPromises)
-    ]);
-
-    yarResults.forEach(({ post, yarers }) => {
-      yarers.forEach(y => allYarers.push({
-        ...y,
-        post_id: post.id,
-        post_title: post.title || post.body?.slice(0,30) || '',
-      }));
-    });
-    allYarers.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-
-    cmtResults.forEach(({ post, comments }) => {
-      comments.forEach(c => {
-        // 본인이 작성한 댓글은 받은 알림에서 제외
-        if (c.nickname !== myNickname) {
-          receivedComments.push({
-            ...c,
-            post_id: post.id,
-            post_title: post.title || post.body?.slice(0,30) || '',
-          });
-        }
-      });
-    });
-    receivedComments.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-  }
+  await Promise.all([
+    loadYarersData(),
+    loadReceivedCommentsData()
+  ]);
 
   $('statPosts').textContent    = myPosts.length;
   $('statYars').textContent     = allYarers.length;
@@ -563,26 +513,25 @@ async function loadAll() {
   checkYarBadge();
   checkCmtBadge();
   renderPosts();
-  
-  if (currentTab === 'yars') renderYarers();
-  if (currentTab === 'comments') renderReceivedCommentsCards();
 }
 
 /* ── 탭 전환 ── */
 function switchTab(tab) {
   currentTab = tab;
 
+  // 탭 버튼 active
   $('tabPosts').classList.toggle('active',    tab === 'posts');
   $('tabYars').classList.toggle('active',     tab === 'yars');
   $('tabComments').classList.toggle('active', tab === 'comments');
 
+  // 섹션 show/hide
   $('secPosts').classList.toggle('hidden',    tab !== 'posts');
   $('secYars').classList.toggle('hidden',     tab !== 'yars');
   $('secComments').classList.toggle('hidden', tab !== 'comments');
 
   if (tab === 'posts')    renderPosts();
   if (tab === 'yars')     { markYarRead(); renderYarers(); }
-  if (tab === 'comments') { markCmtRead(); renderReceivedCommentsCards(); }
+  if (tab === 'comments') { markCmtRead(); renderReceivedComments(); }
 }
 
 /* ── 내 글 렌더 ── */
@@ -622,7 +571,136 @@ function makePostCard(p) {
   return div;
 }
 
-/* ── 야르~ 배지 및 렌더 ── */
+/* ── 받은 야르~ 데이터 수집 ── */
+async function loadYarersData() {
+  if (!myPosts.length) { allYarers = []; return; }
+  try {
+    const results = await Promise.all(
+      myPosts.map(p =>
+        fetch(apiUrl(`/posts/${p.id}/yars`), { credentials:'include' })
+          .then(r => r.json())
+          .then(d => ({ post:p, yarers: d.yarers || [] }))
+          .catch(() => ({ post:p, yarers:[] }))
+      )
+    );
+    allYarers = [];
+    results.forEach(({ post, yarers }) => {
+      yarers.forEach(y => allYarers.push({
+        ...y,
+        post_id:    post.id,
+        post_title: post.title || post.body?.slice(0,30) || '',
+      }));
+    });
+    allYarers.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  } catch { allYarers = []; }
+}
+
+function renderYarers() {
+  const sec = $('secYars');
+  if (!allYarers.length) {
+    sec.innerHTML = `<div class="empty"><div class="empty-icon">🌟</div><div class="empty-text">아직 받은 야르~가 없어요</div></div>`;
+    return;
+  }
+  const card = document.createElement('div');
+  card.className = 'yar-card';
+  allYarers.forEach(y => {
+    const item = document.createElement('div');
+    item.className = 'yar-item';
+    item.innerHTML = `
+      <div class="yar-icon">🌟</div>
+      <div class="yar-info">
+        <div class="yar-nick">${esc((y.nickname || '익명') + '님이 야르~를 보냈어요')}</div>
+        <div class="yar-post">내 글: ${esc(y.post_title || '')}</div>
+      </div>
+      <div class="yar-time">${relTime(y.created_at)}</div>`;
+    item.addEventListener('click', () => openDetail(y.post_id));
+    card.appendChild(item);
+  });
+  sec.innerHTML = '';
+  sec.appendChild(card);
+}
+
+/* ── 받은 댓글 데이터 수집 ── */
+async function loadReceivedCommentsData() {
+  if (!myPosts.length) { receivedComments = []; return; }
+  try {
+    const results = await Promise.all(
+      myPosts.map(p =>
+        fetch(apiUrl(`/posts/${p.id}`), { credentials:'include' })
+          .then(r => r.json())
+          .then(d => ({ post:p, comments: d.comments || [] }))
+          .catch(() => ({ post:p, comments:[] }))
+      )
+    );
+    receivedComments = [];
+    results.forEach(({ post, comments }) => {
+      comments.forEach(c => {
+        // 내가 쓴 댓글은 제외(원하면 제거 가능)
+        if (myNickname && c.nickname === myNickname) return;
+        receivedComments.push({
+          ...c,
+          post_id: post.id,
+          post_title: post.title || post.body?.slice(0,30) || '',
+        });
+      });
+    });
+    receivedComments.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  } catch { receivedComments = []; }
+}
+
+function renderReceivedComments() {
+  const sec = $('secComments');
+  if (!receivedComments.length) {
+    sec.innerHTML = `<div class="empty"><div class="empty-icon">💬</div><div class="empty-text">아직 받은 댓글이 없어요</div><div class="empty-sub">내 글에 댓글이 달리면 이곳에 모여요.</div></div>`;
+    return;
+  }
+  const frag = document.createDocumentFragment();
+  receivedComments.forEach(c => frag.appendChild(makeReceivedCommentCard(c)));
+  sec.innerHTML = '';
+  sec.appendChild(frag);
+}
+
+function makeReceivedCommentCard(c) {
+  const div = document.createElement('div');
+  div.className = 'comment-card';
+  div.innerHTML = `
+    <div class="comment-card-head">
+      <span class="post-ts">${relTime(c.created_at)}</span>
+    </div>
+    <div class="comment-origin" data-post-id="${c.post_id}">📎 ${esc(c.post_title || '원본 글')} →</div>
+    <span class="comment-author-nick">👤 ${esc((c.nickname || '익명') + '님이 댓글을 남겼어요')}</span>
+    <div class="comment-body-text">${esc(c.body || '')}</div>`;
+  div.addEventListener('click', e => {
+    const co = e.target.closest('.comment-origin');
+    if (co) openDetail(+co.dataset.postId);
+    else openDetail(c.post_id);
+  });
+  return div;
+}
+
+/* ── 댓글 배지 ── */
+function checkCmtBadge() {
+  const saved = JSON.parse(localStorage.getItem('rkCmtCounts') || '{}');
+  let n = 0;
+  myPosts.forEach(p => {
+    const prev = saved[p.id] || 0;
+    if ((p.comment_count || 0) > prev) n += (p.comment_count || 0) - prev;
+  });
+  const badge = $('cmtBadge');
+  if (!badge) return;
+  if (n > 0) { badge.textContent = n; badge.classList.remove('hidden'); }
+  else        { badge.classList.add('hidden'); }
+}
+
+function markCmtRead() {
+  const c = {};
+  myPosts.forEach(p => { c[p.id] = p.comment_count || 0; });
+  localStorage.setItem('rkCmtCounts', JSON.stringify(c));
+  const badge = $('cmtBadge');
+  if (badge) badge.classList.add('hidden');
+}
+
+/* ── 야르~ 배지 ── */
 function checkYarBadge() {
   const saved = JSON.parse(localStorage.getItem('rkYarCounts') || '{}');
   let n = 0;
@@ -642,80 +720,7 @@ function markYarRead() {
   $('yarBadge').classList.add('hidden');
 }
 
-function renderYarers() {
-  const sec = $('secYars');
-  if (!allYarers.length) {
-    sec.innerHTML = `<div class="empty"><div class="empty-icon">🌟</div><div class="empty-text">아직 받은 야르~가 없어요</div><div class="empty-sub">좋은 글을 쓰면 친구들이 반응해 줄 거예요!</div></div>`;
-    return;
-  }
-  const card = document.createElement('div');
-  card.className = 'yar-card';
-  allYarers.forEach(y => {
-    const item = document.createElement('div');
-    item.className = 'yar-item';
-    item.innerHTML = `
-      <div class="yar-icon">🌟</div>
-      <div class="yar-info">
-        <div class="yar-nick">${esc(y.nickname)}</div>
-        <div class="yar-post">${esc(y.post_title)}</div>
-      </div>
-      <div class="yar-time">${relTime(y.created_at)}</div>`;
-    item.addEventListener('click', () => openDetail(y.post_id));
-    card.appendChild(item);
-  });
-  sec.innerHTML = '';
-  sec.appendChild(card);
-}
 
-/* ── 받은 댓글 배지 및 렌더 (SNS 요소) ── */
-function checkCmtBadge() {
-  const saved = JSON.parse(localStorage.getItem('rkCmtCounts') || '{}');
-  let n = 0;
-  myPosts.forEach(p => {
-    const prev = saved[p.id] || 0;
-    if ((p.comment_count || 0) > prev) n += (p.comment_count || 0) - prev;
-  });
-  const badge = $('cmtBadge');
-  if (n > 0) { badge.textContent = n; badge.classList.remove('hidden'); }
-  else        { badge.classList.add('hidden'); }
-}
-
-function markCmtRead() {
-  const c = {};
-  myPosts.forEach(p => { c[p.id] = p.comment_count || 0; });
-  localStorage.setItem('rkCmtCounts', JSON.stringify(c));
-  $('cmtBadge').classList.add('hidden');
-}
-
-function renderReceivedCommentsCards() {
-  const sec = $('secComments');
-  if (!receivedComments.length) {
-    sec.innerHTML = `<div class="empty"><div class="empty-icon">💬</div><div class="empty-text">아직 받은 댓글이 없어요</div><div class="empty-sub">글에 달린 댓글들이 여기에 모입니다.</div></div>`;
-    return;
-  }
-  const frag = document.createDocumentFragment();
-  receivedComments.forEach(c => frag.appendChild(makeReceivedCommentCard(c)));
-  sec.innerHTML = '';
-  sec.appendChild(frag);
-}
-
-function makeReceivedCommentCard(c) {
-  const div = document.createElement('div');
-  div.className = 'comment-card';
-  div.innerHTML = `
-    <div class="comment-card-head">
-      <span class="post-ts">${relTime(c.created_at)}</span>
-    </div>
-    <div class="comment-origin" data-post-id="${c.post_id}">📎 ${esc(c.post_title || '원본 글 보기')} →</div>
-    <span class="comment-author-nick">👤 ${esc(c.nickname || '익명')}</span>
-    <div class="comment-body-text">${esc(c.body)}</div>`;
-  div.addEventListener('click', e => {
-    const co = e.target.closest('.comment-origin');
-    if (co) openDetail(+co.dataset.postId);
-    else openDetail(c.post_id);
-  });
-  return div;
-}
 
 /* ── 바텀시트 ── */
 function openSheet(type, id, label) {
@@ -731,23 +736,20 @@ function closeSheet() {
 $('sheetOverlay').addEventListener('click',  e => { if (e.target === $('sheetOverlay')) closeSheet(); });
 $('sheetCancelBtn').addEventListener('click', closeSheet);
 $('sheetEditBtn').addEventListener('click',   () => { closeSheet(); alert('수정 기능은 준비 중이에요 😊'); });
-
 $('sheetDeleteBtn').addEventListener('click', () => {
   const t = sheetType, id = sheetId;
   closeSheet();
-  pendingDeleteFn = t === 'post' ? () => deletePost(id) : () => deleteComment(id);
+  pendingDeleteFn = () => deletePost(id);
   $('confirmOverlay').classList.remove('hidden');
 });
 
 /* ── 삭제 확인 ── */
 function closeConfirm() { $('confirmOverlay').classList.add('hidden'); pendingDeleteFn = null; }
 $('confirmNo').addEventListener('click',  closeConfirm);
-
-// 버그수정 1: Confirm 창 닫힘으로 인한 함수 소실 방지 백업 로직 적용
-$('confirmYes').addEventListener('click', () => { 
-  const fn = pendingDeleteFn; 
-  closeConfirm(); 
-  if (typeof fn === 'function') fn(); 
+$('confirmYes').addEventListener('click', () => {
+  const fn = pendingDeleteFn;
+  closeConfirm();
+  if (typeof fn === 'function') fn();
 });
 
 async function deletePost(postId) {
@@ -756,17 +758,10 @@ async function deletePost(postId) {
     const d = await r.json();
     if (d.ok) {
       myPosts = myPosts.filter(p => p.id !== postId);
-      await loadAll();
+      $('statPosts').textContent = myPosts.length;
+      $('statYars').textContent  = myPosts.reduce((s,p) => s+(p.yar_count||0), 0);
+      renderPosts();
     } else { alert(d.error === 'not_your_post' ? '내 글이 아니에요' : (d.error || '오류')); }
-  } catch { alert('오류가 발생했어요'); }
-}
-
-async function deleteComment(cmtId) {
-  // SNS 마이페이지 구조 변경으로 내 댓글 목록이 없어졌지만 기능은 유지
-  try {
-    const r = await fetch(apiUrl(`/comments/${cmtId}`), { method:'DELETE', credentials:'include' });
-    const d = await r.json();
-    if (!d.ok) { alert(d.error === 'not_your_comment' ? '내 댓글이 아니에요' : (d.error || '오류')); }
   } catch { alert('오류가 발생했어요'); }
 }
 
@@ -823,9 +818,9 @@ async function openDetail(postId) {
   $('dComments').innerHTML = '';
   $('cmtInput').value      = '';
   $('detailOverlay').classList.remove('hidden');
-  fetch(`${API}/posts/${postId}/view`, { method:'POST' }).catch(() => {});
+  fetch(apiUrl(`/posts/${postId}/view`), { method:'POST', credentials:'include' }).catch(() => {});
   try {
-    const r = await fetch(`${API}/posts/${postId}`);
+    const r = await fetch(apiUrl(`/posts/${postId}`), { credentials:'include' });
     const d = await r.json();
     if (!d.ok) { $('dBody').textContent = '불러올 수 없어요'; return; }
     const p = d.post;
@@ -944,7 +939,7 @@ async function sendCmt() {
   const btn = $('cmtSendBtn');
   btn.disabled = true; btn.textContent = '전송중';
   try {
-    const r = await fetch(`${API}/posts/${currentPost.id}/comments`, {
+    const r = await fetch(apiUrl(`/posts/${currentPost.id}/comments`), {
       method:'POST', credentials:'include',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ body, guest_id: guestId }),
@@ -973,14 +968,14 @@ document.addEventListener('keydown', e => {
   if (!$('detailOverlay').classList.contains('hidden'))  { closeDetail();  return; }
 });
 
-/* ── 초기화 (finally 블록 추가로 무한로딩 근원 차단) ── */
+/* ── 초기화 ── */
 async function init() {
   try {
     await initGuest();
     updateProfileUI();
     await loadAll();
-  } catch(e) {
-    console.error("Initialization error:", e);
+  } catch (e) {
+    console.error('init error', e);
   } finally {
     $('loader').classList.add('hidden');
   }
@@ -998,6 +993,7 @@ document.getElementById('statTabComments').addEventListener('click', () => switc
 
 init();
 
+/* ── ✅ 전역 노출 (HTML onclick에서 접근 가능하도록) ── */
 window.switchTab = switchTab;
 window.openDetail = openDetail;
 window.closeDetail = closeDetail;
