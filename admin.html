@@ -205,7 +205,12 @@
       <div class="tool-title">📌 공지 작성</div>
       <input  class="inp" id="noticeTitle" placeholder="공지 제목">
       <textarea class="txa" id="noticeBody" placeholder="공지 내용..." style="min-height:64px;"></textarea>
-      <input class="inp" id="noticeMediaUrl" placeholder="미디어 URL (선택)">
+      <div class="img-row" style="margin-bottom:8px;">
+        <input class="img-url-inp" id="noticeMediaUrl" placeholder="미디어 URL (선택)" style="flex:1;">
+        <input type="file" id="noticeMediaFile" accept="image/*,video/*,audio/*" style="display:none;" onchange="uploadNoticeMedia(this)">
+        <button class="img-up-btn" onclick="document.getElementById('noticeMediaFile').click()">📎 파일</button>
+      </div>
+      <div id="noticeMediaPreview" style="margin-bottom:8px;"></div>
       <button class="btn btn-blue btn-full" id="noticeSendBtn" onclick="publishNotice()">📌 공지 게시</button>
       <div class="status" id="noticeStatus"></div>
     </div>
@@ -237,6 +242,19 @@
         <div class="skel" style="height:50px;"></div>
       </div>
       <div class="status" id="noticeManageStatus"></div>
+    </div>
+
+    <!-- 금지어 관리 -->
+    <div class="tool-card">
+      <div class="tool-title">🚫 금지어 관리</div>
+      <div style="display:flex;gap:6px;margin-bottom:8px;">
+        <input class="inp" id="newBannedWord" placeholder="금지어 입력" style="margin-bottom:0;flex:1;" onkeypress="if(event.key==='Enter')addBannedWord()">
+        <button class="btn btn-red btn-sm" onclick="addBannedWord()">추가</button>
+      </div>
+      <div class="manage-list" id="bannedWordsList">
+        <div class="skel" style="height:36px;margin-bottom:4px;"></div>
+      </div>
+      <div class="status" id="bannedWordsStatus"></div>
     </div>
 
   </div>
@@ -461,10 +479,13 @@
   function adminFetch(path, opts) {
     opts = opts || {};
     var headers = {'X-Admin-Key': adminKey};
+    // FormData일 때는 Content-Type 설정 안 함 (브라우저가 boundary 포함해서 자동 설정)
     if (opts.body && typeof opts.body === 'string') {
       headers['Content-Type'] = 'application/json';
     }
-    return fetch(API + path, Object.assign({}, opts, {headers: headers}));
+    // opts.headers가 있어도 X-Admin-Key 유지 (단, Content-Type은 opts.headers 우선)
+    var mergedHeaders = Object.assign({}, headers, opts.headers || {});
+    return fetch(API + path, Object.assign({}, opts, {headers: mergedHeaders}));
   }
 
   // ── 로그인 (단순 로컬 비교)
@@ -520,7 +541,7 @@
 
   // ── 초기화
   async function init() {
-    await Promise.all([loadCharacters(), loadManagePosts(), loadManageNotices()]);
+    await Promise.all([loadCharacters(), loadManagePosts(), loadManageNotices(), loadBannedWords()]);
     await loadFeed();
   }
 
@@ -649,6 +670,7 @@
     const thumb = document.getElementById(thumbId);
     thumb.innerHTML='<div class="spinner" style="border-top-color:var(--blue);border-color:var(--border);"></div>';
     const fd=new FormData(); fd.append('image',file);
+    if(selectedChar?.id) fd.append('character_id', selectedChar.id);
     try {
       const r = await adminFetch('/admin/upload-image', { method:'POST', body:fd, headers:{'X-Admin-Key':adminKey} });
       const d = await r.json();
@@ -739,9 +761,10 @@
     btn.disabled=true; btn.innerHTML='<span class="spinner"></span> 게시 중';
     showStatus('aiPostStatus','게시 중...','info');
     try {
-      const r=await adminFetch('/admin/posts', {
+      const r=await adminFetch('/system/posts', {
         method:'POST', body:JSON.stringify({
-          character_id:selectedChar.id, title, body, media_url:mediaUrl||null,
+          system_user_id: selectedChar.id, title, body,
+          is_notice: false, media_url: mediaUrl||null,
         }),
       });
       const d=await r.json();
@@ -840,7 +863,7 @@
     if(!confirm('이 댓글을 삭제할까요?')) return;
     try {
       // admin 삭제 endpoint 없으면 일반 삭제 시도
-      const r=await adminFetch(`/comments/${cmtId}`, {method:'DELETE'});
+      const r=await adminFetch(`/admin/comments/${cmtId}`, {method:'DELETE'});
       const d=await r.json();
       if(d.ok) { toast('🗑 댓글 삭제 완료'); loadSelectedPostComments(); }
       else { toast(d.error||'삭제 실패',true); }
@@ -989,6 +1012,71 @@
       } else { showStatus('acStatus','❌ '+(d.error||'실패'),'error'); }
     } catch(e) { showStatus('acStatus','❌ '+e.message,'error'); }
     btn.disabled=false; btn.textContent='➕ 캐릭터 등록';
+  }
+
+
+  // ── 공지 미디어 업로드
+  async function uploadNoticeMedia(inputEl) {
+    const file = inputEl.files[0]; if(!file) return;
+    if(file.size > 20*1024*1024) { toast('20MB 이하 파일만 가능해요',true); return; }
+    const prev = document.getElementById('noticeMediaPreview');
+    prev.innerHTML = '<div style="font-size:12px;color:var(--sub);">업로드 중...</div>';
+    const type = file.type.startsWith('video') ? 'video' : file.type.startsWith('audio') ? 'audio' : 'image';
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('type', type);
+    try {
+      const r = await adminFetch('/admin/upload-media', { method:'POST', body:fd });
+      const d = await r.json();
+      if(d.ok) {
+        document.getElementById('noticeMediaUrl').value = d.url;
+        if(type==='image') prev.innerHTML = `<img src="${d.url}" style="max-height:80px;border-radius:8px;">`;
+        else if(type==='video') prev.innerHTML = `<div style="font-size:12px;color:var(--sub);">🎬 ${file.name}</div>`;
+        else prev.innerHTML = `<div style="font-size:12px;color:var(--sub);">🎵 ${file.name}</div>`;
+        toast('✅ 파일 업로드 완료');
+      } else { toast(d.error||'업로드 실패',true); prev.innerHTML=''; }
+    } catch(e) { toast('업로드 오류: '+e.message,true); prev.innerHTML=''; }
+    inputEl.value='';
+  }
+
+  // ── 금지어 관리
+  async function loadBannedWords() {
+    const wrap = document.getElementById('bannedWordsList');
+    try {
+      const r = await adminFetch('/admin/banned-words');
+      const d = await r.json();
+      const words = d.words || [];
+      if(!words.length) { wrap.innerHTML='<div style="color:var(--sub);font-size:13px;">금지어 없음</div>'; return; }
+      wrap.innerHTML = words.map(w=>`
+        <div class="manage-item" id="bw-${w.id}" style="padding:6px 10px;">
+          <div class="manage-info"><div class="manage-title">${esc(w.word)}</div></div>
+          <button class="manage-del" onclick="deleteBannedWord(${w.id})">삭제</button>
+        </div>`).join('');
+    } catch(e) { wrap.innerHTML=`<div style="color:var(--sub);font-size:13px;">불러오기 실패</div>`; }
+  }
+
+  async function addBannedWord() {
+    const word = document.getElementById('newBannedWord').value.trim();
+    if(!word) { showStatus('bannedWordsStatus','단어를 입력하세요','error'); return; }
+    try {
+      const r = await adminFetch('/admin/banned-words', {method:'POST', body:JSON.stringify({word})});
+      const d = await r.json();
+      if(d.ok) {
+        document.getElementById('newBannedWord').value='';
+        showStatus('bannedWordsStatus',`✅ "${word}" 추가됨`,'success');
+        await loadBannedWords();
+      } else { showStatus('bannedWordsStatus','❌ '+(d.error||'실패'),'error'); }
+    } catch(e) { showStatus('bannedWordsStatus','❌ '+e.message,'error'); }
+  }
+
+  async function deleteBannedWord(id) {
+    if(!confirm('이 금지어를 삭제할까요?')) return;
+    try {
+      const r = await adminFetch(`/admin/banned-words/${id}`, {method:'DELETE'});
+      const d = await r.json();
+      if(d.ok) { document.getElementById(`bw-${id}`)?.remove(); showStatus('bannedWordsStatus','✅ 삭제됨','success'); }
+      else { showStatus('bannedWordsStatus','❌ '+(d.error||'실패'),'error'); }
+    } catch(e) { showStatus('bannedWordsStatus','❌ '+e.message,'error'); }
   }
 
 </script>
