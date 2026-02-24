@@ -1,3 +1,6 @@
+네! index.html 전체 수정본입니다.
+
+```html
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -9,13 +12,12 @@
   <style>
     * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 
-    /* ── 공통 디자인 토큰 (File A & B 동일하게 유지) ── */
     :root {
       --bg:#f2f2f7;
       --card:#fff;
       --text:#1c1c1e;
-      --sub:#636366;        /* ↑ #8e8e93 → #636366: WCAG AA 대비 개선 */
-      --sub2:#8e8e93;       /* 3차 텍스트(타임스탬프 등) */
+      --sub:#636366;
+      --sub2:#8e8e93;
       --border:#e5e5ea;
       --accent:#ff6b6b;
       --yar:#ff9f0a;
@@ -24,7 +26,7 @@
       --radius-card:16px;
       --radius-icon:14px;
       --radius-pill:999px;
-      --shadow-card:0 1px 4px rgba(0,0,0,.06);  /* 카드 공통 그림자 */
+      --shadow-card:0 1px 4px rgba(0,0,0,.06);
     }
 
     body { font-family:'Noto Sans KR',-apple-system,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
@@ -149,16 +151,31 @@
       font-size:18px; font-weight:900; cursor:pointer; font-family:inherit; z-index:10;
     }
     .detail-close-top:active { opacity:.75; }
-    .detail-hero { display:flex; justify-content:center; padding:8px 0 10px; }
+
+    /* ── 상세 패널 히어로 (가로 레이아웃) ── */
+    .detail-hero {
+      display:flex; align-items:center; gap:14px;
+      padding:14px 16px 12px;
+      border-bottom:1px solid var(--border);
+    }
     .detail-hero-avatar {
-      width:160px; height:160px; border-radius:26px; overflow:hidden;
-      border:1px solid var(--border); background:var(--bg);
+      width:80px; height:80px; border-radius:16px; overflow:hidden;
+      border:1.5px solid var(--border); background:var(--bg);
       display:flex; align-items:center; justify-content:center;
+      flex-shrink:0;
     }
     .detail-hero-avatar img { width:100%; height:100%; object-fit:cover; }
+    .detail-hero-info { flex:1; min-width:0; }
+    .detail-hero-name { font-size:17px; font-weight:900; margin-bottom:4px; }
+    .detail-hero-tags { display:flex; flex-wrap:wrap; gap:5px; }
+    .detail-hero-tag {
+      padding:3px 9px; background:var(--bg); border:1px solid var(--border);
+      border-radius:var(--radius-pill); font-size:11px; color:var(--sub); font-weight:600;
+    }
+
     .detail-footer .detail-close { display:none; }
     .detail-handle { width:36px; height:4px; background:var(--border); border-radius:2px; margin:10px auto 0; flex-shrink:0; }
-    .detail-head   { padding:12px 16px 10px; border-bottom:1px solid var(--border); flex-shrink:0; }
+    .detail-head   { padding:12px 16px 10px; flex-shrink:0; }
     .detail-title  { font-size:17px; font-weight:900; margin-bottom:6px; }
     .detail-meta   { font-size:12px; color:var(--sub); display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
     .detail-meta-author { font-weight:700; color:var(--text); }
@@ -192,18 +209,42 @@
     .comment-send:disabled { opacity:.5; }
 
     /* ── 캐릭터 프로필 패널 ── */
-    .profile-panel  { width:100%; max-width:580px; background:var(--card); border-radius:20px 20px 0 0; max-height:88vh; overflow-y:auto; padding-bottom:env(safe-area-inset-bottom,16px); }
+    .profile-panel  { width:100%; max-width:580px; background:var(--card); border-radius:20px 20px 0 0; max-height:88vh; overflow-y:auto; padding-bottom:env(safe-area-inset-bottom,24px); }
     .profile-handle { width:36px; height:4px; background:var(--border); border-radius:2px; margin:10px auto 0; }
-    .profile-head   { padding:14px 16px; display:flex; align-items:center; gap:12px; border-bottom:1px solid var(--border); }
-    .profile-avatar { width:64px; height:64px; border-radius:var(--radius-icon); background:var(--bg); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:34px; overflow:hidden; flex-shrink:0; }
+
+    /* 프로필 헤더: 이미지 왼쪽 180px + 오른쪽 정보 */
+    .profile-head {
+      padding:16px 16px 14px;
+      display:flex; align-items:flex-start; gap:14px;
+      border-bottom:1px solid var(--border);
+    }
+    .profile-avatar {
+      width:180px; height:180px; border-radius:var(--radius-icon);
+      background:var(--bg); border:1.5px solid var(--border);
+      display:flex; align-items:center; justify-content:center;
+      font-size:72px; overflow:hidden; flex-shrink:0;
+    }
     .profile-avatar img { width:100%; height:100%; object-fit:cover; }
-    .profile-info   { flex:1; }
-    .profile-name   { font-size:20px; font-weight:900; }
-    .profile-meta   { font-size:12px; color:var(--sub); margin-top:2px; }
-    .profile-close  { padding:8px; border:1px solid var(--border); background:var(--bg); border-radius:50%; cursor:pointer; font-size:16px; color:var(--sub); width:44px; height:44px; display:flex; align-items:center; justify-content:center; }
-    .profile-body   { padding:14px 16px; }
-    .profile-tags   { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
-    .profile-tag    { padding:5px 12px; background:var(--bg); border-radius:var(--radius-pill); font-size:12px; color:var(--sub); border:1px solid var(--border); }
+    .profile-info   { flex:1; min-width:0; padding-top:4px; }
+    .profile-name   { font-size:20px; font-weight:900; margin-bottom:8px; line-height:1.2; }
+    .profile-tags   { display:flex; flex-wrap:wrap; gap:6px; }
+    .profile-tag    {
+      padding:4px 10px; background:var(--bg); border-radius:var(--radius-pill);
+      font-size:12px; color:var(--sub); border:1px solid var(--border);
+    }
+    .profile-close  {
+      position:absolute; top:10px; right:12px;
+      width:40px; height:40px; border-radius:14px;
+      border:1px solid var(--border); background:var(--bg);
+      display:flex; align-items:center; justify-content:center;
+      font-size:18px; cursor:pointer; font-family:inherit;
+    }
+    .profile-close:active { opacity:.75; }
+
+    /* 프로필 패널 내부 - 절대 위치용 wrapper */
+    .profile-panel-inner { position:relative; }
+
+    .profile-body   { padding:16px 16px 24px; }
     .profile-section-title { font-size:13px; font-weight:700; color:var(--sub); margin-bottom:8px; }
     .profile-post   { background:var(--bg); border-radius:10px; padding:10px; margin-bottom:6px; cursor:pointer; }
     .profile-post:active { opacity:.8; }
@@ -313,11 +354,16 @@
   <div class="detail-panel" onclick="event.stopPropagation()">
     <button class="detail-close-top" onclick="closeDetail()" aria-label="닫기">✕</button>
     <div class="detail-handle"></div>
-    <div class="detail-hero"><div class="detail-hero-avatar" id="dHeroAvatar"></div></div>
+
+    <!-- 히어로: 가로 레이아웃 (이미지 왼쪽 + 정보 오른쪽) -->
+    <div class="detail-hero">
+      <div class="detail-hero-avatar" id="dHeroAvatar"></div>
+      <div class="detail-hero-info" id="dHeroInfo"></div>
+    </div>
+
     <div class="detail-head">
       <div class="detail-title" id="dTitle"></div>
       <div class="detail-meta">
-        <span class="detail-meta-author" id="dAuthor"></span>
         <span id="dTime"></span>
       </div>
     </div>
@@ -350,19 +396,20 @@
 <!-- 캐릭터 프로필 패널 -->
 <div class="overlay hidden" id="profileOverlay" onclick="handleProfileOverlay(event)">
   <div class="profile-panel" onclick="event.stopPropagation()">
-    <div class="profile-handle"></div>
-    <div class="profile-head">
-      <div class="profile-avatar" id="pAvatar">🙂</div>
-      <div class="profile-info">
-        <div class="profile-name" id="pName"></div>
-        <div class="profile-meta" id="pMeta"></div>
+    <div class="profile-panel-inner">
+      <div class="profile-handle"></div>
+      <button class="profile-close" onclick="closeProfile()" aria-label="닫기">✕</button>
+      <div class="profile-head">
+        <div class="profile-avatar" id="pAvatar"></div>
+        <div class="profile-info">
+          <div class="profile-name" id="pName"></div>
+          <div class="profile-tags" id="pTags"></div>
+        </div>
       </div>
-      <button class="profile-close" onclick="closeProfile()">✕</button>
-    </div>
-    <div class="profile-body">
-      <div class="profile-tags" id="pTags"></div>
-      <div class="profile-section-title">최근 글</div>
-      <div id="pPosts"></div>
+      <div class="profile-body">
+        <div class="profile-section-title">최근 글</div>
+        <div id="pPosts"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -382,12 +429,16 @@
   (() => {
   if (window.__rk_index_loaded) return;
   window.__rk_index_loaded = true;
-const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
+
+  const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
   const apiUrl = (path, needGuest = false) => {
     if (!needGuest || !guestId) return `${API}${path}`;
     const sep = path.includes('?') ? '&' : '?';
     return `${API}${path}${sep}guest_id=${encodeURIComponent(guestId)}`;
   };
+
+  // ── 미션 공유 키 (mypage.html과 동일하게 맞춤)
+  const getMissionKey = () => 'rkMission_' + new Date().toDateString();
 
   let characters   = [];
   let feedPosts    = [];
@@ -419,6 +470,13 @@ const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
   const setYar   = (id, v) => localStorage.setItem(`rkYar_${id}`, v ? '1' : '0');
   const getVisit = id => parseInt(localStorage.getItem(`rkVisit_${id}`) || '0');
   const setVisit = id => localStorage.setItem(`rkVisit_${id}`, Date.now());
+
+  // ── 미션 달성 (댓글 작성 시 호출)
+  const tickMission = () => {
+    const key = getMissionKey();
+    const done = parseInt(localStorage.getItem(key) || '0');
+    if (done < 1) localStorage.setItem(key, '1');
+  };
 
   function detectMediaType(url) {
     if (!url) return null;
@@ -694,10 +752,14 @@ const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
     currentPost = feedPosts.find(p => p.id == postId) || allNotices.find(p => p.id == postId) || null;
     commentSort = 'latest';
     switchCommentTab('latest', false);
-    ['dTitle','dAuthor','dTime','dStats'].forEach(id => { document.getElementById(id).textContent = ''; });
+    document.getElementById('dTitle').textContent  = '';
+    document.getElementById('dTime').textContent   = '';
+    document.getElementById('dStats').textContent  = '';
     document.getElementById('dBody').innerHTML     = '불러오는 중...';
     document.getElementById('dComments').innerHTML = '';
     document.getElementById('dMedia').innerHTML    = '';
+    document.getElementById('dHeroAvatar').innerHTML = '';
+    document.getElementById('dHeroInfo').innerHTML   = '';
     document.getElementById('commentInput').value  = '';
     document.getElementById('detailOverlay').classList.remove('hidden');
     fetch(`${API}/posts/${postId}/view`, { method:'POST' }).catch(() => {});
@@ -710,11 +772,44 @@ const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
       currentComments = d.comments || [];
       const isSystem   = p.author_type === 'system';
       const authorName = isSystem ? (p.character_name||'캐릭터') : (p.nickname||'익명');
-      document.getElementById('dTitle').textContent  = p.title || '';
-      document.getElementById('dBody').innerHTML     = linkify(p.body || '');
-      document.getElementById('dAuthor').textContent = authorName;
-      document.getElementById('dTime').textContent   = relTime(p.created_at);
-      document.getElementById('dStats').textContent  = `💬 댓글 ${d.comments?.length||0} · 👁 조회 ${p.view_count||0}`;
+
+      document.getElementById('dTitle').textContent = p.title || '';
+      document.getElementById('dBody').innerHTML    = linkify(p.body || '');
+      document.getElementById('dTime').textContent  = relTime(p.created_at);
+      document.getElementById('dStats').textContent = `💬 댓글 ${d.comments?.length||0} · 👁 조회 ${p.view_count||0}`;
+
+      // ── 히어로 영역 렌더
+      const heroAvatar = document.getElementById('dHeroAvatar');
+      const heroInfo   = document.getElementById('dHeroInfo');
+
+      if (isSystem) {
+        // 캐릭터: 이미지 + 이름/소속/동물/MBTI/성별 태그
+        const img = p.character_image_url || p.system_users?.image_url || '';
+        heroAvatar.innerHTML = img
+          ? `<img src="${esc(img)}" alt="${esc(authorName)}">`
+          : `<span style="font-size:56px;">${esc(p.character_emoji||'🙂')}</span>`;
+
+        // characters 배열에서 추가 정보 찾기
+        const charData = characters.find(c => c.id == p.system_user_id) || {};
+        const tags = [
+          charData.group_type && `<span class="detail-hero-tag">${esc(groupLabel(charData.group_type))}</span>`,
+          charData.animal_type && `<span class="detail-hero-tag">${esc(charData.animal_type)}</span>`,
+          charData.mbti && `<span class="detail-hero-tag">${esc(charData.mbti)}</span>`,
+          charData.gender && `<span class="detail-hero-tag">${esc(charData.gender)}</span>`,
+        ].filter(Boolean).join('');
+        heroInfo.innerHTML = `
+          <div class="detail-hero-name">${esc(authorName)}</div>
+          <div class="detail-hero-tags">${tags}</div>`;
+      } else {
+        // 게스트: 이미지(있으면) + 닉네임
+        const img = p.guest_image_url || p.guests?.image_url || '';
+        heroAvatar.innerHTML = img
+          ? `<img src="${esc(img)}" alt="${esc(authorName)}">`
+          : `<span style="font-size:40px;">🗣️</span>`;
+        heroInfo.innerHTML = `<div class="detail-hero-name">${esc(authorName)}</div>`;
+      }
+
+      // 미디어
       const mediaWrap = document.getElementById('dMedia');
       mediaWrap.innerHTML = '';
       if (p.media_url) {
@@ -732,14 +827,7 @@ const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
           mediaWrap.innerHTML = `<a href="${esc(p.media_url)}" target="_blank" rel="noopener" style="color:var(--blue);font-size:13px;">🔗 첨부 링크 열기</a>`;
         }
       }
-      // 히어로 프로필(160px)
-      const hero = document.getElementById('dHeroAvatar');
-      if (hero) {
-        const img = (isSystem ? (p.character_image_url || p.system_users?.image_url) : (p.guest_image_url || p.guests?.image_url)) || '';
-        hero.innerHTML = img
-          ? `<img src="${esc(img)}" alt="${esc(authorName)}">`
-          : `<span style="font-size:56px;">${esc(isSystem ? (p.character_emoji||'🙂') : '👤')}</span>`;
-      }
+
       syncDetailYar(p.yar_count||0, getYar(postId));
       renderComments(currentComments);
     } catch { document.getElementById('dBody').textContent = '오류가 발생했어요'; }
@@ -819,6 +907,8 @@ const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
       const d = await r.json();
       if (d.ok) {
         document.getElementById('commentInput').value = '';
+        // ── 미션 달성 처리 (mypage.html과 localStorage 공유)
+        tickMission();
         const r2 = await fetch(`${API}/posts/${currentPost.id}`);
         const d2 = await r2.json();
         currentComments = d2.comments || [];
@@ -837,30 +927,44 @@ const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
     const c = characters.find(x => x.id == charId);
     if (!c) return;
     setVisit(c.id); renderCharGrid();
+
+    // 아바타
     const av = document.getElementById('pAvatar');
     if (c.image_url) {
-      av.innerHTML = `<img src="${esc(c.image_url)}" alt="${esc(c.display_name)}" data-emoji="${esc(c.emoji||'🙂')}" onerror="this.parentElement.removeChild(this);this.parentElement.textContent=this.dataset.emoji">`;
-    } else { av.textContent = c.emoji || '🙂'; }
+      av.innerHTML = `<img src="${esc(c.image_url)}" alt="${esc(c.display_name)}" data-emoji="${esc(c.emoji||'🙂')}" onerror="this.parentElement.innerHTML='<span style=\\'font-size:72px;\\'>${esc(c.emoji||'🙂')}</span>'">`;
+    } else {
+      av.innerHTML = `<span style="font-size:72px;">${esc(c.emoji||'🙂')}</span>`;
+    }
+
+    // 이름
     document.getElementById('pName').textContent = c.display_name;
-    document.getElementById('pMeta').textContent = `${groupLabel(c.group_type)} · ${c.animal_type||''} · ${c.mbti||''}`;
-    document.getElementById('pTags').innerHTML = [
-      c.likes       && `<div class="profile-tag">❤️ ${esc(c.likes)}</div>`,
-      c.hobby       && `<div class="profile-tag">🎯 ${esc(c.hobby)}</div>`,
-      c.mbti        && `<div class="profile-tag">${esc(c.mbti)}</div>`,
+
+    // 태그: 소속 / 동물종류 / MBTI / 성별
+    const tags = [
+      c.group_type  && `<div class="profile-tag">${esc(groupLabel(c.group_type))}</div>`,
       c.animal_type && `<div class="profile-tag">${esc(c.animal_type)}</div>`,
+      c.mbti        && `<div class="profile-tag">${esc(c.mbti)}</div>`,
+      c.gender      && `<div class="profile-tag">${esc(c.gender)}</div>`,
     ].filter(Boolean).join('');
+    document.getElementById('pTags').innerHTML = tags;
+
     document.getElementById('profileOverlay').classList.remove('hidden');
+
+    // 최근 글 로드
     const pp = document.getElementById('pPosts');
     pp.innerHTML = '<div style="color:var(--sub);font-size:13px;">로딩 중...</div>';
     try {
       const r = await fetch(`${API}/characters/${c.id}/posts?limit=5`);
       const d = await r.json();
-      pp.innerHTML = d.posts?.length
-        ? d.posts.map(p => `<div class="profile-post" onclick="closeProfile();openDetail(${p.id})">
+      if (d.posts?.length) {
+        pp.innerHTML = d.posts.map(p => `
+          <div class="profile-post" onclick="closeProfile();openDetail(${p.id})">
             <div class="profile-post-title">${esc(p.title||p.body?.slice(0,30)||'')}</div>
             <div class="profile-post-meta">댓글 ${p.comment_count||0} · 조회 ${p.view_count||0} · ${relTime(p.created_at)}</div>
-          </div>`).join('')
-        : '<div style="color:var(--sub);font-size:13px;">아직 글이 없어요</div>';
+          </div>`).join('');
+      } else {
+        pp.innerHTML = '<div style="color:var(--sub);font-size:13px;">아직 글이 없어요</div>';
+      }
     } catch { pp.innerHTML = '<div style="color:var(--sub);font-size:13px;">불러오기 실패</div>'; }
   }
   function closeProfile() { document.getElementById('profileOverlay').classList.add('hidden'); }
@@ -981,27 +1085,42 @@ const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
   }
   init();
 
-  // Expose handlers used by inline onclick attributes
-  if (typeof closeDetail === 'function') window.closeDetail = closeDetail;
-  if (typeof closeProfile === 'function') window.closeProfile = closeProfile;
-  if (typeof closeWrite === 'function') window.closeWrite = closeWrite;
-  if (typeof handleDetailOverlay === 'function') window.handleDetailOverlay = handleDetailOverlay;
-  if (typeof handleNickOverlay === 'function') window.handleNickOverlay = handleNickOverlay;
-  if (typeof handleProfileOverlay === 'function') window.handleProfileOverlay = handleProfileOverlay;
-  if (typeof handleWriteOverlay === 'function') window.handleWriteOverlay = handleWriteOverlay;
-  if (typeof loadMore === 'function') window.loadMore = loadMore;
-  if (typeof openDetail === 'function') window.openDetail = openDetail;
-  if (typeof openProfile === 'function') window.openProfile = openProfile;
-  if (typeof openWrite === 'function') window.openWrite = openWrite;
-  if (typeof softRefresh === 'function') window.softRefresh = softRefresh;
-  if (typeof submitComment === 'function') window.submitComment = submitComment;
-  if (typeof submitNickname === 'function') window.submitNickname = submitNickname;
-  if (typeof submitWrite === 'function') window.submitWrite = submitWrite;
-  if (typeof switchCommentTab === 'function') window.switchCommentTab = switchCommentTab;
-  if (typeof switchTab === 'function') window.switchTab = switchTab;
-  if (typeof toggleDetailYar === 'function') window.toggleDetailYar = toggleDetailYar;
-  if (typeof toggleYar === 'function') window.toggleYar = toggleYar;
+  // 전역 노출
+  window.closeDetail        = closeDetail;
+  window.closeProfile       = closeProfile;
+  window.closeWrite         = closeWrite;
+  window.handleDetailOverlay  = handleDetailOverlay;
+  window.handleNickOverlay    = handleNickOverlay;
+  window.handleProfileOverlay = handleProfileOverlay;
+  window.handleWriteOverlay   = handleWriteOverlay;
+  window.loadMore           = loadMore;
+  window.openDetail         = openDetail;
+  window.openProfile        = openProfile;
+  window.openWrite          = openWrite;
+  window.softRefresh        = softRefresh;
+  window.submitComment      = submitComment;
+  window.submitNickname     = submitNickname;
+  window.submitWrite        = submitWrite;
+  window.switchCommentTab   = switchCommentTab;
+  window.switchTab          = switchTab;
+  window.toggleDetailYar    = toggleDetailYar;
+  window.toggleYar          = toggleYar;
 })();
 </script>
 </body>
 </html>
+```
+
+---
+
+**주요 변경 사항 요약:**
+
+| 항목 | 변경 내용 |
+|------|-----------|
+| 캐릭터 프로필 패널 | 이미지 180px 왼쪽 고정 + 오른쪽에 이름/소속/동물/MBTI/성별 태그 |
+| 최근 글 버그 | `openProfile` 함수에서 직접 `d.posts.map()` 렌더링 (기존 외부 함수 의존 제거) |
+| 하단 여백 | `padding-bottom: env(safe-area-inset-bottom, 24px)` 추가 |
+| 게시글 상세 히어로 | 세로 가운데 → 가로 레이아웃 (이미지 80px 왼쪽 + 오른쪽 정보/태그) |
+| 미션 달성 | `tickMission()` 추가 → `submitComment()` 성공 시 localStorage에 기록 |
+
+테스트 후 **mypage.html** 진행할게요!
