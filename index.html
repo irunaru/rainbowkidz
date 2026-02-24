@@ -140,7 +140,23 @@
     .overlay.hidden { display:none; }
 
     /* ── 상세 패널 ── */
-    .detail-panel { width:100%; max-width:640px; background:var(--card); border-radius:20px 20px 0 0; max-height:90vh; display:flex; flex-direction:column; }
+    .detail-panel { position:relative; width:100%; max-width:640px; background:var(--card); border-radius:20px 20px 0 0; max-height:90vh; display:flex; flex-direction:column; }
+    .detail-close-top {
+      position:absolute; top:10px; right:12px;
+      width:40px; height:40px; border-radius:14px;
+      border:1px solid var(--border); background:var(--bg);
+      display:flex; align-items:center; justify-content:center;
+      font-size:18px; font-weight:900; cursor:pointer; font-family:inherit; z-index:10;
+    }
+    .detail-close-top:active { opacity:.75; }
+    .detail-hero { display:flex; justify-content:center; padding:8px 0 10px; }
+    .detail-hero-avatar {
+      width:160px; height:160px; border-radius:26px; overflow:hidden;
+      border:1px solid var(--border); background:var(--bg);
+      display:flex; align-items:center; justify-content:center;
+    }
+    .detail-hero-avatar img { width:100%; height:100%; object-fit:cover; }
+    .detail-footer .detail-close { display:none; }
     .detail-handle { width:36px; height:4px; background:var(--border); border-radius:2px; margin:10px auto 0; flex-shrink:0; }
     .detail-head   { padding:12px 16px 10px; border-bottom:1px solid var(--border); flex-shrink:0; }
     .detail-title  { font-size:17px; font-weight:900; margin-bottom:6px; }
@@ -295,7 +311,9 @@
 <!-- 게시글 상세 패널 -->
 <div class="overlay hidden" id="detailOverlay" onclick="handleDetailOverlay(event)">
   <div class="detail-panel" onclick="event.stopPropagation()">
+    <button class="detail-close-top" onclick="closeDetail()" aria-label="닫기">✕</button>
     <div class="detail-handle"></div>
+    <div class="detail-hero"><div class="detail-hero-avatar" id="dHeroAvatar"></div></div>
     <div class="detail-head">
       <div class="detail-title" id="dTitle"></div>
       <div class="detail-meta">
@@ -713,6 +731,14 @@ const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
         } else {
           mediaWrap.innerHTML = `<a href="${esc(p.media_url)}" target="_blank" rel="noopener" style="color:var(--blue);font-size:13px;">🔗 첨부 링크 열기</a>`;
         }
+      }
+      // 히어로 프로필(160px)
+      const hero = document.getElementById('dHeroAvatar');
+      if (hero) {
+        const img = (isSystem ? (p.character_image_url || p.system_users?.image_url) : (p.guest_image_url || p.guests?.image_url)) || '';
+        hero.innerHTML = img
+          ? `<img src="${esc(img)}" alt="${esc(authorName)}">`
+          : `<span style="font-size:56px;">${esc(isSystem ? (p.character_emoji||'🙂') : '👤')}</span>`;
       }
       syncDetailYar(p.yar_count||0, getYar(postId));
       renderComments(currentComments);
