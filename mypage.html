@@ -15,17 +15,13 @@
     }
     body { font-family:'Noto Sans KR',-apple-system,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
     .hidden { display:none !important; }
-
     #loader { position:fixed; inset:0; background:rgba(255,255,255,.96); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:9000; gap:10px; }
     .spinner { width:28px; height:28px; border:3px solid var(--border); border-top-color:var(--text); border-radius:50%; animation:spin .8s linear infinite; }
     @keyframes spin { to{ transform:rotate(360deg); } }
-
     .header { background:var(--card); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:100; }
     .header-inner { max-width:640px; margin:0 auto; padding:10px 16px; display:flex; align-items:center; }
     .header-title { font-size:17px; font-weight:900; }
     .container { max-width:640px; margin:0 auto; padding:16px 16px 96px; }
-
-    /* 프로필 */
     .profile-card { background:var(--card); border-radius:var(--radius-card); padding:20px; margin-bottom:12px; box-shadow:var(--shadow); }
     .profile-top { display:flex; align-items:center; gap:16px; }
     .avatar-wrap { position:relative; flex-shrink:0; cursor:pointer; }
@@ -40,7 +36,6 @@
     .btn-sm.primary { background:var(--text); color:#fff; }
     .btn-sm.outline { background:var(--bg); color:var(--text); border:1.5px solid var(--border); }
     .btn-sm:active { opacity:.75; }
-
     .nick-edit { background:var(--bg); border-radius:14px; padding:12px; margin-top:14px; }
     .nick-edit-hint { font-size:12px; color:var(--sub); line-height:1.45; margin-bottom:8px; }
     .nick-row { display:flex; gap:8px; }
@@ -51,8 +46,6 @@
     .nick-msg { font-size:12px; margin-top:6px; min-height:16px; }
     .nick-msg.err { color:var(--accent); }
     .nick-msg.cool { color:var(--sub); }
-
-    /* 통합 탭(통계=탭) */
     .unified-tabs { display:flex; background:var(--card); border-radius:var(--radius-card); padding:4px; margin-top:16px; gap:4px; box-shadow:var(--shadow); border:1px solid var(--border); }
     .u-tab-btn { flex:1; padding:12px 0; border:none; background:transparent; cursor:pointer; border-radius:12px; display:flex; flex-direction:column; align-items:center; position:relative; transition:background .15s; font-family:inherit; }
     .u-tab-btn.active { background:var(--bg); }
@@ -61,8 +54,6 @@
     .u-tab-btn .label { font-size:11px; font-weight:800; color:var(--sub2); margin-top:2px; }
     .u-tab-btn.active .label { color:var(--text); }
     .u-badge { position:absolute; top:8px; right:16%; background:var(--accent); color:#fff; border-radius:10px; font-size:10px; font-weight:900; padding:1px 5px; border:2px solid var(--card); }
-
-    /* SNS 피드 카드 (야르/댓글 공용) */
     .list-item { background:var(--card); border-radius:var(--radius-card); padding:16px; margin-bottom:10px; box-shadow:var(--shadow); display:flex; gap:12px; align-items:flex-start; cursor:pointer; }
     .item-avatar { width:46px; height:46px; border-radius:14px; background:var(--bg); flex-shrink:0; overflow:hidden; border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:22px; }
     .item-avatar img { width:100%; height:100%; object-fit:cover; }
@@ -70,25 +61,18 @@
     .item-top { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:4px; }
     .item-nick { font-size:14px; font-weight:900; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .item-tag { font-size:11px; font-weight:800; color:var(--blue); background:rgba(0,122,255,0.08); padding:2px 6px; border-radius:5px; flex-shrink:0; }
-    .item-content { font-size:14px; color:var(--text); line-height:1.4; margin-bottom:6px; word-break:break-word; }
-    .item-target { font-size:12px; color:var(--sub); background:var(--bg); padding:6px 10px; border-radius:10px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .item-meta { font-size:11px; color:var(--sub2); margin-top:6px; }
-
-    /* 내 글 카드 */
+    .item-content { font-size:13px; color:var(--sub); line-height:1.45; word-break:break-word; margin-top:4px; }
+    .item-target { font-size:12px; color:var(--sub); background:var(--bg); padding:5px 10px; border-radius:8px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin:4px 0; }
+    .item-meta { font-size:11px; color:var(--sub2); white-space:nowrap; }
     .post-card { background:var(--card); border-radius:var(--radius-card); padding:16px; margin-bottom:10px; box-shadow:var(--shadow); cursor:pointer; }
     .post-title { font-size:15px; font-weight:900; margin-bottom:6px; line-height:1.35; }
     .post-body { font-size:13px; color:var(--sub); line-height:1.45; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; margin-bottom:10px; }
     .post-meta { display:flex; gap:12px; font-size:12px; color:var(--sub); align-items:center; }
     .post-delete { margin-left:auto; color:var(--accent); border:none; background:none; font-size:12px; font-weight:900; cursor:pointer; font-family:inherit; }
-
     .empty { text-align:center; padding:48px 20px; color:var(--sub2); }
-
-    /* 하단 */
     .bottom-nav { position:fixed; bottom:0; left:0; right:0; background:var(--card); border-top:1px solid var(--border); display:flex; z-index:100; padding-bottom:env(safe-area-inset-bottom,0); }
     .bottom-nav a { flex:1; text-align:center; padding:12px 0; text-decoration:none; color:var(--sub); font-size:10px; font-weight:800; }
     .bottom-nav a.active { color:var(--text); }
-
-    /* 삭제 확인 */
     .confirm-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:2000; display:flex; align-items:center; justify-content:center; padding:24px; }
     .confirm-overlay.hidden { display:none; }
     .confirm-box { background:#fff; padding:22px; border-radius:22px; width:100%; max-width:300px; text-align:center; }
@@ -101,21 +85,18 @@
   </style>
 </head>
 <body>
-
 <div id="loader">
   <div style="font-size:44px;">🌈</div>
   <div class="spinner"></div>
   <div style="font-size:13px;color:var(--sub);">불러오는 중...</div>
 </div>
-
 <div class="header">
   <div class="header-inner"><div class="header-title">👤 내 페이지</div></div>
 </div>
-
 <div class="container">
   <div class="profile-card">
     <div class="profile-top">
-      <div class="avatar-wrap" id="avatarWrap" aria-label="프로필 이미지 변경">
+      <div class="avatar-wrap" id="avatarWrap">
         <div class="avatar-img" id="avatarImg">👤</div>
         <div class="avatar-cam">📷</div>
       </div>
@@ -128,7 +109,6 @@
         </div>
       </div>
     </div>
-
     <div class="nick-edit hidden" id="nickEdit">
       <div class="nick-edit-hint">한글·영문·숫자 1~10자. 이미 사용 중인 닉네임은 불가합니다.</div>
       <div class="nick-row">
@@ -137,9 +117,7 @@
       </div>
       <div class="nick-msg" id="nickMsg"></div>
     </div>
-
     <input type="file" id="avatarInput" accept="image/*" style="display:none">
-
     <div class="unified-tabs" style="margin-top:16px;">
       <button class="u-tab-btn active" id="tabPosts" type="button">
         <span class="num" id="statPosts">0</span>
@@ -147,28 +125,25 @@
       </button>
       <button class="u-tab-btn" id="tabYars" type="button">
         <span class="num" id="statYars">0</span>
-        <span class="label">🌟 야르~</span>
+        <span class="label">🌟 받은 야르~</span>
         <span class="u-badge hidden" id="yarBadge">0</span>
       </button>
       <button class="u-tab-btn" id="tabComments" type="button">
         <span class="num" id="statComments">0</span>
-        <span class="label">💬 댓글</span>
+        <span class="label">💬 받은 댓글</span>
         <span class="u-badge hidden" id="cmtBadge">0</span>
       </button>
     </div>
   </div>
-
   <div id="secPosts"></div>
   <div id="secYars" class="hidden"></div>
   <div id="secComments" class="hidden"></div>
 </div>
-
 <div class="bottom-nav">
   <a href="index.html">🏠 홈</a>
   <a href="#" id="writeNavBtn">✏️ 글쓰기</a>
   <a href="mypage.html" class="active">👤 내 페이지</a>
 </div>
-
 <div class="confirm-overlay hidden" id="confirmOverlay">
   <div class="confirm-box">
     <div class="confirm-title">글을 삭제할까요?</div>
@@ -179,30 +154,16 @@
     </div>
   </div>
 </div>
-
 <script>
 (() => {
   'use strict';
-
   const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
-
-  let guestId = null;
-  let myNickname = null;
-
-  let myPosts = [];
-  let allYarers = [];
-  let receivedComments = [];
-
+  let guestId = null, myNickname = null;
+  let myPosts = [], allYarers = [], receivedComments = [];
   let pendingDeleteFn = null;
-
-  const $ = (id) => document.getElementById(id);
-  const esc = (s) => String(s ?? '')
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;');
-
-  const relTime = (d) => {
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const relTime = d => {
     if (!d) return '';
     const sec = (Date.now() - new Date(d).getTime()) / 1000;
     if (sec < 60) return '방금';
@@ -211,217 +172,124 @@
     if (sec < 604800) return `${Math.floor(sec/86400)}일 전`;
     try { return new Date(d).toLocaleDateString('ko-KR',{month:'long',day:'numeric'}); } catch { return ''; }
   };
+  const apiUrl = p => { const sep = p.includes('?')?'&':'?'; return guestId?`${API}${p}${sep}guest_id=${encodeURIComponent(guestId)}`:`${API}${p}`; };
 
-  const apiUrl = (p) => {
-    const sep = p.includes('?') ? '&' : '?';
-    return guestId ? `${API}${p}${sep}guest_id=${encodeURIComponent(guestId)}` : `${API}${p}`;
-  };
-
+  // [FIX 2/3] createSafeImg - src 없으면 이모지만 반환
   const createSafeImg = (src, fallbackEmoji) => {
-    if (!src) return fallbackEmoji;
-    const safe = esc(src);
-    // onerror는 인라인이지만, 단일 목적(깨진 이미지 fallback)이며 사용자 입력 HTML을 주입하지 않음.
-    return `<img src="${safe}" alt="" onerror="this.outerHTML='${fallbackEmoji}'">`;
+    if (!src) return `<span style="font-size:22px;">${fallbackEmoji}</span>`;
+    return `<img src="${esc(src)}" alt="" onerror="this.outerHTML='<span style=\\'font-size:22px;\\'>${fallbackEmoji}</span>'">`;
   };
 
-  function setLoader(on) {
-    $('loader').classList.toggle('hidden', !on);
-  }
+  const setLoader = on => $('loader').classList.toggle('hidden', !on);
 
   async function initGuest() {
     try {
-      const r = await fetch(`${API}/guest/init`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ existing_gid: localStorage.getItem('rkGuestId') || null })
-      });
-      if (r.ok) {
-        const d = await r.json();
-        if (d.guest_id) {
-          guestId = d.guest_id;
-          localStorage.setItem('rkGuestId', d.guest_id);
-        }
-      }
-    } catch (e) {
-      // ignore
-    }
-
+      const r = await fetch(`${API}/guest/init`, { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body:JSON.stringify({existing_gid:localStorage.getItem('rkGuestId')||null}) });
+      if (r.ok) { const d = await r.json(); if (d.guest_id) { guestId = d.guest_id; localStorage.setItem('rkGuestId', d.guest_id); } }
+    } catch {}
     try {
-      const r = await fetch(apiUrl('/me'), { credentials: 'include' });
+      const r = await fetch(apiUrl('/me'), { credentials:'include' });
       if (r.ok) {
         const d = await r.json();
         myNickname = d.guest?.nickname || null;
         if (myNickname) localStorage.setItem('rkNickname', myNickname);
         else localStorage.removeItem('rkNickname');
-
-        if (d.guest?.image_url) {
-          $('avatarImg').innerHTML = createSafeImg(d.guest.image_url + `?t=${Date.now()}`, '👤');
-        }
+        if (d.guest?.image_url) $('avatarImg').innerHTML = createSafeImg(d.guest.image_url + `?t=${Date.now()}`, '👤');
       }
-    } catch (e) {
-      myNickname = localStorage.getItem('rkNickname') || null;
-    }
+    } catch { myNickname = localStorage.getItem('rkNickname') || null; }
   }
 
   function updateProfileUI() {
     $('nickDisplay').textContent = myNickname || '익명 친구';
-    $('profileSub').textContent = myNickname ? '무지개 유치원 멤버' : '닉네임을 설정해주세요';
+    $('profileSub').textContent  = myNickname ? '무지개 유치원 멤버' : '닉네임을 설정해주세요';
     $('nickToggleBtn').textContent = myNickname ? '✏️ 닉네임 변경' : '✏️ 닉네임 설정';
   }
 
-  function showNickMsg(text, type) {
-    const el = $('nickMsg');
-    el.textContent = text || '';
-    el.className = 'nick-msg' + (type ? ` ${type}` : '');
-  }
+  function showNickMsg(text, type) { const el=$('nickMsg'); el.textContent=text||''; el.className='nick-msg'+(type?` ${type}`:''); }
 
   function toggleNickEdit(forceOpen) {
     const box = $('nickEdit');
-    const willOpen = (typeof forceOpen === 'boolean') ? forceOpen : box.classList.contains('hidden');
+    const willOpen = typeof forceOpen === 'boolean' ? forceOpen : box.classList.contains('hidden');
     box.classList.toggle('hidden', !willOpen);
-    if (willOpen) {
-      $('nickInput').value = myNickname || '';
-      $('nickInput').focus();
-      showNickMsg('', '');
-    }
+    if (willOpen) { $('nickInput').value = myNickname || ''; $('nickInput').focus(); showNickMsg('',''); }
   }
 
   async function saveNick() {
     const val = $('nickInput').value.trim();
-    showNickMsg('', '');
-
-    if (!val || val.length > 10) {
-      showNickMsg('1~10자로 입력해주세요', 'err');
-      return;
-    }
-    if (!/^[가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z0-9]+$/.test(val)) {
-      showNickMsg('한글, 영문, 숫자만 가능해요', 'err');
-      return;
-    }
-
-    const btn = $('nickSaveBtn');
-    btn.disabled = true;
-    btn.textContent = '저장 중...';
-
+    showNickMsg('','');
+    if (!val || val.length > 10) { showNickMsg('1~10자로 입력해주세요','err'); return; }
+    if (!/^[가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z0-9]+$/.test(val)) { showNickMsg('한글, 영문, 숫자만 가능해요','err'); return; }
+    const btn = $('nickSaveBtn'); btn.disabled = true; btn.textContent = '저장 중...';
     try {
-      const r = await fetch(apiUrl('/guest/nickname'), {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nickname: val })
-      });
-
-      const d = await r.json().catch(() => ({}));
-      if (r.ok && d.ok) {
-        myNickname = d.nickname || val;
-        localStorage.setItem('rkNickname', myNickname);
-        updateProfileUI();
-        toggleNickEdit(false);
-      } else {
-        if (d.error === 'nickname_cooldown_7days') showNickMsg('7일이 지나야 변경할 수 있어요', 'cool');
-        else if (d.error === 'nickname_taken') showNickMsg('이미 사용 중인 닉네임이에요', 'err');
-        else showNickMsg(d.error || '오류가 발생했어요', 'err');
-      }
-    } catch (e) {
-      showNickMsg('오류가 발생했어요', 'err');
-    }
-
-    btn.disabled = false;
-    btn.textContent = '저장';
+      const r = await fetch(apiUrl('/guest/nickname'), { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body:JSON.stringify({nickname:val}) });
+      const d = await r.json().catch(()=>({}));
+      if (r.ok && d.ok) { myNickname = d.nickname||val; localStorage.setItem('rkNickname', myNickname); updateProfileUI(); toggleNickEdit(false); }
+      else if (d.error === 'nickname_cooldown_7days') showNickMsg('7일이 지나야 변경할 수 있어요','cool');
+      else if (d.error === 'nickname_taken') showNickMsg('이미 사용 중인 닉네임이에요','err');
+      else showNickMsg(d.error||'오류가 발생했어요','err');
+    } catch { showNickMsg('오류가 발생했어요','err'); }
+    btn.disabled = false; btn.textContent = '저장';
   }
 
   async function uploadAvatar(file) {
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      alert('5MB 이하 이미지만 가능해요');
-      return;
-    }
-
+    if (file.size > 5*1024*1024) { alert('5MB 이하 이미지만 가능해요'); return; }
     setLoader(true);
-
-    const fd = new FormData();
-    fd.append('image', file);
-    if (guestId) fd.append('guest_id', guestId);
-
+    const fd = new FormData(); fd.append('image', file); if (guestId) fd.append('guest_id', guestId);
     try {
-      const r = await fetch(apiUrl('/guest/upload-image'), {
-        method: 'POST',
-        credentials: 'include',
-        body: fd
-      });
-
-      const d = await r.json().catch(() => ({}));
-      if (r.ok && d.ok && d.image_url) {
-        $('avatarImg').innerHTML = createSafeImg(d.image_url + `?t=${Date.now()}`, '👤');
-      } else {
-        alert(d.error || '업로드 실패');
-      }
-    } catch (e) {
-      alert('업로드 오류가 발생했어요');
-    } finally {
-      setLoader(false);
-      $('avatarInput').value = '';
-    }
+      const r = await fetch(apiUrl('/guest/upload-image'), { method:'POST', credentials:'include', body:fd });
+      const d = await r.json().catch(()=>({}));
+      if (r.ok && d.ok && d.image_url) $('avatarImg').innerHTML = createSafeImg(d.image_url+`?t=${Date.now()}`, '👤');
+      else alert(d.error||'업로드 실패');
+    } catch { alert('업로드 오류가 발생했어요'); }
+    finally { setLoader(false); $('avatarInput').value = ''; }
   }
 
   async function loadAll() {
     try {
-      const pr = await fetch(apiUrl('/my/posts?limit=50&offset=0'), { credentials: 'include' });
-      const pd = pr.ok ? await pr.json() : {};
-      myPosts = pd.posts || [];
-    } catch (e) {
-      myPosts = [];
-    }
+      const pr = await fetch(apiUrl('/my/posts?limit=50&offset=0'), { credentials:'include' });
+      myPosts = pr.ok ? ((await pr.json()).posts || []) : [];
+    } catch { myPosts = []; }
 
-    const yarPromises = myPosts.map(p =>
-      fetch(apiUrl(`/posts/${p.id}/yars`), { credentials: 'include' })
-        .then(r => r.json())
-        .catch(() => ({ yarers: [] }))
-    );
-
-    const cmtPromises = myPosts.map(p =>
-      fetch(apiUrl(`/posts/${p.id}`), { credentials: 'include' })
-        .then(r => r.json())
-        .catch(() => ({ comments: [] }))
-    );
+    const yarPromises = myPosts.map(p => fetch(apiUrl(`/posts/${p.id}/yars`), {credentials:'include'}).then(r=>r.json()).catch(()=>({yarers:[]})));
+    const cmtPromises = myPosts.map(p => fetch(apiUrl(`/posts/${p.id}`),      {credentials:'include'}).then(r=>r.json()).catch(()=>({comments:[]})));
 
     try {
       const [yarRes, cmtRes] = await Promise.all([Promise.all(yarPromises), Promise.all(cmtPromises)]);
 
-      allYarers = yarRes.flatMap((d, i) => (d.yarers || []).map(y => ({
+      // [FIX 2] yarers에 image_url 포함 (worker가 guests(nickname,image_url) 반환)
+      allYarers = yarRes.flatMap((d, i) => (d.yarers||[]).map(y => ({
         ...y,
-        post_id: myPosts[i].id,
-        post_title: myPosts[i].title || (myPosts[i].body ? myPosts[i].body.slice(0, 30) : '') || ''
-      }))).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        post_id:    myPosts[i].id,
+        post_title: myPosts[i].title || (myPosts[i].body?.slice(0,30)) || '',
+      }))).sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
 
-      receivedComments = cmtRes.flatMap((d, i) => (d.comments || [])
+      // [FIX 3/4] 내 댓글 제외 + system_users/guests 이미지 통합
+      const myGid = guestId || localStorage.getItem('rkGuestId');
+      receivedComments = cmtRes.flatMap((d, i) => (d.comments||[])
         .filter(c => {
-          const gid = guestId || localStorage.getItem('rkGuestId');
-          const isMineByNick = (myNickname && c.nickname === myNickname);
-          const isMineByGid = (gid && c.guest_id && c.guest_id === gid);
+          const isMineByNick = myNickname && c.nickname === myNickname;
+          const isMineByGid  = myGid && c.guest_id && c.guest_id === myGid;
           return !(isMineByNick || isMineByGid);
         })
         .map(c => ({
           ...c,
-          post_id: myPosts[i].id,
-          post_title: myPosts[i].title || (myPosts[i].body ? myPosts[i].body.slice(0, 30) : '') || ''
+          image_url:    c.system_users?.image_url || c.guests?.image_url || null,
+          display_nick: c.system_users?.display_name || c.nickname || '익명',
+          post_id:      myPosts[i].id,
+          post_title:   myPosts[i].title || (myPosts[i].body?.slice(0,30)) || '',
         }))
-      ).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      ).sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
 
-    } catch (e) {
-      allYarers = [];
-      receivedComments = [];
-    }
+    } catch { allYarers = []; receivedComments = []; }
 
-    // 통계
-    $('statPosts').textContent = myPosts.length;
-    $('statYars').textContent = allYarers.length;
+    // [FIX 5] statYars = yar_count 합산으로 통일
+    $('statPosts').textContent    = myPosts.length;
+    $('statYars').textContent     = myPosts.reduce((s,p) => s+(p.yar_count||0), 0);
     $('statComments').textContent = receivedComments.length;
 
     checkYarBadge();
     checkCmtBadge();
-
     renderPosts();
     renderYarers();
     renderComments();
@@ -429,232 +297,143 @@
 
   function renderPosts() {
     const sec = $('secPosts');
-    if (!myPosts.length) {
-      sec.innerHTML = '<div class="empty">글이 없습니다.</div>';
-      return;
-    }
-
-    sec.innerHTML = myPosts.map(p => {
-      const title = esc(p.title || '제목 없음');
-      const body = p.body ? esc(p.body) : '';
-      const created = relTime(p.created_at);
-      const commentCount = p.comment_count || 0;
-      const yarCount = p.yar_count || 0;
-      return `
-        <div class="post-card" data-post-id="${p.id}">
-          <div class="post-title">${title}</div>
-          ${body ? `<div class="post-body">${body}</div>` : ''}
-          <div class="post-meta">
-            <span>${created}</span>
-            <span>💬 ${commentCount}</span>
-            <span>🌟 ${yarCount}</span>
-            <button class="post-delete" type="button" data-del-id="${p.id}">삭제</button>
-          </div>
+    if (!myPosts.length) { sec.innerHTML = '<div class="empty">아직 쓴 글이 없어요.</div>'; return; }
+    sec.innerHTML = myPosts.map(p => `
+      <div class="post-card" data-post-id="${p.id}">
+        <div class="post-title">${esc(p.title||'제목 없음')}</div>
+        ${p.body?`<div class="post-body">${esc(p.body)}</div>`:''}
+        <div class="post-meta">
+          <span>${relTime(p.created_at)}</span>
+          <span>💬 ${p.comment_count||0}</span>
+          <span>🌟 ${p.yar_count||0}</span>
+          <button class="post-delete" type="button" data-del-id="${p.id}">삭제</button>
         </div>
-      `;
-    }).join('');
-
+      </div>`).join('');
     sec.querySelectorAll('.post-card').forEach(card => {
-      card.addEventListener('click', (e) => {
-        const delBtn = e.target.closest('[data-del-id]');
-        if (delBtn) return; // 삭제 버튼 클릭은 아래 핸들러에서
+      card.addEventListener('click', e => {
+        if (e.target.closest('[data-del-id]')) return;
         const id = Number(card.dataset.postId);
         if (Number.isFinite(id)) location.href = `index.html?postId=${id}`;
       });
     });
-
     sec.querySelectorAll('[data-del-id]').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const id = Number(btn.dataset.delId);
-        confirmDelete(id);
-      });
+      btn.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); confirmDelete(Number(btn.dataset.delId)); });
     });
   }
 
   function renderYarers() {
     const sec = $('secYars');
-    if (!allYarers.length) {
-      sec.innerHTML = '<div class="empty">받은 야르가 없습니다.</div>';
-      return;
-    }
-
-    sec.innerHTML = allYarers.map(y => {
-      const nick = esc(y.nickname || '익명');
-      const postTitle = esc(y.post_title || '');
-      const when = relTime(y.created_at);
-      return `
-        <div class="list-item" data-post-id="${y.post_id}">
-          <div class="item-avatar">${createSafeImg(y.image_url, '👤')}</div>
-          <div class="item-body">
-            <div class="item-top">
-              <span class="item-nick">${nick}</span>
-              <span class="item-tag">🌟 야르~</span>
-            </div>
-            <div class="item-content">회원님의 글에 별을 보냈습니다.</div>
-            <div class="item-target">${postTitle}</div>
-            <div class="item-meta">${when}</div>
+    if (!allYarers.length) { sec.innerHTML = '<div class="empty">받은 야르~가 없습니다.</div>'; return; }
+    sec.innerHTML = allYarers.map(y => `
+      <div class="list-item" data-post-id="${y.post_id}">
+        <div class="item-avatar">${createSafeImg(y.image_url, '👤')}</div>
+        <div class="item-body">
+          <div class="item-top">
+            <span class="item-nick">${esc(y.nickname||'익명')}</span>
+            <span class="item-meta">${relTime(y.created_at)}</span>
           </div>
+          <div class="item-target">📎 ${esc(y.post_title||'내 글')}</div>
         </div>
-      `;
-    }).join('');
-
+      </div>`).join('');
     sec.querySelectorAll('.list-item').forEach(it => {
-      it.addEventListener('click', () => {
-        const id = Number(it.dataset.postId);
-        if (Number.isFinite(id)) location.href = `index.html?postId=${id}`;
-      });
+      it.addEventListener('click', () => { const id=Number(it.dataset.postId); if(Number.isFinite(id)) location.href=`index.html?postId=${id}`; });
     });
   }
 
   function renderComments() {
     const sec = $('secComments');
-    if (!receivedComments.length) {
-      sec.innerHTML = '<div class="empty">받은 댓글이 없습니다.</div>';
-      return;
-    }
-
-    sec.innerHTML = receivedComments.map(c => {
-      const nick = esc(c.nickname || '익명');
-      const body = esc(c.body || '');
-      const postTitle = esc(c.post_title || '');
-      const when = relTime(c.created_at);
-      return `
-        <div class="list-item" data-post-id="${c.post_id}">
-          <div class="item-avatar">${createSafeImg(c.image_url, '💬')}</div>
-          <div class="item-body">
-            <div class="item-top">
-              <span class="item-nick">${nick}</span>
-              <span class="item-tag">💬 댓글</span>
-            </div>
-            <div class="item-content">${body}</div>
-            <div class="item-target">${postTitle}</div>
-            <div class="item-meta">${when}</div>
+    if (!receivedComments.length) { sec.innerHTML = '<div class="empty">받은 댓글이 없습니다.</div>'; return; }
+    sec.innerHTML = receivedComments.map(c => `
+      <div class="list-item" data-post-id="${c.post_id}">
+        <div class="item-avatar">${createSafeImg(c.image_url, '🗣️')}</div>
+        <div class="item-body">
+          <div class="item-top">
+            <span class="item-nick">${esc(c.display_nick)}</span>
+            <span class="item-meta">${relTime(c.created_at)}</span>
           </div>
+          <div class="item-target">📎 ${esc(c.post_title||'내 글')}</div>
+          <div class="item-content">${esc(c.body||'')}</div>
         </div>
-      `;
-    }).join('');
-
+      </div>`).join('');
     sec.querySelectorAll('.list-item').forEach(it => {
-      it.addEventListener('click', () => {
-        const id = Number(it.dataset.postId);
-        if (Number.isFinite(id)) location.href = `index.html?postId=${id}`;
-      });
+      it.addEventListener('click', () => { const id=Number(it.dataset.postId); if(Number.isFinite(id)) location.href=`index.html?postId=${id}`; });
     });
   }
 
   function switchTab(tab) {
     ['posts','yars','comments'].forEach(t => {
-      const btn = $(`tab${t.charAt(0).toUpperCase()+t.slice(1)}`);
-      const sec = $(`sec${t.charAt(0).toUpperCase()+t.slice(1)}`);
-      btn.classList.toggle('active', t === tab);
-      sec.classList.toggle('hidden', t !== tab);
+      $(`tab${t.charAt(0).toUpperCase()+t.slice(1)}`).classList.toggle('active', t===tab);
+      $(`sec${t.charAt(0).toUpperCase()+t.slice(1)}`).classList.toggle('hidden', t!==tab);
     });
-
-    if (tab === 'yars') markYarRead();
+    if (tab === 'yars')     markYarRead();
     if (tab === 'comments') markCmtRead();
   }
 
-  // 배지: 내 글의 count 변화를 기준
   function checkYarBadge() {
-    const saved = JSON.parse(localStorage.getItem('rkYarCounts') || '{}');
+    const saved = JSON.parse(localStorage.getItem('rkYarCounts')||'{}');
     let n = 0;
-    myPosts.forEach(p => {
-      const prev = saved[p.id] || 0;
-      const cur = p.yar_count || 0;
-      if (cur > prev) n += (cur - prev);
-    });
+    myPosts.forEach(p => { const prev=saved[p.id]||0; if((p.yar_count||0)>prev) n+=(p.yar_count||0)-prev; });
     const badge = $('yarBadge');
-    if (!badge) return;
-    if (n > 0) { badge.textContent = String(n); badge.classList.remove('hidden'); }
-    else { badge.classList.add('hidden'); }
+    if (n>0) { badge.textContent=String(n); badge.classList.remove('hidden'); } else badge.classList.add('hidden');
   }
 
   function markYarRead() {
-    const c = {};
-    myPosts.forEach(p => { c[p.id] = p.yar_count || 0; });
+    const c = {}; myPosts.forEach(p => { c[p.id]=p.yar_count||0; });
     localStorage.setItem('rkYarCounts', JSON.stringify(c));
     $('yarBadge').classList.add('hidden');
+    // [FIX 6] 탭 전환 시 통계 숫자 갱신
+    $('statYars').textContent = myPosts.reduce((s,p) => s+(p.yar_count||0), 0);
   }
 
   function checkCmtBadge() {
-    const saved = JSON.parse(localStorage.getItem('rkCmtCounts') || '{}');
+    const saved = JSON.parse(localStorage.getItem('rkCmtCounts')||'{}');
     let n = 0;
-    myPosts.forEach(p => {
-      const prev = saved[p.id] || 0;
-      const cur = p.comment_count || 0;
-      if (cur > prev) n += (cur - prev);
-    });
+    myPosts.forEach(p => { const prev=saved[p.id]||0; if((p.comment_count||0)>prev) n+=(p.comment_count||0)-prev; });
     const badge = $('cmtBadge');
-    if (!badge) return;
-    if (n > 0) { badge.textContent = String(n); badge.classList.remove('hidden'); }
-    else { badge.classList.add('hidden'); }
+    if (n>0) { badge.textContent=String(n); badge.classList.remove('hidden'); } else badge.classList.add('hidden');
   }
 
   function markCmtRead() {
-    const c = {};
-    myPosts.forEach(p => { c[p.id] = p.comment_count || 0; });
+    const c = {}; myPosts.forEach(p => { c[p.id]=p.comment_count||0; });
     localStorage.setItem('rkCmtCounts', JSON.stringify(c));
     $('cmtBadge').classList.add('hidden');
+    $('statComments').textContent = receivedComments.length;
   }
 
   function confirmDelete(id) {
     pendingDeleteFn = async () => {
       try {
-        const r = await fetch(apiUrl(`/posts/${id}`), { method: 'DELETE', credentials: 'include' });
-        if (r.ok) {
-          await loadAll();
-          switchTab('posts');
-        }
-      } catch (e) {
-        // ignore
-      }
+        const r = await fetch(apiUrl(`/posts/${id}`), { method:'DELETE', credentials:'include' });
+        if (r.ok) { await loadAll(); switchTab('posts'); }
+      } catch {}
     };
     $('confirmOverlay').classList.remove('hidden');
   }
-
-  function closeConfirm() {
-    $('confirmOverlay').classList.add('hidden');
-    pendingDeleteFn = null;
-  }
+  function closeConfirm() { $('confirmOverlay').classList.add('hidden'); pendingDeleteFn = null; }
 
   // 이벤트 바인딩
-  $('tabPosts').addEventListener('click', () => switchTab('posts'));
-  $('tabYars').addEventListener('click', () => switchTab('yars'));
+  $('tabPosts').addEventListener('click',    () => switchTab('posts'));
+  $('tabYars').addEventListener('click',     () => switchTab('yars'));
   $('tabComments').addEventListener('click', () => switchTab('comments'));
-
-  $('nickToggleBtn').addEventListener('click', (e) => { e.stopPropagation(); toggleNickEdit(); });
-  $('nickSaveBtn').addEventListener('click', (e) => { e.preventDefault(); saveNick(); });
-  $('nickInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') saveNick(); });
-
-  $('avatarBtn').addEventListener('click', () => $('avatarInput').click());
-  $('avatarWrap').addEventListener('click', () => $('avatarInput').click());
-  $('avatarInput').addEventListener('change', (e) => uploadAvatar(e.target.files && e.target.files[0]));
-
-  $('confirmNo').addEventListener('click', closeConfirm);
-  $('confirmYes').addEventListener('click', () => { const fn = pendingDeleteFn; closeConfirm(); if (typeof fn === 'function') fn(); });
-  $('confirmOverlay').addEventListener('click', (e) => { if (e.target === $('confirmOverlay')) closeConfirm(); });
-
-  $('writeNavBtn').addEventListener('click', (e) => {
-    e.preventDefault();
-    // 글쓰기는 index.html의 글쓰기 UX를 그대로 사용한다는 전제.
-    location.href = 'index.html#write';
-  });
+  $('nickToggleBtn').addEventListener('click', e => { e.stopPropagation(); toggleNickEdit(); });
+  $('nickSaveBtn').addEventListener('click',   e => { e.preventDefault(); saveNick(); });
+  $('nickInput').addEventListener('keypress',  e => { if(e.key==='Enter') saveNick(); });
+  // [FIX 1] avatarBtn에 stopPropagation - avatarWrap 버블링 방지
+  $('avatarBtn').addEventListener('click',  e => { e.stopPropagation(); $('avatarInput').click(); });
+  $('avatarWrap').addEventListener('click', ()  => $('avatarInput').click());
+  $('avatarInput').addEventListener('change', e => uploadAvatar(e.target.files && e.target.files[0]));
+  $('confirmNo').addEventListener('click',  closeConfirm);
+  $('confirmYes').addEventListener('click', () => { const fn=pendingDeleteFn; closeConfirm(); if(typeof fn==='function') fn(); });
+  $('confirmOverlay').addEventListener('click', e => { if(e.target===$('confirmOverlay')) closeConfirm(); });
+  // [FIX 4] 글쓰기 → index.html#write (index.html에서 해시 감지해서 모달 열기)
+  $('writeNavBtn').addEventListener('click', e => { e.preventDefault(); location.href='index.html#write'; });
 
   // 초기화
   (async () => {
-    try {
-      await initGuest();
-      updateProfileUI();
-      await loadAll();
-    } finally {
-      setLoader(false);
-    }
+    try { await initGuest(); updateProfileUI(); await loadAll(); }
+    finally { setLoader(false); }
   })();
-
 })();
 </script>
-
 </body>
 </html>
