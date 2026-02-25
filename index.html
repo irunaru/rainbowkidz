@@ -150,7 +150,7 @@
       font-size:18px; font-weight:900; cursor:pointer; font-family:inherit; z-index:10;
     }
     .detail-close-top:active { opacity:.75; }
-    .detail-hero { display:flex; justify-content:center; padding:8px 0 10px; }
+    .detail-hero { display:none; } /* 레거시 - 아래 detail-head-row로 대체 */
     .detail-hero-avatar {
       width:160px; height:160px; border-radius:26px; overflow:hidden;
       border:1px solid var(--border); background:var(--bg);
@@ -160,6 +160,10 @@
     .detail-footer .detail-close { display:none; }
     .detail-handle { width:36px; height:4px; background:var(--border); border-radius:2px; margin:10px auto 0; flex-shrink:0; }
     .detail-head   { padding:12px 16px 10px; border-bottom:1px solid var(--border); flex-shrink:0; }
+    .detail-head-row { display:flex; gap:12px; align-items:flex-start; }
+    .detail-head-avatar { width:64px; height:64px; border-radius:18px; background:var(--bg); border:1.5px solid var(--border); overflow:hidden; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:30px; }
+    .detail-head-avatar img { width:100%; height:100%; object-fit:cover; }
+    .detail-head-info { flex:1; min-width:0; }
     .detail-title  { font-size:17px; font-weight:900; margin-bottom:6px; }
     .detail-meta   { font-size:12px; color:var(--sub); display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
     .detail-meta-author { font-weight:700; color:var(--text); }
@@ -318,12 +322,16 @@
   <div class="detail-panel" onclick="event.stopPropagation()">
     <button class="detail-close-top" onclick="closeDetail()" aria-label="닫기">✕</button>
     <div class="detail-handle"></div>
-    <div class="detail-hero"><div class="detail-hero-avatar" id="dHeroAvatar"></div></div>
     <div class="detail-head">
-      <div class="detail-title" id="dTitle"></div>
-      <div class="detail-meta">
-        <span class="detail-meta-author" id="dAuthor"></span>
-        <span id="dTime"></span>
+      <div class="detail-head-row">
+        <div class="detail-head-avatar" id="dHeroAvatar"></div>
+        <div class="detail-head-info">
+          <div class="detail-title" id="dTitle"></div>
+          <div class="detail-meta">
+            <span class="detail-meta-author" id="dAuthor"></span>
+            <span id="dTime"></span>
+          </div>
+        </div>
       </div>
     </div>
     <div class="detail-scroll">
@@ -538,12 +546,23 @@ const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
   function renderCharGrid() {
     const grid = document.getElementById('charGrid');
     const now  = Date.now();
-    const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
+    // 원조 멤버와 전학생 구분:
+    // created_at 기준으로 최초 다수 등록 배치(원조)와 이후 추가(전학생)를 자동 감지
+    // → 전체 중 가장 오래된 캐릭터 기준으로 +1일 이내 등록된 건 원조, 나머지는 전학생
+    const times = characters
+      .filter(c => c.created_at)
+      .map(c => new Date(c.created_at).getTime())
+      .sort((a,b) => a-b);
+    const ONE_DAY = 24 * 60 * 60 * 1000;
+    // 원조 배치 기준: 최초 등록일 + 48시간 이내 = 원조 멤버
+    const firstBatch = times.length ? times[0] + ONE_DAY * 2 : 0;
 
-    // 7일 이내 신규 캐릭터는 최상단 고정, 나머지는 활동점수순 유지
+    // 전학생은 최상단 고정, 나머지는 활동점수순 유지
     const sorted = [...characters].sort((a, b) => {
-      const aNew = a.created_at && (now - new Date(a.created_at).getTime()) < SEVEN_DAYS;
-      const bNew = b.created_at && (now - new Date(b.created_at).getTime()) < SEVEN_DAYS;
+      const at = a.created_at ? new Date(a.created_at).getTime() : 0;
+      const bt = b.created_at ? new Date(b.created_at).getTime() : 0;
+      const aNew = at > firstBatch;
+      const bNew = bt > firstBatch;
       if (aNew && !bNew) return -1;
       if (!aNew && bNew) return  1;
       return 0; // 같은 그룹 내 기존 순서(점수순) 유지
@@ -551,8 +570,9 @@ const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
 
     document.getElementById('charCount').textContent = `${sorted.length}명 (최근 활동순)`;
     grid.innerHTML = sorted.map(c => {
-      const isUnread = getVisit(c.id) === 0;
-      const isNewChar = c.created_at && (now - new Date(c.created_at).getTime()) < SEVEN_DAYS;
+      const isUnread  = getVisit(c.id) === 0;
+      const charTime  = c.created_at ? new Date(c.created_at).getTime() : 0;
+      const isNewChar = charTime > firstBatch;
       const imgHtml = c.image_url
         ? `<img src="${esc(c.image_url)}" alt="${esc(c.display_name)}" data-emoji="${esc(c.emoji||'🙂')}" onerror="this.parentElement.removeChild(this);this.parentElement.textContent=this.dataset.emoji">`
         : '';
