@@ -372,6 +372,13 @@
         <div class="status" id="aiPostStatus"></div>
       </div>
 
+      <!-- ② - 예약 댓글 관리 -->
+      <div class="sec">
+        <div class="sec-title">📋 예약 댓글 관리</div>
+        <div style="font-size:12px;color:var(--sub);margin-bottom:8px;">게시글을 선택하면 예약된 댓글 목록을 볼 수 있어요.</div>
+        <div id="scheduledCmtList" style="font-size:13px;color:var(--sub);">게시글을 선택하세요.</div>
+      </div>
+
       <!-- ③ AI 댓글 생성 + 예약 시간 (5번) -->
       <div class="sec">
         <div class="sec-title">💬 AI 댓글 제안</div>
@@ -808,7 +815,38 @@
         <div class="postitem-meta">${esc(p.character_name||p.nickname||'익명')} · ID:${p.id} · 댓글 ${p.comment_count||0}</div>
       </div>`).join('');
   }
-  function selectPost(id) { selectedPostId=id; renderPostPicker(); }
+  function selectPost(id) { selectedPostId=id; renderPostPicker(); loadScheduledComments(id); }
+
+  async function loadScheduledComments(postId) {
+    const el = document.getElementById('scheduledCmtList');
+    if (!el) return;
+    el.innerHTML = '로딩 중...';
+    try {
+      // Supabase에서 미래 예약댓글만 조회
+      const now = new Date().toISOString();
+      const r = await adminFetch(`/admin/scheduled-comments?post_id=${postId}`);
+      const d = await r.json();
+      const list = d.comments || [];
+      if (!list.length) { el.innerHTML = '<span style="color:var(--sub);">예약된 댓글이 없어요.</span>'; return; }
+      el.innerHTML = list.map(c => `
+        <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);">
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:700;font-size:12px;">${esc(c.nickname||'캐릭터')}</div>
+            <div style="font-size:12px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(c.body)}</div>
+            <div style="font-size:11px;color:var(--sub2);">⏰ ${new Date(c.scheduled_at).toLocaleString('ko-KR')}</div>
+          </div>
+          <button class="btn btn-danger btn-sm" onclick="cancelScheduledComment(${c.id})">취소</button>
+        </div>`).join('');
+    } catch(e) { el.innerHTML = `<span style="color:var(--accent);">오류: ${e.message}</span>`; }
+  }
+
+  async function cancelScheduledComment(commentId) {
+    if (!confirm('예약 댓글을 취소(삭제)할까요?')) return;
+    const r = await adminFetch(`/admin/comments/${commentId}`, { method:'DELETE' });
+    const d = await r.json();
+    if (d.ok) { toast('예약 댓글 취소됨'); if (selectedPostId) loadScheduledComments(selectedPostId); }
+    else toast('삭제 실패: ' + (d.error||''), true);
+  }
 
   // ── AI 댓글 (예약 시간 포함, 5번)
   async function generateComment() {
