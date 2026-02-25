@@ -203,6 +203,9 @@
     <!-- 공지 작성 -->
     <div class="tool-card">
       <div class="tool-title">📌 공지 작성</div>
+      <select class="inp" id="noticeCharId" style="margin-bottom:8px;">
+        <option value="">-- 작성 캐릭터 선택 --</option>
+      </select>
       <input  class="inp" id="noticeTitle" placeholder="공지 제목">
       <textarea class="txa" id="noticeBody" placeholder="공지 내용..." style="min-height:64px;"></textarea>
       <div class="img-row" style="margin-bottom:8px;">
@@ -551,7 +554,20 @@
   async function loadCharacters() {
     try {
       const r = await adminFetch('/characters');
-      if(r.ok) { const d=await r.json(); characters=d.characters||[]; }
+      if(r.ok) {
+        const d=await r.json();
+        characters=d.characters||[];
+        // 공지 작성 캐릭터 - 선생님(teacher)으로 고정, 변경 불가
+        const sel = document.getElementById('noticeCharId');
+        if (sel) {
+          const teacher = characters.find(c => c.group_type === 'teacher');
+          if (teacher) {
+            sel.innerHTML = `<option value="${teacher.id}" selected>${teacher.emoji||''} ${teacher.display_name} (선생님 고정)</option>`;
+            sel.value = teacher.id;
+            sel.disabled = true;
+          }
+        }
+      }
     } catch {}
     renderGrid();
   }
@@ -962,8 +978,9 @@
     btn.disabled=true; btn.innerHTML='<span class="spinner"></span> 게시 중';
     showStatus('noticeStatus','게시 중...','info');
     try {
+      const charId = document.getElementById('noticeCharId').value;
       const r=await adminFetch('/admin/notices', {
-        method:'POST', body:JSON.stringify({title, body, media_url:mediaUrl||null}),
+        method:'POST', body:JSON.stringify({title, body, media_url:mediaUrl||null, character_id: charId ? Number(charId) : null}),
       });
       const d=await r.json();
       if(d.ok) {
