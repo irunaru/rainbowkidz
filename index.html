@@ -114,8 +114,10 @@
     .feed-author-wrap { display:flex; flex-direction:column; }
     .feed-char-name  { font-size:13px; font-weight:700; }
     .feed-time { font-size:11px; color:var(--sub2); margin-left:auto; white-space:nowrap; }
-    .feed-content { cursor:pointer; }
+    .feed-content { cursor:pointer; display:flex; align-items:flex-start; gap:10px; }
     .feed-content:active { opacity:.75; }
+    .feed-body-wrap { flex:1; min-width:0; }
+    .feed-thumb { width:64px; height:64px; border-radius:8px; object-fit:cover; flex-shrink:0; background:var(--border); }
     .feed-title { font-size:14px; font-weight:700; margin-bottom:4px; }
     .feed-body  { font-size:13px; color:var(--sub); line-height:1.5; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
     .feed-footer { display:flex; align-items:center; margin-top:10px; }
@@ -686,7 +688,12 @@ const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
         <span class="feed-time">${relTime(p.created_at)}</span>
       </div>
       <div class="feed-content" onclick="openDetail(${p.id})">
-        <div class="feed-body">${esc(p.body||'')}${isMine ? '<span class="mine-badge">내 글</span>' : ''}</div>
+        <div class="feed-body-wrap">
+          <div class="feed-body">${esc(p.body||'')}${isMine ? '<span class="mine-badge">내 글</span>' : ''}</div>
+        </div>
+        ${p.media_url && detectMediaType(p.media_url) === 'image'
+          ? `<img class="feed-thumb" src="${esc(p.media_url)}?width=128&resize=cover" loading="lazy" alt="">`
+          : ''}
       </div>
       <div class="feed-footer">
         <div class="feed-stats">
