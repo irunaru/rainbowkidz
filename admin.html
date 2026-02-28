@@ -10,7 +10,7 @@
     * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
     /* ===== DESIGN TOKENS (SAFE TO EDIT) ===== */
   :root {
-      --bg:#f2f2f7; --card:#fff; --text:#1c1c1e; --sub:#636366; --border:#e5e5ea;
+      --bg:#f2f2f7; --card:#fff; --text:#1c1c1e; --sub:#636366; --sub2:#8e8e93; --border:#e5e5ea;
       --blue:#007aff; --green:#34c759; --red:#ff3b30; --orange:#ff9f0a; --purple:#af52de;
       --radius:16px;
     }
@@ -511,8 +511,10 @@
           // 키 만료/불일치 → 로그아웃 처리
           adminKey = '';
           localStorage.removeItem('rkAdminKey');
-          document.getElementById('loginBox').classList.remove('hidden');
-          document.getElementById('mainBox').classList.add('hidden');
+          sessionStorage.removeItem('rkAdminKey');
+          document.getElementById('pwGate').style.display = '';
+          document.getElementById('mainHeader').style.display = 'none';
+          document.getElementById('mainContent').style.display = 'none';
           document.getElementById('pwError').textContent = '인증이 만료되었어요. 다시 로그인해주세요.';
         }
         return res;
@@ -881,7 +883,7 @@
             <div style="font-size:12px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(c.body)}</div>
             <div style="font-size:11px;color:var(--sub2);">⏰ ${new Date(c.scheduled_at).toLocaleString('ko-KR')}</div>
           </div>
-          <button class="btn btn-danger btn-sm" onclick="cancelScheduledComment(${c.id})">취소</button>
+          <button class="btn btn-red btn-sm" onclick="cancelScheduledComment(${c.id})">취소</button>
         </div>`).join('');
     } catch(e) { el.innerHTML = `<span style="color:var(--accent);">오류: ${e.message}</span>`; }
   }
