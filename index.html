@@ -83,7 +83,14 @@
     .write-submit:disabled { opacity:.5; }
     .write-error { font-size:12px; color:var(--accent); min-height:16px; padding:0 16px 8px; }
 
-    /* ── 섹션 헤더 ── */
+  
+  /* ── 글쓰기 이미지 첨부 ── */
+  .write-img-btn { padding:8px 14px; border:1.5px solid var(--border); border-radius:var(--radius-pill); background:var(--bg); color:var(--sub); font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; }
+  .write-img-btn:active { opacity:.75; }
+  .write-preview { position:relative; display:inline-block; margin:0 16px 8px; }
+  .write-preview img { width:80px; height:80px; border-radius:10px; object-fit:cover; display:block; border:1.5px solid var(--border); }
+  .write-preview-del { position:absolute; top:-6px; right:-6px; width:20px; height:20px; border-radius:50%; background:var(--text); color:#fff; border:none; font-size:13px; line-height:20px; text-align:center; cursor:pointer; padding:0; font-family:inherit; }
+  /* ── 섹션 헤더 ── */
     .section-header { padding:16px 16px 8px; display:flex; align-items:center; justify-content:space-between; }
     .section-title  { font-size:15px; font-weight:700; }
     .section-sub    { font-size:12px; color:var(--sub); }
@@ -320,8 +327,11 @@
     <div class="write-body">
       <textarea class="write-textarea" id="writeBody" placeholder="오늘 친구랑 무슨 일이 있었나요? 선생님한테 칭찬 받았나요? 인형이랑 뭐하고 놀았어요? 🌈" maxlength="5000"></textarea>
     </div>
+    <div id="writeImgPreview"></div>
     <div class="write-error" id="writeError"></div>
     <div class="write-footer">
+      <button class="write-img-btn" onclick="document.getElementById('writeImgInput').click()">📷 사진</button>
+      <input type="file" id="writeImgInput" accept="image/*" style="display:none" onchange="handleWriteImg(this)">
       <button class="write-submit" id="writeSubmitBtn" onclick="submitWrite()">게시하기</button>
     </div>
   </div>
@@ -428,6 +438,7 @@ const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
   let hasMore      = false;
   let guestId      = null;
   let myNickname   = null;
+  let writeImgFile = null;
   let pendingYarId  = null;
   let pendingAction = null;
   let noticesExpanded = false;
@@ -1012,7 +1023,28 @@ const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
     document.getElementById('writeBody').focus();
     document.getElementById('writeError').textContent = '';
   }
-  function closeWrite() { document.getElementById('writeOverlay').classList.add('hidden'); }
+  function closeWrite() {
+    document.getElementById('writeOverlay').classList.add('hidden');
+    writeImgFile = null;
+    document.getElementById('writeImgPreview').innerHTML = '';
+    document.getElementById('writeImgInput').value = '';
+  }
+
+  function handleWriteImg(input) {
+    const file = input.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { alert('이미지는 5MB 이하만 첨부할 수 있어요'); input.value = ''; return; }
+    writeImgFile = file;
+    const url = URL.createObjectURL(file);
+    document.getElementById('writeImgPreview').innerHTML =
+      `<div class="write-preview"><img src="${url}" alt="미리보기"><button class="write-preview-del" onclick="clearWriteImg()">✕</button></div>`;
+  }
+
+  function clearWriteImg() {
+    writeImgFile = null;
+    document.getElementById('writeImgPreview').innerHTML = '';
+    document.getElementById('writeImgInput').value = '';
+  }
   function handleWriteOverlay(e) { if (e.target.id === 'writeOverlay') closeWrite(); }
 
   async function submitWrite() {
@@ -1023,10 +1055,21 @@ const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
     errEl.textContent = '';
     btn.disabled = true; btn.textContent = '게시 중...';
     try {
+      // 이미지가 있으면 먼저 업로드
+      let mediaUrl = null;
+      if (writeImgFile) {
+        const fd = new FormData();
+        fd.append('image', writeImgFile);
+        fd.append('guest_id', guestId);
+        const upRes = await fetch(apiUrl('/guest/upload-post-image', true), { method:'POST', credentials:'include', body: fd });
+        const upData = await upRes.json();
+        if (upData.ok) mediaUrl = upData.image_url;
+        else { errEl.textContent = '이미지 업로드 실패'; btn.disabled = false; btn.textContent = '게시하기'; return; }
+      }
       const r = await fetch(apiUrl('/posts', true), {
         method: 'POST', credentials: 'include',
         headers: { 'Content-Type':'application/json' },
-        body: JSON.stringify({ body, guest_id: guestId }),
+        body: JSON.stringify({ body, guest_id: guestId, ...(mediaUrl ? { media_url: mediaUrl } : {}) }),
       });
       const d = await r.json();
       if (d.ok) {
