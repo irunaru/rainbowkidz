@@ -8,7 +8,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
   <style>
     * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-    :root {
+    /* ===== DESIGN TOKENS (SAFE TO EDIT) ===== */
+  :root {
       --bg:#f2f2f7; --card:#fff; --text:#1c1c1e; --sub:#636366; --border:#e5e5ea;
       --blue:#007aff; --green:#34c759; --red:#ff3b30; --orange:#ff9f0a; --purple:#af52de;
       --radius:16px;
@@ -16,6 +17,8 @@
     body { font-family:'Noto Sans KR',-apple-system,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
     .hidden { display:none !important; }
     @keyframes spin { to { transform:rotate(360deg); } }
+
+  /* ===== COMPONENTS (SAFE TO EDIT) ===== */
     @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
     .skel { background:linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%); background-size:200% 100%; animation:shimmer 1.4s ease-in-out infinite; border-radius:12px; }
     .spinner { display:inline-block; width:14px; height:14px; border:2px solid rgba(255,255,255,.35); border-top-color:#fff; border-radius:50%; animation:spin .7s linear infinite; }
@@ -106,7 +109,8 @@
     .char-name  { font-size:11px; font-weight:700; color:var(--text); margin-top:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .char-group { font-size:10px; color:var(--sub); margin-top:1px; }
 
-    /* ── 오버레이 패널 */
+    /* ===== LAYOUT (SAFE TO EDIT) ===== */
+  /* ── 오버레이 패널 */
     .overlay { position:fixed; inset:0; background:rgba(0,0,0,.45); display:flex; align-items:flex-end; justify-content:center; z-index:500; padding:8px; }
     .panel { width:100%; max-width:740px; background:var(--card); border-radius:20px; max-height:93vh; overflow-y:auto; }
     .panel-head { position:sticky; top:0; background:var(--card); border-bottom:1px solid var(--border); padding:12px 16px; display:flex; align-items:center; gap:10px; border-radius:20px 20px 0 0; z-index:10; }
