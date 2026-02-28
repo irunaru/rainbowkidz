@@ -792,6 +792,10 @@ const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
         hero.innerHTML = img
           ? `<img src="${esc(img)}" data-lightbox="1" data-lb-src="${esc(img)}" alt="${esc(authorName)}">`
           : `<span style="font-size:100px;">${esc(isSystem ? (p.character_emoji||'🙂') : '👤')}</span>`;
+        if (img) hero.querySelector('img').onclick = (e) => {
+          e.stopPropagation();
+          window.__openLightbox && window.__openLightbox(img, authorName);
+        };
       }
       syncDetailYar(p.yar_count||0, getYar(postId));
       renderComments(currentComments);
@@ -960,6 +964,10 @@ const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
     const av = document.getElementById('pAvatar');
     if (c.image_url) {
       av.innerHTML = `<img src="${esc(c.image_url)}" data-lightbox="1" data-lb-src="${esc(c.image_url)}" alt="${esc(c.display_name)}" data-emoji="${esc(c.emoji||'🙂')}" onerror="this.parentElement.removeChild(this);this.parentElement.textContent=this.dataset.emoji">`;
+      av.querySelector('img') && (av.querySelector('img').onclick = (e) => {
+        e.stopPropagation();
+        window.__openLightbox && window.__openLightbox(c.image_url, c.display_name);
+      });
     } else { av.textContent = c.emoji || '🙂'; }
     document.getElementById('pName').textContent = c.display_name;
     document.getElementById('pMeta').textContent = `${groupLabel(c.group_type)} · ${c.animal_type||''} · ${c.mbti||''}`;
