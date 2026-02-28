@@ -11,7 +11,7 @@
     /* ===== DESIGN TOKENS (SAFE TO EDIT) ===== */
   :root {
       --bg:#f2f2f7; --card:#fff; --text:#1c1c1e; --sub:#636366; --sub2:#8e8e93; --border:#e5e5ea;
-      --blue:#007aff; --green:#34c759; --red:#ff3b30; --orange:#ff9f0a; --purple:#af52de;
+      --blue:#007aff; --green:#34c759; --red:#ff3b30; --orange:#ff9f0a; --purple:#af52de; --accent:#ff3b30;
       --radius:16px;
     }
     body { font-family:'Noto Sans KR',-apple-system,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
@@ -212,12 +212,13 @@
       </select>
       <input  class="inp" id="noticeTitle" placeholder="공지 제목">
       <textarea class="txa" id="noticeBody" placeholder="공지 내용..." style="min-height:64px;"></textarea>
-      <div class="img-row" style="margin-bottom:8px;">
-        <input class="img-url-inp" id="noticeMediaUrl" placeholder="미디어 URL (선택)" style="flex:1;">
-        <input type="file" id="noticeMediaFile" accept="image/*,video/*,audio/*" style="display:none;" onchange="uploadNoticeMedia(this)">
-        <button class="img-up-btn" onclick="document.getElementById('noticeMediaFile').click()">📎 파일</button>
-      </div>
-      <div id="noticeMediaPreview" style="margin-bottom:8px;"></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+          <button class="btn" onclick="document.getElementById('noticeImgInput').click()" style="padding:8px 14px;font-size:12px;">📷 이미지 첨부</button>
+          <span id="noticeImgName" style="font-size:12px;color:var(--sub);">선택 없음</span>
+          <button id="noticeImgClear" onclick="clearNoticeImg()" style="display:none;padding:4px 8px;font-size:12px;border:1px solid var(--border);border-radius:6px;background:var(--bg);cursor:pointer;">✕</button>
+        </div>
+        <input type="file" id="noticeImgInput" accept="image/*" style="display:none" onchange="handleNoticeImg(this)">
+        <div id="noticeImgPreview" style="margin-bottom:8px;"></div>
       <button class="btn btn-blue btn-full" id="noticeSendBtn" onclick="publishNotice()">📌 공지 게시</button>
       <div class="status" id="noticeStatus"></div>
     </div>
@@ -471,6 +472,27 @@
   var cachedFeed    = [];
   var selectedChar  = null;
   var adminImgFile  = null;
+  var noticeImgFile = null;
+
+  function handleNoticeImg(input) {
+    const file = input.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { alert('이미지는 5MB 이하만 첨부할 수 있어요'); input.value=''; return; }
+    noticeImgFile = file;
+    document.getElementById('noticeImgName').textContent = file.name;
+    document.getElementById('noticeImgClear').style.display = 'inline-block';
+    const url = URL.createObjectURL(file);
+    document.getElementById('noticeImgPreview').innerHTML =
+      `<img src="${url}" style="width:80px;height:80px;border-radius:8px;object-fit:cover;border:1.5px solid var(--border);">`;
+  }
+
+  function clearNoticeImg() {
+    noticeImgFile = null;
+    document.getElementById('noticeImgInput').value = '';
+    document.getElementById('noticeImgName').textContent = '선택 없음';
+    document.getElementById('noticeImgClear').style.display = 'none';
+    document.getElementById('noticeImgPreview').innerHTML = '';
+  }
   var selectedPostId = null;
 
   // ── 유틸
@@ -1058,12 +1080,22 @@
   async function publishNotice() {
     const title    = document.getElementById('noticeTitle').value.trim();
     const body     = document.getElementById('noticeBody').value.trim();
-    const mediaUrl = document.getElementById('noticeMediaUrl').value.trim();
     if(!title||!body) { showStatus('noticeStatus','제목과 내용을 입력하세요','error'); return; }
     const btn=document.getElementById('noticeSendBtn');
     btn.disabled=true; btn.innerHTML='<span class="spinner"></span> 게시 중';
     showStatus('noticeStatus','게시 중...','info');
     try {
+      // 이미지가 있으면 먼저 업로드
+      let mediaUrl = null;
+      if (noticeImgFile) {
+        const fd = new FormData();
+        fd.append('image', noticeImgFile);
+        fd.append('character_id', `notice_${Date.now()}`);
+        const upRes = await adminFetch('/admin/upload-image', { method:'POST', body:fd });
+        const upData = await upRes.json();
+        if (upData.image_url) mediaUrl = upData.image_url;
+        else { showStatus('noticeStatus','이미지 업로드 실패','error'); btn.disabled=false; btn.textContent='📌 공지 게시'; return; }
+      }
       const charId = document.getElementById('noticeCharId').value;
       const r=await adminFetch('/admin/notices', {
         method:'POST', body:JSON.stringify({title, body, media_url:mediaUrl||null, character_id: charId ? Number(charId) : null}),
@@ -1073,7 +1105,7 @@
         showStatus('noticeStatus','✅ 공지가 게시됐어요','success');
         document.getElementById('noticeTitle').value='';
         document.getElementById('noticeBody').value='';
-        document.getElementById('noticeMediaUrl').value='';
+        clearNoticeImg();
         loadManageNotices();
       } else { showStatus('noticeStatus','❌ '+(d.error||'실패'),'error'); }
     } catch(e) { showStatus('noticeStatus','❌ '+e.message,'error'); }
@@ -1125,28 +1157,6 @@
 
 
   // ── 공지 미디어 업로드
-  async function uploadNoticeMedia(inputEl) {
-    const file = inputEl.files[0]; if(!file) return;
-    if(file.size > 20*1024*1024) { toast('20MB 이하 파일만 가능해요',true); return; }
-    const prev = document.getElementById('noticeMediaPreview');
-    prev.innerHTML = '<div style="font-size:12px;color:var(--sub);">업로드 중...</div>';
-    const type = file.type.startsWith('video') ? 'video' : file.type.startsWith('audio') ? 'audio' : 'image';
-    const fd = new FormData();
-    fd.append('file', file);
-    fd.append('type', type);
-    try {
-      const r = await adminFetch('/admin/upload-media', { method:'POST', body:fd });
-      const d = await r.json();
-      if(d.ok) {
-        document.getElementById('noticeMediaUrl').value = d.url;
-        if(type==='image') prev.innerHTML = `<img src="${d.url}" style="max-height:80px;border-radius:8px;">`;
-        else if(type==='video') prev.innerHTML = `<div style="font-size:12px;color:var(--sub);">🎬 ${file.name}</div>`;
-        else prev.innerHTML = `<div style="font-size:12px;color:var(--sub);">🎵 ${file.name}</div>`;
-        toast('✅ 파일 업로드 완료');
-      } else { toast(d.error||'업로드 실패',true); prev.innerHTML=''; }
-    } catch(e) { toast('업로드 오류: '+e.message,true); prev.innerHTML=''; }
-    inputEl.value='';
-  }
 
   // ── 금지어 관리
   async function loadBannedWords() {

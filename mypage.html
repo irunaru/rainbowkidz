@@ -200,9 +200,10 @@
   const apiUrl = p => { const sep = p.includes('?')?'&':'?'; return guestId?`${API}${p}${sep}guest_id=${encodeURIComponent(guestId)}`:`${API}${p}`; };
 
   // [FIX 2/3] createSafeImg - src 없으면 이모지만 반환
-  const createSafeImg = (src, fallbackEmoji) => {
+  const createSafeImg = (src, fallbackEmoji, enableLightbox=false) => {
     if (!src) return `<span style="font-size:22px;">${fallbackEmoji}</span>`;
-    return `<img src="${esc(src)}" data-lightbox="1" data-lb-src="${esc(src)}" alt="" onerror="this.outerHTML='<span style=\\'font-size:22px;\\'>${fallbackEmoji}</span>'">`;
+    const lb = enableLightbox ? ` data-lightbox="1" data-lb-src="${esc(src)}"` : '';
+    return `<img src="${esc(src)}"${lb} alt="" onerror="this.outerHTML='<span style=\\'font-size:22px;\\'>${fallbackEmoji}</span>'">`;
   };
 
   const setLoader = on => $('loader').classList.toggle('hidden', !on);
@@ -219,7 +220,7 @@
         myNickname = d.guest?.nickname || null;
         if (myNickname) localStorage.setItem('rkNickname', myNickname);
         else localStorage.removeItem('rkNickname');
-        if (d.guest?.image_url) $('avatarImg').innerHTML = createSafeImg(d.guest.image_url + `?t=${Date.now()}`, '👤');
+        if (d.guest?.image_url) $('avatarImg').innerHTML = createSafeImg(d.guest.image_url + `?t=${Date.now()}`, '👤', true);
       }
     } catch { myNickname = localStorage.getItem('rkNickname') || null; }
   }
@@ -264,7 +265,7 @@
     try {
       const r = await fetch(apiUrl('/guest/upload-image'), { method:'POST', credentials:'include', body:fd });
       const d = await r.json().catch(()=>({}));
-      if (r.ok && d.ok && d.image_url) $('avatarImg').innerHTML = createSafeImg(d.image_url+`?t=${Date.now()}`, '👤');
+      if (r.ok && d.ok && d.image_url) $('avatarImg').innerHTML = createSafeImg(d.image_url+`?t=${Date.now()}`, '👤', true);
       else alert(d.error||'업로드 실패');
     } catch { alert('업로드 오류가 발생했어요'); }
     finally { setLoader(false); $('avatarInput').value = ''; }
@@ -300,6 +301,7 @@
         .map(c => ({
           ...c,
           image_url:    c.system_users?.image_url || c.guests?.image_url || null,
+          emoji:        c.system_users?.emoji || '🗣️',
           display_nick: c.system_users?.display_name || c.nickname || '익명',
           post_id:      myPosts[i].id,
           post_title:   myPosts[i].title || (myPosts[i].body?.slice(0,30)) || '',
@@ -370,7 +372,7 @@
     if (!receivedComments.length) { sec.innerHTML = '<div class="empty">받은 댓글이 없습니다.</div>'; return; }
     sec.innerHTML = receivedComments.map(c => `
       <div class="list-item" data-post-id="${c.post_id}">
-        <div class="item-avatar">${createSafeImg(c.image_url, '🗣️')}</div>
+        <div class="item-avatar">${createSafeImg(c.image_url, c.emoji||'🗣️')}</div>
         <div class="item-body">
           <div class="item-top">
             <span class="item-nick">${esc(c.display_nick)}</span>
