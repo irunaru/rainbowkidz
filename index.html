@@ -687,7 +687,7 @@ const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
         </div>
         <span class="feed-time">${relTime(p.created_at)}</span>
       </div>
-      <div class="feed-content" onclick="openDetail(${p.id})">
+      <div class="feed-content" onclick="if(!event.target.closest('.feed-thumb')){openDetail(${p.id})}">
         <div class="feed-body-wrap">
           <div class="feed-body">${esc(p.body||'')}${isMine ? '<span class="mine-badge">내 글</span>' : ''}</div>
         </div>
