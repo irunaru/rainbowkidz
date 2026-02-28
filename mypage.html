@@ -166,6 +166,17 @@
     </div>
   </div>
 </div>
+<!-- ===== Lightbox Overlay (SAFE) ===== -->
+<div id="lbOverlay" class="lb-overlay" aria-hidden="true">
+  <div class="lb-panel" role="dialog" aria-modal="true">
+    <div class="lb-top">
+      <button type="button" class="lb-btn" id="lbCloseBtn">닫기</button>
+    </div>
+    <div class="lb-img-wrap" id="lbBack">
+      <img id="lbImg" class="lb-img" alt="">
+    </div>
+  </div>
+</div>
 <script>
 (() => {
   if (window.__rk_mypage_loaded) return;
@@ -498,17 +509,5 @@
   }
 
 })();
-</script>
-<!-- ===== Lightbox Overlay (SAFE) ===== -->
-<div id="lbOverlay" class="lb-overlay" aria-hidden="true">
-  <div class="lb-panel" role="dialog" aria-modal="true">
-    <div class="lb-top">
-      <button type="button" class="lb-btn" id="lbCloseBtn">닫기</button>
-    </div>
-    <div class="lb-img-wrap" id="lbBack">
-      <img id="lbImg" class="lb-img" alt="">
-    </div>
-  </div>
-</div>
-</body>
+</script></body>
 </html>
