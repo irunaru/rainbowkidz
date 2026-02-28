@@ -85,7 +85,16 @@
     .confirm-btn { flex:1; padding:12px; border:none; border-radius:12px; font-weight:900; cursor:pointer; font-family:inherit; }
     .confirm-btn.no { background:var(--bg); color:var(--text); border:1.5px solid var(--border); }
     .confirm-btn.yes { background:var(--accent); color:#fff; }
-  </style>
+    /* ===== Lightbox Overlay (SAFE) ===== */
+  .lb-overlay{position:fixed;inset:0;background:rgba(0,0,0,.82);display:none;align-items:center;justify-content:center;padding:16px;z-index:9999}
+  .lb-overlay.is-open{display:flex}
+  .lb-panel{width:min(92vw,980px);height:min(88vh,980px);display:grid;grid-template-rows:auto 1fr;gap:10px}
+  .lb-top{display:flex;justify-content:flex-end;gap:8px}
+  .lb-btn{border:0;border-radius:10px;padding:10px 12px;background:rgba(255,255,255,.14);color:#fff;font-weight:700;cursor:pointer}
+  .lb-img-wrap{background:rgba(255,255,255,.06);border-radius:14px;overflow:hidden;display:grid;place-items:center}
+  .lb-img{max-width:100%;max-height:100%;object-fit:contain;user-select:none;-webkit-user-drag:none}
+  img[data-lightbox="1"]{cursor:zoom-in}
+</style>
 </head>
 <body>
 <div id="loader">
@@ -182,7 +191,7 @@
   // [FIX 2/3] createSafeImg - src 없으면 이모지만 반환
   const createSafeImg = (src, fallbackEmoji) => {
     if (!src) return `<span style="font-size:22px;">${fallbackEmoji}</span>`;
-    return `<img src="${esc(src)}" alt="" onerror="this.outerHTML='<span style=\\'font-size:22px;\\'>${fallbackEmoji}</span>'">`;
+    return `<img src="${esc(src)}" data-lightbox="1" data-lb-src="${esc(src)}" alt="" onerror="this.outerHTML='<span style=\\'font-size:22px;\\'>${fallbackEmoji}</span>'">`;
   };
 
   const setLoader = on => $('loader').classList.toggle('hidden', !on);
@@ -425,7 +434,10 @@
   $('nickInput').addEventListener('keypress',  e => { if(e.key==='Enter') saveNick(); });
   // [FIX 1] avatarBtn에 stopPropagation - avatarWrap 버블링 방지
   $('avatarBtn').addEventListener('click',  e => { e.stopPropagation(); $('avatarInput').click(); });
-  $('avatarWrap').addEventListener('click', ()  => $('avatarInput').click());
+  $('avatarWrap').addEventListener('click', (e) => {
+    if (e.target?.closest?.('img[data-lightbox="1"]')) return;
+    $('avatarInput').click();
+  });
   $('avatarInput').addEventListener('change', e => uploadAvatar(e.target.files && e.target.files[0]));
   $('confirmNo').addEventListener('click',  closeConfirm);
   $('confirmYes').addEventListener('click', () => { const fn=pendingDeleteFn; closeConfirm(); if(typeof fn==='function') fn(); });
@@ -438,7 +450,65 @@
     try { await initGuest(); updateProfileUI(); await loadAll(); }
     finally { setLoader(false); }
   })();
+
+  // ===== Lightbox Overlay (SAFE) =====
+  function initLightbox() {
+    const overlay  = document.getElementById('lbOverlay');
+    const imgEl    = document.getElementById('lbImg');
+    const closeBtn = document.getElementById('lbCloseBtn');
+    const back     = document.getElementById('lbBack');
+    if (!overlay || !imgEl || !closeBtn || !back) return;
+    let lastActive = null;
+    function openLightbox(src, alt) {
+      if (!src) return;
+      lastActive = document.activeElement;
+      imgEl.src = src; imgEl.alt = alt || '';
+      overlay.classList.add('is-open');
+      overlay.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+      closeBtn.focus();
+    }
+    function closeLightbox() {
+      overlay.classList.remove('is-open');
+      overlay.setAttribute('aria-hidden', 'true');
+      imgEl.removeAttribute('src');
+      document.body.style.overflow = '';
+      if (lastActive && lastActive.focus) lastActive.focus();
+      lastActive = null;
+    }
+    document.addEventListener('click', (e) => {
+      const img = e.target?.closest?.('img[data-lightbox="1"]');
+      if (!img) return;
+      const src = img.getAttribute('data-lb-src') || img.currentSrc || img.src;
+      openLightbox(src, img.alt);
+    });
+    closeBtn.addEventListener('click', closeLightbox);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) closeLightbox(); });
+    back.addEventListener('click', (e) => { if (e.target === back) closeLightbox(); });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && overlay.classList.contains('is-open')) closeLightbox();
+    });
+    window.__openLightbox = openLightbox;
+    window.__closeLightbox = closeLightbox;
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initLightbox, { once: true });
+  } else {
+    initLightbox();
+  }
+
 })();
 </script>
+<!-- ===== Lightbox Overlay (SAFE) ===== -->
+<div id="lbOverlay" class="lb-overlay" aria-hidden="true">
+  <div class="lb-panel" role="dialog" aria-modal="true">
+    <div class="lb-top">
+      <button type="button" class="lb-btn" id="lbCloseBtn">닫기</button>
+    </div>
+    <div class="lb-img-wrap" id="lbBack">
+      <img id="lbImg" class="lb-img" alt="">
+    </div>
+  </div>
+</div>
 </body>
 </html>
