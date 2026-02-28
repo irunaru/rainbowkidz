@@ -303,7 +303,7 @@
       <button class="write-close" onclick="closeWrite()">✕ 닫기</button>
     </div>
     <div class="write-body">
-      <textarea class="write-textarea" id="writeBody" placeholder="내용을 입력하세요... (5자 이상)" maxlength="5000"></textarea>
+      <textarea class="write-textarea" id="writeBody" placeholder="오늘 친구랑 무슨 일이 있었나요? 선생님한테 칭찬 받았나요? 인형이랑 뭐하고 놀았어요? 🌈" maxlength="5000"></textarea>
     </div>
     <div class="write-error" id="writeError"></div>
     <div class="write-footer">
@@ -992,7 +992,16 @@ const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
       const d = await r.json();
       if (d.ok) {
         document.getElementById('writeBody').value  = '';
-        closeWrite(); await loadFeed(true);
+        closeWrite();
+        // 새 글을 피드 맨 앞에 즉시 삽입 (스크롤 튐 없음)
+        if (d.post) {
+          feedPosts.unshift(d.post);
+          const sec = document.getElementById('feedSection');
+          const newCard = makeFeedCard(d.post);
+          sec.insertBefore(newCard, sec.firstChild);
+        } else {
+          await loadFeed(true);
+        }
       } else if (d.error === 'nickname_required') { myNickname = null; closeWrite(); openNickModal('글을 쓰려면 닉네임이 필요해요!'); }
       else if (d.error === 'rate_limit_post') { errEl.textContent = '너무 빠릅니다. 잠시 후 다시 시도해주세요'; }
       else { errEl.textContent = d.error || '오류가 발생했어요'; }
