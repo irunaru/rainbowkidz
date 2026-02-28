@@ -156,6 +156,8 @@
 </div>
 <script>
 (() => {
+  if (window.__rk_mypage_loaded) return;
+  window.__rk_mypage_loaded = true;
   'use strict';
   const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
   let guestId = null, myNickname = null;
@@ -300,7 +302,7 @@
     if (!myPosts.length) { sec.innerHTML = '<div class="empty">아직 쓴 글이 없어요.</div>'; return; }
     sec.innerHTML = myPosts.map(p => `
       <div class="post-card" data-post-id="${p.id}">
-        <div class="post-title">${esc(p.title||'제목 없음')}</div>
+        <div class="post-title">${esc(p.title||p.body?.slice(0,40)||'')}</div>
         ${p.body?`<div class="post-body">${esc(p.body)}</div>`:''}
         <div class="post-meta">
           <span>${relTime(p.created_at)}</span>

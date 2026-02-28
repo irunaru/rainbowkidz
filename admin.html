@@ -359,7 +359,6 @@
       <div class="sec">
         <div class="sec-title">✨ AI 게시글 제안</div>
         <div style="font-size:12px;color:var(--sub);margin-bottom:8px;">AI가 이 캐릭터 말투로 초안을 제안해요. 수정 후 게시하세요!</div>
-        <input class="inp" id="aiTitle" placeholder="제목">
         <textarea class="txa" id="aiBody" placeholder="본문"></textarea>
         <input class="inp" id="aiMediaUrl" placeholder="미디어 URL (선택)">
         <div style="font-size:11px;font-weight:700;color:var(--sub);margin-bottom:4px;">예약 게시 시간 (비워두면 즉시)</div>
@@ -491,13 +490,22 @@
   function adminFetch(path, opts) {
     opts = opts || {};
     var headers = {'X-Admin-Key': adminKey};
-    // FormData일 때는 Content-Type 설정 안 함 (브라우저가 boundary 포함해서 자동 설정)
     if (opts.body && typeof opts.body === 'string') {
       headers['Content-Type'] = 'application/json';
     }
-    // opts.headers가 있어도 X-Admin-Key 유지 (단, Content-Type은 opts.headers 우선)
     var mergedHeaders = Object.assign({}, headers, opts.headers || {});
-    return fetch(API + path, Object.assign({}, opts, {headers: mergedHeaders}));
+    return fetch(API + path, Object.assign({}, opts, {headers: mergedHeaders}))
+      .then(function(res) {
+        if (res.status === 401) {
+          // 키 만료/불일치 → 로그아웃 처리
+          adminKey = '';
+          localStorage.removeItem('rkAdminKey');
+          document.getElementById('loginBox').classList.remove('hidden');
+          document.getElementById('mainBox').classList.add('hidden');
+          document.getElementById('pwError').textContent = '인증이 만료되었어요. 다시 로그인해주세요.';
+        }
+        return res;
+      });
   }
 
   // ── 로그인 (단순 로컬 비교)
@@ -751,7 +759,6 @@
 
   // ── AI 게시글
   function clearPost() {
-    document.getElementById('aiTitle').value='';
     document.getElementById('aiBody').value='';
     document.getElementById('aiMediaUrl').value='';
     document.getElementById('postScheduled').value='';
@@ -769,7 +776,6 @@
       });
       const d=await r.json();
       if(d.ok && d.post) {
-        document.getElementById('aiTitle').value=d.post.title||'';
         document.getElementById('aiBody').value =d.post.body ||'';
         showStatus('aiPostStatus','✅ AI 제안 완료! 수정 후 게시하세요','success');
       } else { showStatus('aiPostStatus','❌ '+(d.error||'생성 실패'),'error'); }
@@ -779,10 +785,9 @@
 
   async function publishPost() {
     if(!selectedChar) { toast('캐릭터를 선택하세요',true); return; }
-    const title    = document.getElementById('aiTitle').value.trim();
     const body     = document.getElementById('aiBody').value.trim();
     const mediaUrl = document.getElementById('aiMediaUrl').value.trim();
-    if(!title||!body) { showStatus('aiPostStatus','제목과 내용을 입력하세요','error'); return; }
+    if(!body) { showStatus('aiPostStatus','내용을 입력하세요','error'); return; }
     const btn=document.getElementById('btnPubPost');
     btn.disabled=true; btn.innerHTML='<span class="spinner"></span> 게시 중';
     showStatus('aiPostStatus','게시 중...','info');
@@ -790,7 +795,7 @@
       const scheduled = document.getElementById('postScheduled').value;
       const r=await adminFetch('/system/posts', {
         method:'POST', body:JSON.stringify({
-          system_user_id: selectedChar.id, title, body,
+          system_user_id: selectedChar.id, title: '', body,
           is_notice: false, media_url: mediaUrl||null,
           scheduled_at: scheduled ? new Date(scheduled).toISOString() : null,
         }),

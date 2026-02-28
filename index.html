@@ -303,7 +303,6 @@
       <button class="write-close" onclick="closeWrite()">✕ 닫기</button>
     </div>
     <div class="write-body">
-      <input class="write-input" id="writeTitle" placeholder="제목 (2~80자)" maxlength="80">
       <textarea class="write-textarea" id="writeBody" placeholder="내용을 입력하세요... (5자 이상)" maxlength="5000"></textarea>
     </div>
     <div class="write-error" id="writeError"></div>
@@ -663,8 +662,7 @@ const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
         <span class="feed-time">${relTime(p.created_at)}</span>
       </div>
       <div class="feed-content" onclick="openDetail(${p.id})">
-        ${p.title ? `<div class="feed-title">${esc(p.title)}${isMine ? '<span class="mine-badge">내 글</span>' : ''}</div>` : ''}
-        <div class="feed-body">${esc(p.body||'')}</div>
+        <div class="feed-body">${esc(p.body||'')}${isMine ? '<span class="mine-badge">내 글</span>' : ''}</div>
       </div>
       <div class="feed-footer">
         <div class="feed-stats">
@@ -972,18 +970,16 @@ const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
     }
     if (!myNickname) { pendingAction = 'write'; openNickModal('글을 쓰려면 닉네임이 필요해요!'); return; }
     document.getElementById('writeOverlay').classList.remove('hidden');
-    document.getElementById('writeTitle').focus();
+    document.getElementById('writeBody').focus();
     document.getElementById('writeError').textContent = '';
   }
   function closeWrite() { document.getElementById('writeOverlay').classList.add('hidden'); }
   function handleWriteOverlay(e) { if (e.target.id === 'writeOverlay') closeWrite(); }
 
   async function submitWrite() {
-    const title = document.getElementById('writeTitle').value.trim();
     const body  = document.getElementById('writeBody').value.trim();
     const errEl = document.getElementById('writeError');
     const btn   = document.getElementById('writeSubmitBtn');
-    if (title.length < 2) { errEl.textContent = '제목은 2자 이상 입력해주세요'; return; }
     if (body.length  < 5) { errEl.textContent = '내용은 5자 이상 입력해주세요'; return; }
     errEl.textContent = '';
     btn.disabled = true; btn.textContent = '게시 중...';
@@ -991,11 +987,10 @@ const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
       const r = await fetch(apiUrl('/posts', true), {
         method: 'POST', credentials: 'include',
         headers: { 'Content-Type':'application/json' },
-        body: JSON.stringify({ title, body, guest_id: guestId }),
+        body: JSON.stringify({ body, guest_id: guestId }),
       });
       const d = await r.json();
       if (d.ok) {
-        document.getElementById('writeTitle').value = '';
         document.getElementById('writeBody').value  = '';
         closeWrite(); await loadFeed(true);
       } else if (d.error === 'nickname_required') { myNickname = null; closeWrite(); openNickModal('글을 쓰려면 닉네임이 필요해요!'); }
