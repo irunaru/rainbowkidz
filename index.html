@@ -1168,6 +1168,7 @@ const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
     document.addEventListener('click', (e) => {
       const img = e.target?.closest?.('img[data-lightbox="1"]');
       if (!img) return;
+      e.stopPropagation();
       const src = img.getAttribute('data-lb-src') || img.currentSrc || img.src;
       openLightbox(src, img.alt);
     });
