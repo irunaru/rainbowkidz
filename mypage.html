@@ -493,7 +493,7 @@
       e.stopPropagation();
       const src = img.getAttribute('data-lb-src') || img.currentSrc || img.src;
       openLightbox(src, img.alt);
-    });
+    }, true);
     closeBtn.addEventListener('click', closeLightbox);
     overlay.addEventListener('click', (e) => { if (e.target === overlay) closeLightbox(); });
     back.addEventListener('click', (e) => { if (e.target === back) closeLightbox(); });

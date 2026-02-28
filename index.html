@@ -692,7 +692,7 @@ const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
           <div class="feed-body">${esc(p.body||'')}${isMine ? '<span class="mine-badge">내 글</span>' : ''}</div>
         </div>
         ${p.media_url && detectMediaType(p.media_url) === 'image'
-          ? `<img class="feed-thumb" data-lightbox="1" data-lb-src="${esc(p.media_url)}" src="${esc(p.media_url)}?width=128&resize=cover" loading="lazy" alt="" onclick="event.stopPropagation()">`
+          ? `<img class="feed-thumb" data-lightbox="1" data-lb-src="${esc(p.media_url)}" src="${esc(p.media_url)}?width=128&resize=cover" loading="lazy" alt="">`
           : ''}
       </div>
       <div class="feed-footer">
@@ -1186,7 +1186,7 @@ const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
       e.stopPropagation();
       const src = img.getAttribute('data-lb-src') || img.currentSrc || img.src;
       openLightbox(src, img.alt);
-    });
+    }, true);
     closeBtn.addEventListener('click', closeLightbox);
     overlay.addEventListener('click', (e) => { if (e.target === overlay) closeLightbox(); });
     back.addEventListener('click', (e) => { if (e.target === back) closeLightbox(); });
