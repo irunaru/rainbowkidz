@@ -364,7 +364,13 @@
         <div class="sec-title">✨ AI 게시글 제안</div>
         <div style="font-size:12px;color:var(--sub);margin-bottom:8px;">AI가 이 캐릭터 말투로 초안을 제안해요. 수정 후 게시하세요!</div>
         <textarea class="txa" id="aiBody" placeholder="본문"></textarea>
-        <input class="inp" id="aiMediaUrl" placeholder="미디어 URL (선택)">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+          <button class="btn" onclick="document.getElementById('aiImgInput').click()" style="padding:8px 14px;font-size:12px;">📷 이미지 첨부</button>
+          <span id="aiImgName" style="font-size:12px;color:var(--sub);">선택 없음</span>
+          <button id="aiImgClear" onclick="clearAdminImg()" style="display:none;padding:4px 8px;font-size:12px;border:1px solid var(--border);border-radius:6px;background:var(--bg);cursor:pointer;">✕</button>
+        </div>
+        <input type="file" id="aiImgInput" accept="image/*" style="display:none" onchange="handleAdminImg(this)">
+        <div id="aiImgPreview" style="margin-bottom:8px;"></div>
         <div style="font-size:11px;font-weight:700;color:var(--sub);margin-bottom:4px;">예약 게시 시간 (비워두면 즉시)</div>
         <input class="inp" type="datetime-local" id="postScheduled" style="margin-bottom:10px;">
         <div class="btn-row">
@@ -464,6 +470,7 @@
   var characters    = [];
   var cachedFeed    = [];
   var selectedChar  = null;
+  var adminImgFile  = null;
   var selectedPostId = null;
 
   // ── 유틸
@@ -764,9 +771,29 @@
   // ── AI 게시글
   function clearPost() {
     document.getElementById('aiBody').value='';
-    document.getElementById('aiMediaUrl').value='';
     document.getElementById('postScheduled').value='';
     hideStatus('aiPostStatus');
+    clearAdminImg();
+  }
+
+  function handleAdminImg(input) {
+    const file = input.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { alert('이미지는 5MB 이하만 첨부할 수 있어요'); input.value=''; return; }
+    adminImgFile = file;
+    document.getElementById('aiImgName').textContent = file.name;
+    document.getElementById('aiImgClear').style.display = 'inline-block';
+    const url = URL.createObjectURL(file);
+    document.getElementById('aiImgPreview').innerHTML =
+      `<img src="${url}" style="width:80px;height:80px;border-radius:8px;object-fit:cover;border:1.5px solid var(--border);">`;
+  }
+
+  function clearAdminImg() {
+    adminImgFile = null;
+    document.getElementById('aiImgInput').value = '';
+    document.getElementById('aiImgName').textContent = '선택 없음';
+    document.getElementById('aiImgClear').style.display = 'none';
+    document.getElementById('aiImgPreview').innerHTML = '';
   }
 
   async function generatePost() {
@@ -790,12 +817,22 @@
   async function publishPost() {
     if(!selectedChar) { toast('캐릭터를 선택하세요',true); return; }
     const body     = document.getElementById('aiBody').value.trim();
-    const mediaUrl = document.getElementById('aiMediaUrl').value.trim();
     if(!body) { showStatus('aiPostStatus','내용을 입력하세요','error'); return; }
     const btn=document.getElementById('btnPubPost');
     btn.disabled=true; btn.innerHTML='<span class="spinner"></span> 게시 중';
     showStatus('aiPostStatus','게시 중...','info');
     try {
+      // 이미지가 있으면 먼저 업로드
+      let mediaUrl = null;
+      if (adminImgFile) {
+        const fd = new FormData();
+        fd.append('image', adminImgFile);
+        fd.append('character_id', `post_${selectedChar.id}_${Date.now()}`);
+        const upRes = await adminFetch('/admin/upload-image', { method:'POST', body:fd });
+        const upData = await upRes.json();
+        if (upData.image_url) mediaUrl = upData.image_url;
+        else { showStatus('aiPostStatus','이미지 업로드 실패','error'); btn.disabled=false; btn.innerHTML='📤 게시'; return; }
+      }
       const scheduled = document.getElementById('postScheduled').value;
       const r=await adminFetch('/system/posts', {
         method:'POST', body:JSON.stringify({
