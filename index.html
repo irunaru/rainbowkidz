@@ -135,6 +135,8 @@
     .yar-btn.active { border-color:var(--yar); color:var(--yar); background:#fff9ee; }
     @keyframes yarBounce { 0%{transform:scale(1)} 30%{transform:scale(1.35)} 60%{transform:scale(.9)} 80%{transform:scale(1.1)} 100%{transform:scale(1)} }
     .yar-btn.bounce { animation:yarBounce .35s cubic-bezier(.36,.07,.19,.97) both; }
+    @keyframes yarPop { 0%{transform:translate(var(--dx),var(--dy)) scale(1);opacity:1} 100%{transform:translate(calc(var(--dx)*3),calc(var(--dy)*3)) scale(0);opacity:0} }
+    .yar-particle { position:fixed; pointer-events:none; font-size:14px; animation:yarPop .6s ease-out forwards; z-index:9999; }
     .mine-badge { font-size:10px; font-weight:700; color:var(--blue); background:#e8f0fe; border-radius:10px; padding:2px 7px; margin-left:6px; vertical-align:middle; }
 
     /* ── 토스트 / 더보기 ── */
@@ -659,7 +661,7 @@ const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
   function renderFeed(reset = true) {
     const sec = document.getElementById('feedSection');
     if (!feedPosts.length) {
-      sec.innerHTML = '<div style="padding:24px;color:var(--sub);text-align:center;font-size:14px;">아직 이야기가 없어요</div>';
+      sec.innerHTML = '<div style="padding:40px 24px;text-align:center;"><div style="font-size:48px;margin-bottom:12px;">🌈</div><div style="font-size:15px;font-weight:700;margin-bottom:6px;color:var(--text);">아직 이야기가 없어요</div><div style="font-size:13px;color:var(--sub);margin-bottom:16px;">첫 번째 이야기를 들려주세요!</div><button onclick="openWrite()" style="padding:10px 24px;background:var(--text);color:#fff;border:none;border-radius:var(--radius-pill);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">✏️ 첫 이야기 쓰기</button></div>';
       document.getElementById('loadMoreBtn').classList.add('hidden');
       return;
     }
@@ -725,6 +727,26 @@ const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
   }
 
   // ── 야르~
+  // 야르~ 촉각/시각 피드백
+  function yarFeedback(btn) {
+    // 진동 (Android 지원, iOS 무시)
+    if (navigator.vibrate) navigator.vibrate(30);
+    // 파티클
+    const rect = btn.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const emojis = ['⭐','✨','🌟','💛','🎉'];
+    for (let i = 0; i < 6; i++) {
+      const el = document.createElement('span');
+      el.className = 'yar-particle';
+      el.textContent = emojis[i % emojis.length];
+      const angle = (i / 6) * Math.PI * 2;
+      el.style.cssText = `left:${cx}px;top:${cy}px;--dx:${Math.cos(angle)*20}px;--dy:${Math.sin(angle)*20}px;`;
+      document.body.appendChild(el);
+      el.addEventListener('animationend', () => el.remove());
+    }
+  }
+
   async function toggleYar(e, postId) {
     e.stopPropagation();
     if (!myNickname) { pendingYarId = postId; pendingAction = 'yar'; openNickModal('야르~를 누르려면 닉네임이 필요해요!'); return; }
@@ -737,6 +759,7 @@ const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
     if (btn) {
       btn.className = `yar-btn${!wasYar?' active bounce':''}`;
       btn.innerHTML = `🌟 야르~ ${post.yar_count}`;
+      if (!wasYar) yarFeedback(btn);
       btn.addEventListener('animationend', () => btn.classList.remove('bounce'), { once:true });
     }
     if (currentPost?.id == postId) syncDetailYar(post.yar_count, !wasYar);
