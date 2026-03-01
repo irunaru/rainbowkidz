@@ -504,6 +504,11 @@
 <script>
   var API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
 
+  // ── 안전한 JSON 파싱 헬퍼
+  async function safeJson(r) {
+    try { return await r.json(); } catch(e) { return { ok: false, error: '서버 응답 오류' }; }
+  }
+
   var adminToken    = '';  // HMAC 서명 토큰
   var characters    = [];
   var cachedFeed    = [];
@@ -600,7 +605,7 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password: pw })
       });
-      var d = await r.json();
+      var d = await safeJson(r);
       if (!d.ok) { err.textContent = '비밀번호가 틀렸어요'; btn.disabled = false; btn.textContent = '입장'; return; }
       adminToken = d.token;
       try {
@@ -643,7 +648,7 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ password: saved })
         });
-        var d = await r.json();
+        var d = await safeJson(r);
         if (d.ok) {
           adminToken = d.token;
           if (localStorage.getItem('rkAdminKey')) document.getElementById('pwSave').checked = true;
@@ -669,7 +674,7 @@
     try {
       const r = await adminFetch('/characters');
       if(r.ok) {
-        const d=await r.json();
+        const d = await safeJson(r);
         characters=d.characters||[];
         // 공지 작성 캐릭터 - 선생님(teacher)으로 고정, 변경 불가
         const sel = document.getElementById('noticeCharId');
@@ -689,7 +694,7 @@
   async function loadFeed(limit=50) {
     try {
       const r = await fetch(API+`/timeline?limit=${limit}&sort=latest`);
-      if(r.ok) { const d=await r.json(); cachedFeed=d.posts||[]; }
+      if(r.ok) { const d = await safeJson(r); cachedFeed=d.posts||[]; }
     } catch {}
   }
 
@@ -803,9 +808,10 @@
     thumb.innerHTML='<div class="spinner" style="border-top-color:var(--blue);border-color:var(--border);"></div>';
     const fd=new FormData(); fd.append('image',file);
     if(selectedChar?.id) fd.append('character_id', selectedChar.id);
+    else fd.append('character_id', 'temp_' + Date.now());
     try {
       const r = await adminFetch('/admin/upload-image', { method:'POST', body:fd });
-      const d = await r.json();
+      const d = await safeJson(r);
       if(d.ok) {
         document.getElementById(urlId).value=d.image_url;
         syncThumb(urlId,thumbId,emojiId);
@@ -840,7 +846,7 @@
       const r = await adminFetch(`/admin/characters/${selectedChar.id}`, {
         method:'PATCH', body:JSON.stringify(payload),
       });
-      const d = await r.json();
+      const d = await safeJson(r);
       if(d.ok) {
         showStatus('pSaveStatus','✅ 저장됐어요','success');
         await loadCharacters();
@@ -893,7 +899,7 @@
       const r=await adminFetch('/admin/generate-post', {
         method:'POST', body:JSON.stringify({character_id:selectedChar.id}),
       });
-      const d=await r.json();
+      const d = await safeJson(r);
       if(d.ok && d.post) {
         document.getElementById('aiBody').value =d.post.body ||'';
         showStatus('aiPostStatus','✅ AI 제안 완료! 수정 후 게시하세요','success');
@@ -914,11 +920,11 @@
       let mediaUrl = null;
       if (adminImgFile) {
         const fd = new FormData();
-        fd.append('image', adminImgFile);
-        fd.append('character_id', `post_${selectedChar.id}_${Date.now()}`);
-        const upRes = await adminFetch('/admin/upload-image', { method:'POST', body:fd });
-        const upData = await upRes.json();
-        if (upData.image_url) mediaUrl = upData.image_url;
+        fd.append('file', adminImgFile);
+        fd.append('type', 'image');
+        const upRes = await adminFetch('/admin/upload-media', { method:'POST', body:fd });
+        const upData = await safeJson(upRes);
+        if (upData.url) mediaUrl = upData.url;
         else { showStatus('aiPostStatus','이미지 업로드 실패','error'); btn.disabled=false; btn.innerHTML='📤 게시'; return; }
       }
       const scheduled = document.getElementById('postScheduled').value;
@@ -929,7 +935,7 @@
           scheduled_at: scheduled ? new Date(scheduled).toISOString() : null,
         }),
       });
-      const d=await r.json();
+      const d = await safeJson(r);
       if(d.ok) {
         const msg = scheduled ? `✅ 게시 예약 완료 (${new Date(scheduled).toLocaleString('ko-KR')})` : '✅ 게시 완료';
         showStatus('aiPostStatus', msg, 'success');
@@ -959,7 +965,7 @@
       // Supabase에서 미래 예약댓글만 조회
       const now = new Date().toISOString();
       const r = await adminFetch(`/admin/scheduled-comments?post_id=${postId}`);
-      const d = await r.json();
+      const d = await safeJson(r);
       const list = d.comments || [];
       if (!list.length) { el.innerHTML = '<span style="color:var(--sub);">예약된 댓글이 없어요.</span>'; return; }
       el.innerHTML = list.map(c => `
@@ -977,7 +983,7 @@
   async function cancelScheduledComment(commentId) {
     if (!confirm('예약 댓글을 취소(삭제)할까요?')) return;
     const r = await adminFetch(`/admin/comments/${commentId}`, { method:'DELETE' });
-    const d = await r.json();
+    const d = await safeJson(r);
     if (d.ok) { toast('예약 댓글 취소됨'); if (selectedPostId) loadScheduledComments(selectedPostId); }
     else toast('삭제 실패: ' + (d.error||''), true);
   }
@@ -993,7 +999,7 @@
       const r=await adminFetch('/admin/generate-comment', {
         method:'POST', body:JSON.stringify({post_id:selectedPostId, character_id:selectedChar.id}),
       });
-      const d=await r.json();
+      const d = await safeJson(r);
       if(d.ok) {
         document.getElementById('aiComment').value=d.comment||'';
         showStatus('aiCommentStatus','✅ AI 제안 완료! 수정 후 게시하세요','success');
@@ -1017,7 +1023,7 @@
       const r=await adminFetch('/admin/system-comment', {
         method:'POST', body:JSON.stringify(payload),
       });
-      const d=await r.json();
+      const d = await safeJson(r);
       if(d.ok) {
         document.getElementById('aiComment').value='';
         document.getElementById('cmtScheduled').value='';
@@ -1036,7 +1042,7 @@
     wrap.innerHTML='<div style="color:var(--sub);font-size:13px;margin-top:8px;">로딩 중...</div>';
     try {
       const r=await fetch(API+`/posts/${selectedPostId}/comments?limit=100`);
-      const d=await r.json();
+      const d = await safeJson(r);
       const cmts=d.comments||[];
       if(!cmts.length) { wrap.innerHTML='<div class="cmt-wrap"><div style="color:var(--sub);font-size:13px;">댓글이 없어요</div></div>'; return; }
       wrap.innerHTML=`<div class="cmt-wrap">${cmts.map(cm=>{
@@ -1058,7 +1064,7 @@
     try {
       // admin 삭제 endpoint 없으면 일반 삭제 시도
       const r=await adminFetch(`/admin/comments/${cmtId}`, {method:'DELETE'});
-      const d=await r.json();
+      const d = await safeJson(r);
       if(d.ok) { toast('🗑 댓글 삭제 완료'); loadSelectedPostComments(); }
       else { toast(d.error||'삭제 실패',true); }
     } catch(e) { toast(e.message,true); }
@@ -1070,20 +1076,22 @@
     const filter = document.getElementById('mgmtFilter').value;
     wrap.innerHTML='<div class="skel" style="height:48px;margin-bottom:6px;"></div>'.repeat(3);
     try {
-      const params=new URLSearchParams({limit:40, sort:'latest'});
+      const params=new URLSearchParams({limit:40});
       if(filter!=='all') params.set('author_type',filter);
-      // timeline 사용 (관리자 token 없이도 가져올 수 있음)
-      const r=await fetch(API+`/timeline?${params}`);
-      const d=await r.json();
+      const r=await adminFetch(`/admin/posts?${params}`);
+      const d = await safeJson(r);
       const posts=d.posts||[];
       if(!posts.length) { wrap.innerHTML='<div style="color:var(--sub);font-size:13px;">글이 없어요</div>'; return; }
       wrap.innerHTML=posts.map(p=>{
-        const name=p.author_type==='system'?(p.character_name||'캐릭터'):(p.nickname||'익명');
-        const em  =p.character_emoji||p.author_emoji||'👤';
+        const su   = p.system_users;
+        const name = p.author_type==='system'?(su?.display_name||'캐릭터'):(p.guests?.nickname||'익명');
+        const em   = su?.emoji||'👤';
+        const scheduledBadge = p.scheduled_at && new Date(p.scheduled_at) > new Date()
+          ? `<span style="font-size:10px;color:var(--blue);font-weight:700;">⏰ 예약</span> ` : '';
         return `<div class="manage-item" id="mp-${p.id}">
           <div class="manage-em">${esc(em)}</div>
           <div class="manage-info">
-            <div class="manage-title">${esc(p.title||p.body?.slice(0,40)||'제목없음')}</div>
+            <div class="manage-title">${scheduledBadge}${esc(p.title||p.body?.slice(0,40)||'제목없음')}</div>
             <div class="manage-meta">${esc(name)} · ID:${p.id} · 야르 ${p.yar_count||0} · 댓글 ${p.comment_count||0} · ${relTime(p.created_at)}</div>
           </div>
           <button class="manage-del" onclick="deletePost(${p.id})">삭제</button>
@@ -1099,7 +1107,7 @@
     if(!confirm('이 게시글을 삭제할까요?')) return;
     try {
       const r=await adminFetch(`/admin/posts/${postId}`, {method:'DELETE'});
-      const d=await r.json();
+      const d = await safeJson(r);
       if(d.ok) {
         document.getElementById(`mp-${postId}`)?.remove();
         cachedFeed=cachedFeed.filter(p=>p.id!==postId);
@@ -1115,7 +1123,7 @@
     wrap.innerHTML='<div class="skel" style="height:48px;margin-bottom:6px;"></div>'.repeat(2);
     try {
       const r=await adminFetch('/admin/notices?limit=20');
-      const d=await r.json();
+      const d = await safeJson(r);
       const notices=d.notices||[];
       if(!notices.length) { wrap.innerHTML='<div style="color:var(--sub);font-size:13px;">공지가 없어요</div>'; return; }
       wrap.innerHTML=notices.map(n=>`
@@ -1134,7 +1142,7 @@
     if(!confirm('이 공지를 삭제할까요?')) return;
     try {
       const r=await adminFetch(`/admin/notices/${id}`, {method:'DELETE'});
-      const d=await r.json();
+      const d = await safeJson(r);
       if(d.ok) { document.getElementById(`mn-${id}`)?.remove(); showStatus('noticeManageStatus','✅ 삭제됐어요','success'); }
       else { showStatus('noticeManageStatus','❌ '+(d.error||'실패'),'error'); }
     } catch(e) { showStatus('noticeManageStatus','❌ '+e.message,'error'); }
@@ -1153,18 +1161,18 @@
       let mediaUrl = null;
       if (noticeImgFile) {
         const fd = new FormData();
-        fd.append('image', noticeImgFile);
-        fd.append('character_id', `notice_${Date.now()}`);
-        const upRes = await adminFetch('/admin/upload-image', { method:'POST', body:fd });
-        const upData = await upRes.json();
-        if (upData.image_url) mediaUrl = upData.image_url;
+        fd.append('file', noticeImgFile);
+        fd.append('type', 'image');
+        const upRes = await adminFetch('/admin/upload-media', { method:'POST', body:fd });
+        const upData = await safeJson(upRes);
+        if (upData.url) mediaUrl = upData.url;
         else { showStatus('noticeStatus','이미지 업로드 실패','error'); btn.disabled=false; btn.textContent='📌 공지 게시'; return; }
       }
       const charId = document.getElementById('noticeCharId').value;
       const r=await adminFetch('/admin/notices', {
         method:'POST', body:JSON.stringify({title, body, media_url:mediaUrl||null, character_id: charId ? Number(charId) : null}),
       });
-      const d=await r.json();
+      const d = await safeJson(r);
       if(d.ok) {
         showStatus('noticeStatus','✅ 공지가 게시됐어요','success');
         document.getElementById('noticeTitle').value='';
@@ -1204,7 +1212,7 @@
     };
     try {
       const r=await adminFetch('/admin/characters', {method:'POST', body:JSON.stringify(payload)});
-      const d=await r.json();
+      const d = await safeJson(r);
       if(d.ok) {
         showStatus('acStatus',`✅ ${name} 등록 완료!`,'success');
         ['acName','acEmoji','acAnimal','acMbti','acLikes','acHobby','acSpeech','acImgUrl'].forEach(id=>{
@@ -1227,7 +1235,7 @@
     const wrap = document.getElementById('bannedWordsList');
     try {
       const r = await adminFetch('/admin/banned-words');
-      const d = await r.json();
+      const d = await safeJson(r);
       const words = d.words || [];
       if(!words.length) { wrap.innerHTML='<div style="color:var(--sub);font-size:13px;">금지어 없음</div>'; return; }
       wrap.innerHTML = words.map(w=>`
@@ -1243,7 +1251,7 @@
     if(!word) { showStatus('bannedWordsStatus','단어를 입력하세요','error'); return; }
     try {
       const r = await adminFetch('/admin/banned-words', {method:'POST', body:JSON.stringify({word})});
-      const d = await r.json();
+      const d = await safeJson(r);
       if(d.ok) {
         document.getElementById('newBannedWord').value='';
         showStatus('bannedWordsStatus',`✅ "${word}" 추가됨`,'success');
@@ -1256,7 +1264,7 @@
     if(!confirm('이 금지어를 삭제할까요?')) return;
     try {
       const r = await adminFetch(`/admin/banned-words/${id}`, {method:'DELETE'});
-      const d = await r.json();
+      const d = await safeJson(r);
       if(d.ok) { document.getElementById(`bw-${id}`)?.remove(); showStatus('bannedWordsStatus','✅ 삭제됨','success'); }
       else { showStatus('bannedWordsStatus','❌ '+(d.error||'실패'),'error'); }
     } catch(e) { showStatus('bannedWordsStatus','❌ '+e.message,'error'); }
