@@ -306,6 +306,7 @@
     <div class="skel" style="height:120px;margin-bottom:10px;"></div>
   </div>
   <button class="load-more hidden" id="loadMoreBtn" onclick="loadMore()">더 보기</button>
+  <div id="feedSentinel" style="height:1px;"></div>
 </div>
 
 <!-- 바텀 네비 -->
@@ -435,6 +436,7 @@ const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
   let allNotices   = [];
   let currentSort  = 'latest';
   let feedOffset   = 0;
+  let isLoadingMore = false;
   const FEED_LIMIT = 20;
   let hasMore      = false;
   let guestId      = null;
@@ -645,10 +647,13 @@ const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
   }
 
   async function loadMore() {
+    if (isLoadingMore || !hasMore) return;
+    isLoadingMore = true;
     const btn = document.getElementById('loadMoreBtn');
     btn.disabled = true; btn.textContent = '불러오는 중...';
     await loadFeed(false);
     btn.disabled = false; btn.textContent = '더 보기';
+    isLoadingMore = false;
   }
 
   function renderFeed(reset = true) {
@@ -668,7 +673,7 @@ const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
     }
     const btn = document.getElementById('loadMoreBtn');
     if (hasMore) { btn.classList.remove('hidden'); btn.textContent = '더 보기'; }
-    else { btn.classList.add('hidden'); }
+    else { btn.classList.add('hidden'); if (feedIO) feedIO.disconnect(); }
   }
 
   function makeFeedCard(p) {
@@ -1189,6 +1194,22 @@ const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
   if (typeof handleProfileOverlay === 'function') window.handleProfileOverlay = handleProfileOverlay;
   if (typeof handleWriteOverlay === 'function') window.handleWriteOverlay = handleWriteOverlay;
   if (typeof loadMore === 'function') window.loadMore = loadMore;
+
+  // ── 무한 스크롤 (SAFE)
+  let feedIO = null;
+
+  function initInfiniteScroll() {
+    const sentinel = document.getElementById('feedSentinel');
+    if (!sentinel || !('IntersectionObserver' in window)) return;
+    if (feedIO) feedIO.disconnect();
+    feedIO = new IntersectionObserver((entries) => {
+      if (!entries.some(e => e.isIntersecting)) return;
+      loadMore();
+    }, { root: null, rootMargin: '600px 0px', threshold: 0 });
+    feedIO.observe(sentinel);
+  }
+
+  initInfiniteScroll();
   if (typeof openDetail === 'function') window.openDetail = openDetail;
   if (typeof openProfile === 'function') window.openProfile = openProfile;
   if (typeof openWrite === 'function') window.openWrite = openWrite;
