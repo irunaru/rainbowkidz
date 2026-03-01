@@ -326,7 +326,7 @@
 
   function renderPosts() {
     const sec = $('secPosts');
-    if (!myPosts.length) { sec.innerHTML = '<div class="empty">아직 쓴 글이 없어요.</div>'; return; }
+    if (!myPosts.length) { sec.innerHTML = '<div class="empty"><div style="font-size:48px;margin-bottom:12px;">🌈</div><div style="font-size:15px;font-weight:700;margin-bottom:6px;">아직 쓴 글이 없어요</div><div style="font-size:13px;margin-bottom:16px;">친구들에게 첫 이야기를 들려주세요!</div><button onclick="location.href=\'index.html#write\'" style="padding:10px 24px;background:var(--text);color:#fff;border:none;border-radius:var(--radius-pill);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">✏️ 첫 이야기 쓰기</button></div>'; return; }
     sec.innerHTML = myPosts.map(p => `
       <div class="post-card" data-post-id="${p.id}">
         <div class="post-body">${esc((p.body || p.title || '').trim())}</div>
@@ -351,7 +351,7 @@
 
   function renderYarers() {
     const sec = $('secYars');
-    if (!allYarers.length) { sec.innerHTML = '<div class="empty">받은 야르~가 없습니다.</div>'; return; }
+    if (!allYarers.length) { sec.innerHTML = '<div class="empty"><div style="font-size:48px;margin-bottom:12px;">🥺</div><div style="font-size:15px;font-weight:700;margin-bottom:6px;">아직 받은 야르~가 없어요</div><div style="font-size:13px;">글을 올리면 친구들이 야르~를 보내줄 거예요!</div></div>'; return; }
     sec.innerHTML = allYarers.map(y => `
       <div class="list-item" data-post-id="${y.post_id}">
         <div class="item-avatar">${createSafeImg(y.image_url, '👤')}</div>
@@ -370,7 +370,7 @@
 
   function renderComments() {
     const sec = $('secComments');
-    if (!receivedComments.length) { sec.innerHTML = '<div class="empty">받은 댓글이 없습니다.</div>'; return; }
+    if (!receivedComments.length) { sec.innerHTML = '<div class="empty"><div style="font-size:48px;margin-bottom:12px;">🐾</div><div style="font-size:15px;font-weight:700;margin-bottom:6px;">아직 받은 댓글이 없어요</div><div style="font-size:13px;">친구들이 곧 댓글을 달아줄 거예요!</div></div>'; return; }
     sec.innerHTML = receivedComments.map(c => `
       <div class="list-item" data-post-id="${c.post_id}">
         <div class="item-avatar">${createSafeImg(c.image_url, c.emoji||'🗣️')}</div>
