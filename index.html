@@ -1030,10 +1030,14 @@ const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
     document.getElementById('writeError').textContent = '';
   }
   function closeWrite() {
+    const body = document.getElementById('writeBody').value.trim();
+    if ((body.length >= 10 || writeImgFile) &&
+        !confirm('작성 중인 내용이 사라집니다. 정말 닫을까요?')) return;
     document.getElementById('writeOverlay').classList.add('hidden');
     writeImgFile = null;
     document.getElementById('writeImgPreview').innerHTML = '';
     document.getElementById('writeImgInput').value = '';
+    document.getElementById('writeBody').value = '';
   }
 
   function handleWriteImg(input) {
