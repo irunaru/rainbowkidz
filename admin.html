@@ -123,6 +123,16 @@
 
     /* ── 패널 섹션 */
     .sec { background:var(--bg); border:1px solid var(--border); border-radius:14px; padding:14px; margin-bottom:12px; }
+    .acc-group { border:1.5px solid var(--border); border-radius:16px; margin-bottom:14px; overflow:hidden; }
+    .acc-header { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; background:var(--card); cursor:pointer; user-select:none; }
+    .acc-header:active { opacity:.8; }
+    .acc-title { font-size:14px; font-weight:900; }
+    .acc-arrow { font-size:12px; color:var(--sub); transition:transform .2s; }
+    .acc-header.open .acc-arrow { transform:rotate(180deg); }
+    .acc-body { display:none; padding:12px; background:var(--bg); }
+    .acc-body.open { display:block; }
+    .acc-body .sec { margin-bottom:8px; }
+    .acc-body .sec:last-child { margin-bottom:0; }
     .sec-title { font-size:13px; font-weight:900; margin-bottom:10px; }
 
     /* ── 이미지 미리보기+업로드 인라인 (4번 요구사항) */
@@ -343,8 +353,15 @@
     <div class="panel-body">
 
       <!-- ① 이름 + 이미지 (이름 다음 바로) -->
-      <div class="sec">
-        <div class="sec-title">👤 기본 정보 · 이미지</div>
+      <!-- ── 그룹 1: 기본 정보 ── -->
+      <div class="acc-group">
+        <div class="acc-header open" onclick="toggleAcc(this)">
+          <span class="acc-title">👤 기본 정보</span>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="acc-body open">
+          <div class="sec">
+            <div class="sec-title">👤 기본 정보 · 이미지</div>
         <div class="row2" style="margin-bottom:10px;">
           <div class="field"><label>이름</label><input class="inp" id="fName" style="margin-bottom:0;"></div>
           <div class="field"><label>이모지</label><input class="inp" id="fEmoji" style="margin-bottom:0;"></div>
@@ -359,6 +376,16 @@
         </div>
         <div class="status" id="pImgStatus"></div>
       </div>
+        </div><!-- acc-body -->
+      </div><!-- acc-group 기본정보 -->
+
+      <!-- ── 그룹 2: AI 운영 ── -->
+      <div class="acc-group">
+        <div class="acc-header open" onclick="toggleAcc(this)">
+          <span class="acc-title">🤖 AI 운영</span>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="acc-body open">
 
       <!-- ② AI 게시글 생성 -->
       <div class="sec">
@@ -412,7 +439,16 @@
         <button class="btn btn-ghost btn-sm" onclick="loadSelectedPostComments()">💬 선택한 게시글 댓글 보기</button>
         <div id="cmtManageWrap"></div>
       </div>
+        </div><!-- acc-body -->
+      </div><!-- acc-group AI운영 -->
 
+      <!-- ── 그룹 3: 캐릭터 정보 편집 ── -->
+      <div class="acc-group">
+        <div class="acc-header open" onclick="toggleAcc(this)">
+          <span class="acc-title">📝 캐릭터 정보 편집</span>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="acc-body open">
       <!-- ⑤ 캐릭터 정보 편집 -->
       <div class="sec">
         <div class="sec-title">📝 캐릭터 정보 편집</div>
@@ -459,6 +495,8 @@
         </div>
         <div class="status" id="pSaveStatus"></div>
       </div>
+        </div><!-- acc-body -->
+      </div><!-- acc-group 캐릭터정보 -->
 
     </div>
   </div>
@@ -472,6 +510,12 @@
   var cachedFeed    = [];
   var selectedChar  = null;
   var adminImgFile  = null;
+
+  function toggleAcc(header) {
+    header.classList.toggle('open');
+    const body = header.nextElementSibling;
+    body.classList.toggle('open');
+  }
   var noticeImgFile = null;
 
   function handleNoticeImg(input) {
