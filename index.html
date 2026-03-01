@@ -12,7 +12,8 @@
     /* ===== DESIGN TOKENS (SAFE TO EDIT) ===== */
     /* ── 공통 디자인 토큰 (File A & B 동일하게 유지) ── */
     :root {
-      --bg:#f2f2f7;
+      --hero-avatar:80px;
+    --bg:#f2f2f7;
       --card:#fff;
       --text:#1c1c1e;
       --sub:#636366;        /* ↑ #8e8e93 → #636366: WCAG AA 대비 개선 */
@@ -166,9 +167,9 @@
     .detail-handle { width:36px; height:4px; background:var(--border); border-radius:2px; margin:10px auto 0; flex-shrink:0; }
     .detail-hero { display:flex; justify-content:flex-start; padding:14px 16px 0; }
     .detail-hero-avatar {
-      width:180px; height:180px; border-radius:26px; overflow:hidden;
+      width:var(--hero-avatar); height:var(--hero-avatar); border-radius:18px; overflow:hidden;
       border:1.5px solid var(--border); background:var(--bg);
-      display:flex; align-items:center; justify-content:center;
+      display:flex; align-items:center; justify-content:center; flex-shrink:0;
     }
     .detail-hero-avatar img { width:100%; height:100%; object-fit:cover; }
     .detail-head   { padding:10px 16px 10px; border-bottom:1px solid var(--border); flex-shrink:0; }
@@ -803,7 +804,7 @@ const API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
           mediaWrap.innerHTML = `<a href="${esc(p.media_url)}" target="_blank" rel="noopener" style="color:var(--blue);font-size:13px;">🔗 첨부 링크 열기</a>`;
         }
       }
-      // 히어로 프로필(180px)
+      // 히어로 프로필(var(--hero-avatar))
       const hero = document.getElementById('dHeroAvatar');
       if (hero) {
         const img = (isSystem ? (p.character_image_url || p.system_users?.image_url) : (p.guest_image_url || p.guests?.image_url)) || '';

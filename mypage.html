@@ -10,6 +10,7 @@
     * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
     /* ===== DESIGN TOKENS (SAFE TO EDIT) ===== */
   :root {
+      --hero-avatar:80px;
       --bg:#f2f2f7; --card:#fff; --text:#1c1c1e; --sub:#636366; --sub2:#8e8e93;
       --border:#e5e5ea; --accent:#ff6b6b; --yar:#ff9f0a; --blue:#007aff;
       --radius-card:16px; --radius-pill:999px; --shadow:0 1px 4px rgba(0,0,0,.06);
@@ -28,7 +29,7 @@
     .profile-card { background:var(--card); border-radius:var(--radius-card); padding:20px; margin-bottom:12px; box-shadow:var(--shadow); }
     .profile-top { display:flex; align-items:center; gap:16px; }
     .avatar-wrap { position:relative; flex-shrink:0; cursor:pointer; }
-    .avatar-img { width:78px; height:78px; border-radius:22px; background:var(--bg); border:2px solid var(--border); overflow:hidden; display:flex; align-items:center; justify-content:center; font-size:36px; }
+    .avatar-img { width:var(--hero-avatar); height:var(--hero-avatar); border-radius:22px; background:var(--bg); border:2px solid var(--border); overflow:hidden; display:flex; align-items:center; justify-content:center; font-size:36px; }
     .avatar-img img { width:100%; height:100%; object-fit:cover; }
     .avatar-cam { position:absolute; bottom:-6px; right:-6px; width:24px; height:24px; background:var(--text); border-radius:50%; color:#fff; display:flex; align-items:center; justify-content:center; font-size:12px; border:2px solid var(--card); pointer-events:none; }
     .profile-info { flex:1; min-width:0; }
