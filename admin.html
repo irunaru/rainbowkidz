@@ -182,7 +182,7 @@
 <div class="toast" id="toast"></div>
 
 <!-- ── 로그인 게이트 -->
-<div id="pwGate">
+<div id="pwGate" style="display:none;">
   <div class="pw-box">
     <div class="pw-logo">🌈</div>
     <div class="pw-title">관리자 로그인</div>
@@ -638,31 +638,44 @@
     if (e.key === 'Enter') checkPw();
   });
 
-  // ── 자동 로그인 (저장된 키 → 서버 검증)
+// ── 자동 로그인 (저장된 키 → 서버 검증)
   (async function() {
+    var gate = document.getElementById('pwGate');
+    var saved = localStorage.getItem('rkAdminKey') || sessionStorage.getItem('rkAdminKey');
+    
+    // 1. 저장된 키가 아예 없으면 즉시 로그인 창 표시
+    if (!saved) {
+      gate.style.display = 'flex';
+      document.getElementById('pwInput').focus();
+      return;
+    }
+
+    // 2. 키가 있으면 서버에 검증 요청 (이 동안은 화면이 비어있는 상태로 대기함)
     try {
-      var saved = localStorage.getItem('rkAdminKey') || sessionStorage.getItem('rkAdminKey');
-      if (saved) {
-        var r = await fetch(API + '/admin/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ password: saved })
-        });
-        var d = await safeJson(r);
-        if (d.ok) {
-          adminToken = d.token;
-          if (localStorage.getItem('rkAdminKey')) document.getElementById('pwSave').checked = true;
-          enterAdmin();
-          return;
-        }
-        // 저장된 키가 유효하지 않으면 제거
+      var r = await fetch(API + '/admin/banned-words', {
+        method: 'GET',
+        headers: { 'Authorization': 'Bearer ' + saved }
+      });
+      
+      if (r.ok) {
+        adminToken = saved;
+        if (localStorage.getItem('rkAdminKey')) document.getElementById('pwSave').checked = true;
+        enterAdmin();
+        return;
+      }
+      
+      // 3. 토큰이 만료되었거나 올바르지 않으면 삭제
+      if (r.status === 401) {
         localStorage.removeItem('rkAdminKey');
         sessionStorage.removeItem('rkAdminKey');
       }
     } catch(e) {}
+    
+    // 4. 검증 실패 시에만 로그인 창 표시
+    gate.style.display = 'flex';
     document.getElementById('pwInput').focus();
   })();
-
+    
   // ── 초기화
   async function init() {
     await Promise.all([loadCharacters(), loadManagePosts(), loadManageNotices(), loadBannedWords()]);
