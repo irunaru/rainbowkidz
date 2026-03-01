@@ -75,8 +75,9 @@
     .post-delete { margin-left:auto; color:var(--accent); border:none; background:none; font-size:12px; font-weight:900; cursor:pointer; font-family:inherit; }
     .empty { text-align:center; padding:48px 20px; color:var(--sub2); }
     .bottom-nav { position:fixed; bottom:0; left:0; right:0; background:var(--card); border-top:1px solid var(--border); display:flex; z-index:100; padding-bottom:env(safe-area-inset-bottom,0); }
-    .bottom-nav a { flex:1; text-align:center; padding:12px 0; text-decoration:none; color:var(--sub); font-size:10px; font-weight:800; }
+    .bottom-nav a { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:8px 0 6px; text-decoration:none; color:var(--sub); font-size:10px; font-weight:600; gap:2px; min-height:50px; }
     .bottom-nav a.active { color:var(--text); }
+    .nav-icon { font-size:22px; }
     .confirm-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:2000; display:flex; align-items:center; justify-content:center; padding:24px; }
     .confirm-overlay.hidden { display:none; }
     .confirm-box { background:#fff; padding:22px; border-radius:22px; width:100%; max-width:300px; text-align:center; }
@@ -153,9 +154,9 @@
   <div id="secComments" class="hidden"></div>
 </div>
 <div class="bottom-nav">
-  <a href="index.html">🏠 홈</a>
-  <a href="#" id="writeNavBtn">✏️ 글쓰기</a>
-  <a href="mypage.html" class="active">👤 내 페이지</a>
+  <a href="index.html"><span class="nav-icon">🏠</span>홈</a>
+  <a href="#" id="writeNavBtn"><span class="nav-icon">✏️</span>글쓰기</a>
+  <a href="mypage.html" class="active"><span class="nav-icon">👤</span>내 페이지</a>
 </div>
 <div class="confirm-overlay hidden" id="confirmOverlay">
   <div class="confirm-box">
@@ -328,8 +329,7 @@
     if (!myPosts.length) { sec.innerHTML = '<div class="empty">아직 쓴 글이 없어요.</div>'; return; }
     sec.innerHTML = myPosts.map(p => `
       <div class="post-card" data-post-id="${p.id}">
-        <div class="post-title">${esc(p.title||p.body?.slice(0,40)||'')}</div>
-        ${p.body?`<div class="post-body">${esc(p.body)}</div>`:''}
+        <div class="post-body">${esc((p.body || p.title || '').trim())}</div>
         <div class="post-meta">
           <span>${relTime(p.created_at)}</span>
           <span>💬 ${p.comment_count||0}</span>
