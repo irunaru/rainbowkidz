@@ -503,9 +503,8 @@
 </div>
 <script>
   var API = 'https://rainbowkidz-api.irunaru.workers.dev/api/v1';
-  var ADMIN_PW = 'yimkim1221';
 
-  var adminKey      = '';
+  var adminToken    = '';  // HMAC 서명 토큰
   var characters    = [];
   var cachedFeed    = [];
   var selectedChar  = null;
@@ -566,7 +565,7 @@
   // ── API fetch 공통
   function adminFetch(path, opts) {
     opts = opts || {};
-    var headers = {'X-Admin-Key': adminKey};
+    var headers = {'Authorization': 'Bearer ' + adminToken};
     if (opts.body && typeof opts.body === 'string') {
       headers['Content-Type'] = 'application/json';
     }
@@ -575,7 +574,7 @@
       .then(function(res) {
         if (res.status === 401) {
           // 키 만료/불일치 → 로그아웃 처리
-          adminKey = '';
+          adminToken = '';
           localStorage.removeItem('rkAdminKey');
           sessionStorage.removeItem('rkAdminKey');
           document.getElementById('pwGate').style.display = '';
@@ -587,19 +586,29 @@
       });
   }
 
-  // ── 로그인 (단순 로컬 비교)
-  function checkPw() {
+  // ── 로그인 (서버 검증)
+  async function checkPw() {
     var pw  = document.getElementById('pwInput').value.trim();
     var err = document.getElementById('pwError');
+    var btn = document.getElementById('pwBtn');
     err.textContent = '';
     if (!pw) { err.textContent = '비밀번호를 입력해주세요'; return; }
-    if (pw !== ADMIN_PW) { err.textContent = '비밀번호가 틀렸어요'; return; }
-    adminKey = ADMIN_PW;
+    btn.disabled = true; btn.textContent = '확인 중...';
     try {
-      if (document.getElementById('pwSave').checked) localStorage.setItem('rkAdminKey', ADMIN_PW);
-      sessionStorage.setItem('rkAdminKey', ADMIN_PW);
-    } catch(e) {}
-    enterAdmin();
+      var r = await fetch(API + '/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pw })
+      });
+      var d = await r.json();
+      if (!d.ok) { err.textContent = '비밀번호가 틀렸어요'; btn.disabled = false; btn.textContent = '입장'; return; }
+      adminToken = d.token;
+      try {
+        if (document.getElementById('pwSave').checked) localStorage.setItem('rkAdminKey', d.token);
+        sessionStorage.setItem('rkAdminKey', d.token);
+      } catch(e) {}
+      enterAdmin();
+    } catch(e) { err.textContent = '서버 오류: ' + e.message; btn.disabled = false; btn.textContent = '입장'; }
   }
 
   function enterAdmin() {
@@ -610,7 +619,7 @@
   }
 
   function logout() {
-    adminKey = '';
+    adminToken = '';
     try { sessionStorage.removeItem('rkAdminKey'); localStorage.removeItem('rkAdminKey'); } catch(e) {}
     document.getElementById('pwGate').style.display = '';
     document.getElementById('mainHeader').style.display = 'none';
@@ -624,15 +633,26 @@
     if (e.key === 'Enter') checkPw();
   });
 
-  // ── 자동 로그인 (저장된 키)
-  (function() {
+  // ── 자동 로그인 (저장된 키 → 서버 검증)
+  (async function() {
     try {
       var saved = localStorage.getItem('rkAdminKey') || sessionStorage.getItem('rkAdminKey');
-      if (saved && saved === ADMIN_PW) {
-        adminKey = saved;
-        if (localStorage.getItem('rkAdminKey')) document.getElementById('pwSave').checked = true;
-        enterAdmin();
-        return;
+      if (saved) {
+        var r = await fetch(API + '/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: saved })
+        });
+        var d = await r.json();
+        if (d.ok) {
+          adminToken = d.token;
+          if (localStorage.getItem('rkAdminKey')) document.getElementById('pwSave').checked = true;
+          enterAdmin();
+          return;
+        }
+        // 저장된 키가 유효하지 않으면 제거
+        localStorage.removeItem('rkAdminKey');
+        sessionStorage.removeItem('rkAdminKey');
       }
     } catch(e) {}
     document.getElementById('pwInput').focus();
