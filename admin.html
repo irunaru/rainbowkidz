@@ -1110,7 +1110,6 @@
           <button class="manage-del" onclick="deletePost(${p.id})">삭제</button>
         </div>`;
       }).join('');
-      cachedFeed=posts;
     } catch(e) {
       wrap.innerHTML=`<div style="color:var(--sub);font-size:13px;">불러오기 실패: ${e.message}</div>`;
     }
